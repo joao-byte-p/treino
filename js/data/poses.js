@@ -31,7 +31,6 @@ export const POSES = {
     viewBox: '0 34 100 60',
     accent: 'arms',
     props: [...PRONE_FLOOR, { type: 'box', x: 58, y: 82, w: 20, h: 6 }],
-    arrow: { from: [90, 54], to: [90, 74] },
     frames: [
       {
         label: 'Em cima, corpo em linha',
@@ -53,7 +52,6 @@ export const POSES = {
     viewBox: '14 6 72 92',
     accent: 'legs',
     props: STAND_FLOOR,
-    arrow: { from: [82, 46], to: [82, 68] },
     frames: [
       {
         label: 'Em pé, halter ao peito',
@@ -78,7 +76,6 @@ export const POSES = {
     viewBox: '12 6 78 92',
     accent: 'legs',
     props: STAND_FLOOR,
-    arrow: { from: [44, 50], to: [24, 58], bow: 0.25 },
     frames: [
       {
         label: 'Em pé, halteres nas coxas',
@@ -102,7 +99,6 @@ export const POSES = {
     viewBox: '30 34 66 60',
     accent: 'arms',
     props: [{ type: 'floor', y: 88, x1: 32, x2: 94 }],
-    arrow: { from: [90, 58], to: [90, 78] },
     frames: [
       {
         label: 'Anca alta, braços esticados',
@@ -145,7 +141,6 @@ export const POSES = {
   'pushup-decline': {
     viewBox: '0 34 96 58',
     props: [{ type: 'floor', y: 88, x1: 2, x2: 94 }, { type: 'box', x: 0, y: 49, w: 22, h: 39 }],
-    arrow: { from: [86, 58], to: [86, 74] },
     frames: [
       {
         label: 'Pés elevados, corpo em linha',
@@ -186,7 +181,6 @@ export const POSES = {
   'pushup-pseudo-planche': {
     viewBox: VB_PRONE,
     props: PRONE_FLOOR,
-    arrow: { from: [88, 58], to: [88, 76] },
     frames: [
       {
         label: 'Mãos à altura da anca, ombros à frente',
@@ -207,7 +201,6 @@ export const POSES = {
   'pike-elevated': {
     viewBox: '4 20 92 72',
     props: [{ type: 'floor', y: 88, x1: 6, x2: 94 }, { type: 'box', x: 6, y: 65, w: 26, h: 23 }],
-    arrow: { from: [88, 62], to: [88, 80] },
     frames: [
       {
         label: 'Anca alta, quase na vertical',
@@ -242,7 +235,6 @@ export const POSES = {
   'db-press-seated': {
     viewBox: '20 2 62 88',
     props: [{ type: 'floor', y: 84, x1: 22, x2: 78 }, { type: 'box', x: 26, y: 62, w: 40, h: 4 }, { type: 'bar', x1: 28, y1: 62, x2: 28, y2: 40 }],
-    arrow: { from: [74, 34], to: [74, 18] },
     frames: [
       {
         label: 'Halteres à altura das orelhas',
@@ -265,7 +257,6 @@ export const POSES = {
   'db-press-standing': {
     viewBox: VB_STAND_TALL,
     props: STAND_FLOOR,
-    arrow: { from: [76, 26], to: [76, 8] },
     frames: [
       {
         label: 'Halteres à altura das orelhas',
@@ -288,7 +279,6 @@ export const POSES = {
   'db-push-press': {
     viewBox: VB_STAND_TALL,
     props: STAND_FLOOR,
-    arrow: { from: [76, 26], to: [76, 8] },
     frames: [
       {
         label: 'Mini-agachamento, joelhos alinhados',
@@ -312,7 +302,6 @@ export const POSES = {
   'diamond-pushup': {
     viewBox: VB_PRONE,
     props: PRONE_FLOOR,
-    arrow: { from: [88, 58], to: [88, 76] },
     frames: [
       { label: 'Mãos juntas sob o peito', hip: [47.1, 65.2], torso: 30.7, head: 0, arms: PRONE_HANDS, legs: PRONE2_LEGS },
       { label: 'Cotovelos colados ao tronco', hip: [51.4, 76.1], torso: 12, head: 0, arms: PRONE_HANDS, legs: PRONE2_LEGS_LOW },
@@ -333,7 +322,6 @@ export const POSES = {
   'chair-dips': {
     viewBox: '16 18 68 62',
     props: [{ type: 'floor', y: 78, x1: 18, x2: 82 }, { type: 'box', x: 20, y: 60, w: 20, h: 18 }],
-    arrow: { from: [26, 36], to: [26, 48] },
     frames: [
       {
         label: 'Braços esticados, ombros longe das orelhas',
@@ -354,7 +342,6 @@ export const POSES = {
   'bar-dips': {
     viewBox: '28 -4 44 104',
     props: [{ type: 'bar', x1: 40, y1: 48, x2: 66, y2: 48 }, { type: 'bar', x1: 36, y1: 52, x2: 62, y2: 52 }],
-    arrow: { from: [76, 32], to: [76, 46] },
     frames: [
       {
         label: 'Braços esticados, tronco ligeiramente à frente',
@@ -376,7 +363,6 @@ export const POSES = {
     viewBox: '6 6 88 88',
     wide: true, far: [0, 0],
     props: [{ type: 'floor', y: 90, x1: 8, x2: 92 }],
-    arrow: { from: [84, 46], to: [84, 32] },
     frames: [
       {
         label: 'Peso leve, braços ao lado do corpo',
@@ -399,7 +385,6 @@ export const POSES = {
   'db-row-1arm': {
     viewBox: '20 12 76 82',
     props: [{ type: 'floor', y: 88, x1: 22, x2: 92 }, { type: 'box', x: 46, y: 76, w: 32, h: 12 }],
-    arrow: { from: [80, 62], to: [80, 48] },
     frames: [
       {
         label: 'Costas neutras, braço estendido',
@@ -422,7 +407,6 @@ export const POSES = {
   'renegade-row': {
     viewBox: VB_PRONE,
     props: PRONE_FLOOR,
-    arrow: { from: [84, 72], to: [84, 58] },
     frames: [
       {
         label: 'Prancha alta sobre os halteres',
@@ -445,7 +429,6 @@ export const POSES = {
   'inverted-row-bars': {
     viewBox: '4 30 92 62',
     props: [{ type: 'floor', y: 88, x1: 6, x2: 94 }, { type: 'bar', x1: 52, y1: 40, x2: 84, y2: 40 }, { type: 'wall', x: 82, y1: 40, y2: 88 }],
-    arrow: { from: [30, 62], to: [30, 50] },
     frames: [
       {
         label: 'Corpo em linha, braços esticados',
@@ -467,7 +450,6 @@ export const POSES = {
     viewBox: '10 -2 80 100',
     wide: true, far: [0, 0],
     props: [{ type: 'bar', x1: 24, y1: 4, x2: 76, y2: 4 }],
-    arrow: { from: [78, 46], to: [78, 32] },
     frames: [
       {
         label: 'Braços esticados, ombros ativos',
@@ -489,7 +471,6 @@ export const POSES = {
     viewBox: '10 -2 80 100',
     wide: true, far: [0, 0],
     props: [{ type: 'bar', x1: 24, y1: 4, x2: 76, y2: 4 }],
-    arrow: { from: [78, 32], to: [78, 46] },
     frames: [
       {
         label: 'Começa com o queixo acima da barra',
@@ -511,7 +492,6 @@ export const POSES = {
     viewBox: '10 -2 80 100',
     wide: true, far: [0, 0],
     props: [{ type: 'bar', x1: 24, y1: 4, x2: 76, y2: 4 }],
-    arrow: { from: [78, 74], to: [78, 58] },
     frames: [
       {
         label: 'Suspenso, ombros ativos',
@@ -532,7 +512,6 @@ export const POSES = {
   'db-curl': {
     viewBox: VB_STAND,
     props: STAND_FLOOR,
-    arrow: { from: [72, 52], to: [72, 38] },
     frames: [
       {
         label: 'Cotovelos colados ao tronco',
@@ -553,7 +532,6 @@ export const POSES = {
   'db-hammer-curl': {
     viewBox: VB_STAND,
     props: STAND_FLOOR,
-    arrow: { from: [72, 52], to: [72, 38] },
     frames: [
       {
         label: 'Pega neutra, polegar para cima',
@@ -574,7 +552,6 @@ export const POSES = {
   'db-rear-delt-fly': {
     viewBox: '10 10 88 84',
     props: [{ type: 'floor', y: 90, x1: 12, x2: 96 }],
-    arrow: { from: [30, 74], to: [30, 62] },
     frames: [
       {
         label: 'Tronco a 45°, joelhos suaves',
@@ -597,7 +574,6 @@ export const POSES = {
   'superman': {
     viewBox: '-4 56 108 30',
     props: [{ type: 'floor', y: 78, x1: 8, x2: 108 }],
-    arrow: { from: [96, 84], to: [96, 72] },
     frames: [
       {
         label: 'Deitado de barriga para baixo',
@@ -618,7 +594,6 @@ export const POSES = {
   'split-squat': {
     viewBox: '14 10 80 86',
     props: STAND_FLOOR,
-    arrow: { from: [82, 50], to: [82, 66] },
     frames: [
       {
         label: 'Pés fixos, um à frente do outro',
@@ -642,7 +617,6 @@ export const POSES = {
   'bulgarian-split-squat': {
     viewBox: '14 10 80 86',
     props: [{ type: 'floor', y: 90, x1: 16, x2: 88 }, { type: 'box', x: 20, y: 76, w: 22, h: 14 }],
-    arrow: { from: [82, 52], to: [82, 68] },
     frames: [
       {
         label: 'Pé de trás na cadeira, peso à frente',
@@ -666,7 +640,6 @@ export const POSES = {
   'pistol-assisted': {
     viewBox: '10 10 88 86',
     props: [{ type: 'floor', y: 90, x1: 12, x2: 96 }, { type: 'wall', x: 78, y1: 20, y2: 90 }],
-    arrow: { from: [24, 54], to: [24, 70] },
     frames: [
       {
         label: 'Segura numa porta ou mesa',
@@ -688,7 +661,6 @@ export const POSES = {
   'reverse-lunge': {
     viewBox: '14 10 80 86',
     props: STAND_FLOOR,
-    arrow: { from: [80, 52], to: [66, 66], bow: 0.3 },
     frames: [
       {
         label: 'Em pé, peso nas mãos',
@@ -712,7 +684,6 @@ export const POSES = {
   'step-up': {
     viewBox: '29 -5 58 100',
     props: [{ type: 'floor', y: 90, x1: 16, x2: 94 }, { type: 'box', x: 56, y: 70, w: 26, h: 20 }],
-    arrow: { from: [26, 60], to: [26, 46] },
     frames: [
       {
         label: 'Pé todo no degrau, sem impulso atrás',
@@ -736,7 +707,6 @@ export const POSES = {
   'walking-lunge': {
     viewBox: '10 10 84 86',
     props: [{ type: 'floor', y: 90, x1: 12, x2: 92 }],
-    arrow: { from: [82, 46], to: [82, 62] },
     frames: [
       {
         label: 'Passo longo, tronco vertical',
@@ -790,7 +760,6 @@ export const POSES = {
   'slow-step-down': {
     viewBox: '34 -3 49 98',
     props: [{ type: 'floor', y: 90, x1: 30, x2: 86 }, { type: 'box', x: 46, y: 78, w: 26, h: 12 }],
-    arrow: { from: [36, 62], to: [36, 76] },
     frames: [
       {
         label: 'Em pé no degrau',
@@ -812,7 +781,6 @@ export const POSES = {
   'tibialis-raise': {
     viewBox: '30 14 62 82',
     props: [{ type: 'floor', y: 90, x1: 32, x2: 88 }, { type: 'wall', x: 42, y1: 20, y2: 90 }],
-    arrow: { from: [76, 82], to: [76, 72] },
     frames: [
       {
         label: 'Costas na parede, pés à frente',
@@ -833,7 +801,6 @@ export const POSES = {
   'calf-raise-single': {
     viewBox: '20 6 64 92',
     props: [{ type: 'floor', y: 92, x1: 22, x2: 80 }, { type: 'box', x: 38, y: 84, w: 28, h: 8 }, { type: 'wall', x: 74, y1: 18, y2: 92 }],
-    arrow: { from: [30, 74], to: [30, 62] },
     frames: [
       {
         label: 'Calcanhar abaixo do degrau',
@@ -854,7 +821,6 @@ export const POSES = {
   'db-single-leg-rdl': {
     viewBox: '-4 8 100 88',
     props: [{ type: 'floor', y: 90, x1: -2, x2: 94 }],
-    arrow: { from: [70, 44], to: [70, 60] },
     frames: [
       {
         label: 'Halter na mão oposta à perna de apoio',
@@ -877,7 +843,6 @@ export const POSES = {
   'db-staggered-rdl': {
     viewBox: '12 6 78 92',
     props: STAND_FLOOR,
-    arrow: { from: [44, 50], to: [24, 58], bow: 0.25 },
     frames: [
       {
         label: 'Pé de trás só com a ponta no chão',
@@ -900,7 +865,6 @@ export const POSES = {
   'db-swing': {
     viewBox: '14 6 76 92',
     props: STAND_FLOOR,
-    arrow: { from: [70, 62], to: [74, 40], bow: 0.3 },
     frames: [
       {
         label: 'Anca para trás, halter entre as pernas',
@@ -923,7 +887,6 @@ export const POSES = {
   'glute-bridge': {
     viewBox: '17 58 76 36',
     props: [{ type: 'floor', y: 89, x1: 16, x2: 94 }],
-    arrow: { from: [46, 62], to: [46, 52] },
     frames: [
       {
         label: 'Anca no chão, pés à largura da anca',
@@ -944,7 +907,6 @@ export const POSES = {
   'db-hip-thrust': {
     viewBox: '16 54 84 40',
     props: [{ type: 'floor', y: 90, x1: 18, x2: 98 }, { type: 'box', x: 68, y: 68, w: 26, h: 22 }],
-    arrow: { from: [46, 78], to: [46, 66] },
     frames: [
       {
         label: 'Ombros no banco, halter na anca',
@@ -967,7 +929,6 @@ export const POSES = {
   'single-leg-hip-thrust': {
     viewBox: '16 42 84 52',
     props: [{ type: 'floor', y: 90, x1: 18, x2: 98 }, { type: 'box', x: 68, y: 68, w: 26, h: 22 }],
-    arrow: { from: [46, 78], to: [46, 66] },
     frames: [
       {
         label: 'Uma perna no ar, joelho a 90°',
@@ -1098,7 +1059,6 @@ export const POSES = {
   'hollow-rock': {
     viewBox: '10 46 98 46',
     props: [{ type: 'floor', y: 88, x1: 12, x2: 106 }],
-    arrow: { from: [30, 52], to: [44, 52] },
     frames: [
       {
         label: 'Balança para trás',
@@ -1119,7 +1079,6 @@ export const POSES = {
   'burpee-stepout': {
     viewBox: '5 7 84 88',
     props: [{ type: 'floor', y: 90, x1: 2, x2: 98 }],
-    arrow: { from: [92, 40], to: [92, 58] },
     frames: [
       {
         label: 'Em pé, pronto a descer',
@@ -1140,7 +1099,6 @@ export const POSES = {
   'db-thruster': {
     viewBox: VB_STAND_TALL,
     props: STAND_FLOOR,
-    arrow: { from: [78, 30], to: [78, 12] },
     frames: [
       {
         label: 'Agachamento com halteres aos ombros',
@@ -1184,7 +1142,6 @@ export const POSES = {
   'plank-row-alt': {
     viewBox: VB_PRONE,
     props: PRONE_FLOOR,
-    arrow: { from: [84, 72], to: [84, 58] },
     frames: [
       {
         label: 'Prancha sobre halteres leves',
@@ -1206,7 +1163,6 @@ export const POSES = {
   'shadow-boxing': {
     viewBox: '10 6 84 92',
     props: [{ type: 'floor', y: 90, x1: 12, x2: 92 }],
-    arrow: { from: [80, 34], to: [90, 32] },
     frames: [
       {
         label: 'Postura de guarda, joelhos suaves',
@@ -1227,7 +1183,6 @@ export const POSES = {
   'bear-crawl': {
     viewBox: '4 44 96 48',
     props: [{ type: 'floor', y: 88, x1: 6, x2: 96 }],
-    arrow: { from: [82, 52], to: [92, 52] },
     frames: [
       {
         label: 'Joelhos a dois dedos do chão',
@@ -1268,7 +1223,6 @@ export const POSES = {
   'squat-to-stand': {
     viewBox: VB_STAND,
     props: STAND_FLOOR,
-    arrow: { from: [80, 48], to: [80, 64] },
     frames: [
       {
         label: 'Em pé, braços à frente',
@@ -1436,7 +1390,6 @@ export const POSES = {
   'worlds-greatest': {
     viewBox: '4 16 92 80',
     props: [{ type: 'floor', y: 90, x1: 6, x2: 94 }],
-    arrow: { from: [30, 40], to: [30, 26] },
     frames: [
       {
         label: 'Afundo longo, mão no chão',
@@ -1457,7 +1410,6 @@ export const POSES = {
   'thoracic-rotation': {
     viewBox: '0 30 100 60',
     props: [{ type: 'floor', y: 86, x1: 2, x2: 98 }],
-    arrow: { from: [80, 46], to: [80, 36] },
     frames: [
       {
         label: 'Cotovelo ao cotovelo oposto',
@@ -1478,7 +1430,6 @@ export const POSES = {
   'ankle-mobility': {
     viewBox: '18 10 60 82',
     props: [{ type: 'floor', y: 88, x1: 20, x2: 76 }, { type: 'wall', x: 70, y1: 14, y2: 88 }],
-    arrow: { from: [56, 62], to: [66, 62] },
     frames: [
       {
         label: 'Pé a um palmo da parede',
@@ -1590,7 +1541,6 @@ export const POSES = {
   'arm-circles': {
     viewBox: '10 -2 80 100',
     props: STAND_FLOOR,
-    arrow: { from: [76, 20], to: [80, 36], bow: 0.6 },
     frames: [
       {
         label: 'Braços à frente',
@@ -1611,7 +1561,6 @@ export const POSES = {
   'hip-circles': {
     viewBox: '10 6 80 92',
     props: STAND_FLOOR,
-    arrow: { from: [70, 76], to: [80, 66], bow: 0.5 },
     frames: [
       {
         label: 'Mãos na anca, balanço para a frente',
@@ -1632,7 +1581,6 @@ export const POSES = {
   'bw-squat-warm': {
     viewBox: VB_STAND,
     props: STAND_FLOOR,
-    arrow: { from: [80, 48], to: [80, 64] },
     frames: [
       {
         label: 'Em pé, braços à frente',
@@ -1655,7 +1603,6 @@ export const POSES = {
     viewBox: '6 6 88 88',
     wide: true, far: [0, 0],
     props: [{ type: 'floor', y: 90, x1: 8, x2: 92 }],
-    arrow: { from: [84, 34], to: [90, 34] },
     frames: [
       {
         label: 'Toalha esticada à frente',
@@ -1696,7 +1643,6 @@ export const POSES = {
   'db-swing-hiit': {
     viewBox: '14 6 76 92',
     props: STAND_FLOOR,
-    arrow: { from: [70, 62], to: [74, 40], bow: 0.3 },
     frames: [
       {
         label: 'Anca para trás, ritmo constante',

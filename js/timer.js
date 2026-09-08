@@ -46,7 +46,8 @@ export async function keepAwake(on) {
 }
 
 // Contagem decrescente baseada em timestamps (não deriva se o separador abrandar).
-export function countdown(seconds, { onTick, onDone, tone = 'rest' } = {}) {
+export function countdown(seconds, { onTick, onDone, onFrame, tone = 'rest' } = {}) {
+  const total = Math.max(0.001, seconds);
   const end = Date.now() + seconds * 1000;
   let last = seconds;
   let raf = null;
@@ -60,6 +61,7 @@ export function countdown(seconds, { onTick, onDone, tone = 'rest' } = {}) {
     if (paused) { raf = requestAnimationFrame(loop); return; }
     const remain = Math.max(0, (endAt - Date.now()) / 1000);
     const whole = Math.ceil(remain);
+    onFrame?.(Math.min(1, remain / total));
     if (whole !== last) {
       last = whole;
       if (whole > 0 && whole <= 3) beep('tick');
@@ -74,6 +76,7 @@ export function countdown(seconds, { onTick, onDone, tone = 'rest' } = {}) {
     raf = requestAnimationFrame(loop);
   }
   onTick?.(seconds, seconds);
+  onFrame?.(1);
   raf = requestAnimationFrame(loop);
 
   return {

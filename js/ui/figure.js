@@ -206,6 +206,59 @@ function marksSVG(marks = [], j) {
   }).join('');
 }
 
+// Seta de movimento ancorada ao corpo: descobre qual a articulação que mais se
+// desloca entre as poses e desenha a seta ao lado dela, na direção do movimento.
+// Assim a pista fica junto da parte que se move, em vez de flutuar num canto.
+function autoArrow(P, frame, farOff, wide) {
+  const [vx, vy, vw, vh] = (P.viewBox || '0 0 100 100').split(' ').map(Number);
+  if (!P.frames || P.frames.length < 2) return null;
+  const A = joints(P.frames[0], farOff, wide);
+  const B = joints(P.frames[P.frames.length - 1], farOff, wide);
+  const now = joints(frame, farOff, wide);
+  const pick = j => [
+    ['wrist', j.arms[j.arms.length - 1]?.pts[2]],
+    ['ankle', j.legs[j.legs.length - 1]?.pts[2]],
+    ['knee', j.legs[j.legs.length - 1]?.pts[1]],
+    ['shoulder', j.shoulder],
+    ['hip', j.hip],
+    ['head', j.headC],
+  ];
+  const a = pick(A), b = pick(B), c = pick(now);
+  let best = null;
+  for (let i = 0; i < a.length; i++) {
+    if (!a[i][1] || !b[i][1] || !c[i][1]) continue;
+    const d = Math.hypot(b[i][1][0] - a[i][1][0], b[i][1][1] - a[i][1][1]);
+    if (!best || d > best.d) best = { d, from: a[i][1], to: b[i][1], at: c[i][1] };
+  }
+  if (!best || best.d < 5) return null;
+  const ux = (best.to[0] - best.from[0]) / best.d;
+  const uy = (best.to[1] - best.from[1]) / best.d;
+  // desloca a seta PERPENDICULARMENTE ao movimento, para ficar ao lado do
+  // percurso e não em cima do corpo; escolhe o lado mais afastado da anca
+  const away = (best.at[0] - now.hip[0]) * -uy + (best.at[1] - now.hip[1]) * ux;
+  const sgn = away >= 0 ? 1 : -1;
+  const ox = -uy * sgn;
+  const oy = ux * sgn;
+  const len = Math.max(12, Math.min(17, best.d));
+  let start = [best.at[0] + ox * 15 - ux * len / 2, best.at[1] + oy * 15 - uy * len / 2];
+  let end = [start[0] + ux * len, start[1] + uy * len];
+  // a seta tem de ficar dentro do enquadramento, senão bate no texto em volta
+  const m = 5;
+  const shift = (i, lo, hi) => {
+    const min = Math.min(start[i], end[i]);
+    const max = Math.max(start[i], end[i]);
+    let d = 0;
+    if (min < lo) d = lo - min;
+    else if (max > hi) d = hi - max;
+    start[i] += d; end[i] += d;
+    return Math.max(start[i], end[i]) <= hi + 0.5 && Math.min(start[i], end[i]) >= lo - 0.5;
+  };
+  const okX = shift(0, vx + m, vx + vw - m);
+  const okY = shift(1, vy + m, vy + vh - m);
+  if (!okX || !okY) return null;
+  return { from: start, to: end };
+}
+
 function arrowSVG(a) {
   if (!a) return '';
   const [x1, y1] = a.from, [x2, y2] = a.to;
@@ -273,30 +326,41 @@ function bodySVG(f, farOff, wide) {
 }
 
 // ---- SVG estático (miniaturas, tira passo a passo) ----
-export function figureSVG(id, { frame = 0, size = 120, showProps = true, arrow = false, className = '' } = {}) {
+// Calcula largura/altura respeitando um limite de altura, para poses altas e
+// estreitas não estourarem o espaço disponível.
+function fit(vw, vh, size, maxH) {
+  let w = size;
+  let h = (size * vh) / vw;
+  if (maxH && h > maxH) { h = maxH; w = (maxH * vw) / vh; }
+  return [Math.round(w), Math.round(h)];
+}
+
+export function figureSVG(id, { frame = 0, size = 120, maxH = 0, showProps = true, arrow = false, className = '' } = {}) {
   const P = POSES[id];
   if (!P) return '';
   const f = P.frames[Math.min(frame, P.frames.length - 1)];
   const b = bodySVG(f, P.far, P.wide);
   const vb = P.viewBox || '0 0 100 100';
   const [, , vw, vh] = vb.split(' ').map(Number);
-  return `<svg class="fig ${className}" viewBox="${vb}" width="${size}" height="${Math.round((size * vh) / vw)}" aria-hidden="true">
+  const [w, h] = fit(vw, vh, size, maxH);
+  return `<svg class="fig ${className}" viewBox="${vb}" width="${w}" height="${h}" aria-hidden="true">
     ${showProps ? propsSVG(P.props) : ''}
     ${b.far}${b.torso}${b.head}${b.near}${b.marks}
     ${itemsSVG(f.items, b.j)}
-    ${arrow ? arrowSVG(f.arrow || P.arrow) : ''}
+    ${arrow ? arrowSVG(f.arrow || P.arrow || autoArrow(P, f, P.far || FAR, P.wide)) : ''}
   </svg>`;
 }
 
 // ---- SVG animado ----
-export function mountFigure(host, id, { size = 200, period = 3200, animate = true, arrow = true } = {}) {
+export function mountFigure(host, id, { size = 200, maxH = 0, period = 3200, animate = true, arrow = true } = {}) {
   const P = POSES[id];
   if (!P || !host) return () => {};
   const vb = P.viewBox || '0 0 100 100';
   const [, , vw, vh] = vb.split(' ').map(Number);
   const f0 = P.frames[0];
   const b0 = bodySVG(f0, P.far, P.wide);
-  host.innerHTML = `<svg class="fig fig-anim" viewBox="${vb}" width="${size}" height="${Math.round((size * vh) / vw)}" aria-hidden="true">
+  const [w, h] = fit(vw, vh, size, maxH);
+  host.innerHTML = `<svg class="fig fig-anim" viewBox="${vb}" width="${w}" height="${h}" aria-hidden="true">
     ${propsSVG(P.props)}
     <g data-far>${b0.far}</g>
     <g data-torso>${b0.torso}</g>
@@ -304,7 +368,7 @@ export function mountFigure(host, id, { size = 200, period = 3200, animate = tru
     <g data-near>${b0.near}</g>
     <g data-marks>${b0.marks}</g>
     <g data-items>${itemsSVG(f0.items, b0.j)}</g>
-    ${arrow ? arrowSVG(f0.arrow || P.arrow) : ''}
+    <g data-arrow>${arrow ? arrowSVG(f0.arrow || P.arrow || autoArrow(P, f0, P.far || FAR, P.wide)) : ''}</g>
   </svg>`;
 
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -315,6 +379,7 @@ export function mountFigure(host, id, { size = 200, period = 3200, animate = tru
     far: svg.querySelector('[data-far]'), torso: svg.querySelector('[data-torso]'),
     near: svg.querySelector('[data-near]'), head: svg.querySelector('[data-head]'),
     marks: svg.querySelector('[data-marks]'), items: svg.querySelector('[data-items]'),
+    arrow: svg.querySelector('[data-arrow]'),
   };
   let raf = null;
   let visible = true;
@@ -330,6 +395,7 @@ export function mountFigure(host, id, { size = 200, period = 3200, animate = tru
       g.head.innerHTML = b.head;
       g.marks.innerHTML = b.marks;
       g.items.innerHTML = itemsSVG(f.items, b.j);
+      if (g.arrow && arrow) g.arrow.innerHTML = arrowSVG(f.arrow || P.arrow || autoArrow(P, f, P.far || FAR, P.wide));
     }
     raf = requestAnimationFrame(tick);
   }

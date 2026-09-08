@@ -16,6 +16,8 @@ let cleanup = null;
 let figOffs = [];
 let planOffset = 0;
 let libQuery = '';
+let libFilter = 'todos';
+let libMine = false;
 
 const TAB_OF = { home: 'home', plan: 'plan', day: 'plan', library: 'library', exercise: 'library', progress: 'progress', settings: 'settings' };
 
@@ -46,7 +48,7 @@ function render(scrollTop = true) {
     case 'home': html = renderHome(nav); break;
     case 'plan': html = renderPlan(nav, planOffset); break;
     case 'day': html = renderDay(nav, route.params.date, route.params.alt ?? null); break;
-    case 'library': html = renderLibrary(nav, libQuery); break;
+    case 'library': html = renderLibrary(nav, libQuery, libFilter, libMine); break;
     case 'exercise': html = renderExercise(nav, route.params.id); break;
     case 'progress': html = renderProgress(nav); break;
     case 'settings': html = renderSettings(nav, false); break;
@@ -57,7 +59,7 @@ function render(scrollTop = true) {
   }
   view.innerHTML = html;
   view.querySelectorAll('[data-fig]').forEach(hostEl => {
-    figOffs.push(mountFigure(hostEl, hostEl.dataset.fig, { size: 300, period: 3400 }));
+    figOffs.push(mountFigure(hostEl, hostEl.dataset.fig, { size: 300, maxH: 300, period: 3400, animate: state.profile.animate !== false }));
   });
   view.classList.remove('enter'); void view.offsetWidth; view.classList.add('enter');
   if (scrollTop) window.scrollTo(0, 0);
@@ -67,6 +69,15 @@ function render(scrollTop = true) {
   if (route.name === 'library') {
     const inp = view.querySelector('[data-lib-search]');
     inp?.addEventListener('input', () => { libQuery = inp.value; const pos = inp.selectionStart; render(false); const n = view.querySelector('[data-lib-search]'); n?.focus(); try { n?.setSelectionRange(pos, pos); } catch { /* ok */ } });
+    view.querySelectorAll('[data-lib-filter]').forEach(b => b.addEventListener('click', () => { libFilter = b.dataset.libFilter; render(false); }));
+    view.querySelector('[data-lib-mine]')?.addEventListener('change', e => { libMine = e.target.checked; render(false); });
+  }
+  if (route.name === 'exercise') {
+    view.querySelector('[data-anim-toggle]')?.addEventListener('click', e => {
+      update(s => { s.profile.animate = s.profile.animate === false; });
+      e.target.textContent = getState().profile.animate === false ? 'Voltar a animar' : 'Parar o movimento';
+      render(false);
+    });
   }
   if (route.name === 'exercise') {
     view.querySelectorAll('[data-level]').forEach(b => b.addEventListener('click', () => {

@@ -100,14 +100,19 @@ export function renderPlan(nav, offsetWeeks = 0) {
     const l = findLog(s.date);
     const status = s.type === 'rest' ? '' : l?.completed ? 'done' : (s.date < todayISO ? 'missed' : (s.date === todayISO ? 'today' : ''));
     const mainBlock = s.blocks.find(b => ['strength', 'hiit', 'circuit', 'cardio', 'mobility'].includes(b.kind));
+    const n = mainBlock && s.type !== 'rest' && s.type !== 'cardio' ? `${mainBlock.items.length} exercícios · ` : '';
+    // o círculo diz apenas estado: um número aqui lia-se como aviso
+    const mark = status === 'done' ? '<span class="dayrow-status done">✓</span>'
+      : status === 'missed' ? '<span class="dayrow-status missed">—</span>'
+      : status === 'today' ? '<span class="dayrow-status today"></span>' : '';
     return `
     <li class="dayrow ${status} tone-${s.tone}" data-nav="day" data-date="${s.date}" role="button" tabindex="0" aria-label="${esc(s.weekday)}: ${esc(s.title)}">
       <div class="dayrow-date"><span>${esc(s.weekdayShort)}</span><strong>${new Date(s.date).getDate()}</strong></div>
       <div class="dayrow-body">
         <div class="dayrow-title">${esc(s.title)}</div>
-        <div class="dayrow-sub">${s.type === 'rest' ? esc(s.subtitle) : `${s.estMinutes} min · ${esc(s.subtitle)}`}</div>
+        <div class="dayrow-sub">${s.type === 'rest' ? esc(s.subtitle) : `${s.estMinutes} min · ${n}${esc(s.subtitle)}`}</div>
       </div>
-      <div class="dayrow-status">${status === 'done' ? '✓' : status === 'missed' ? '—' : (mainBlock ? mainBlock.items.length : '')}</div>
+      ${mark}
     </li>`;
   }).join('');
 
@@ -167,17 +172,23 @@ export function applyAlt(session, altIndex) {
 }
 
 // ─────────────────────────── BIBLIOTECA ───────────────────────────
-export function renderLibrary(nav, query = '') {
+export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = false) {
   const state = getState();
   const q = query.trim().toLowerCase();
+  const eq = state.profile.equipment || {};
   const order = ['push', 'pull', 'squat', 'knee', 'hinge', 'glute', 'core', 'hiit', 'cardio', 'mobility', 'warmup'];
-  const groups = order.map(p => ({
-    p, items: EXERCISES.filter(e => e.pattern === p && (!q || e.name.toLowerCase().includes(q) || e.nameEn.toLowerCase().includes(q) || e.muscles.join(' ').toLowerCase().includes(q))),
-  })).filter(g => g.items.length);
+  const matches = e => (!q || e.name.toLowerCase().includes(q) || e.nameEn.toLowerCase().includes(q) || e.muscles.join(' ').toLowerCase().includes(q))
+    && (filter === 'todos' || e.pattern === filter)
+    && (!onlyMine || e.equipment.every(k => eq[k] !== false));
+  const groups = order.map(p => ({ p, items: EXERCISES.filter(e => e.pattern === p && matches(e)) })).filter(g => g.items.length);
+  const total = groups.reduce((a, g) => a + g.items.length, 0);
+  const chips = ['todos', ...order].map(p => `<button class="fchip ${filter === p ? 'on' : ''}" data-lib-filter="${p}">${p === 'todos' ? 'Todos' : esc(PATTERN_LABEL[p])}</button>`).join('');
   return `
-  <header class="top"><div><div class="eyebrow">Biblioteca</div><h1>${EXERCISES.length} exercícios</h1></div></header>
+  <header class="top"><div><div class="eyebrow">Biblioteca</div><h1>${total} ${total === 1 ? 'exercício' : 'exercícios'}</h1></div></header>
   <input class="search" type="search" placeholder="Procurar exercício ou músculo" value="${esc(query)}" data-lib-search aria-label="Procurar">
-  ${groups.map(g => `
+  <div class="fchips" role="group" aria-label="Filtrar por tipo">${chips}</div>
+  <label class="toggle small only-mine"><input type="checkbox" data-lib-mine ${onlyMine ? 'checked' : ''}><span>Só com o material que tenho</span></label>
+  ${total ? groups.map(g => `
     <section class="block">
       <h3 class="block-title">${esc(PATTERN_LABEL[g.p])} <span class="muted">${g.items.length}</span></h3>
       <ul class="exlist">${g.items.map(ex => {
@@ -185,12 +196,12 @@ export function renderLibrary(nav, query = '') {
         const lvl = state.chainLevels[ex.chain] || 1;
         const isCurrent = ex.level === Math.min(lvl, chainLevels(ex.chain).length);
         return `<li class="exrow" data-nav="exercise" data-ex="${ex.id}" role="button" tabindex="0" aria-label="Ver ${esc(ex.name)}">
-          <div class="exrow-thumb" aria-hidden="true">${illustration(ex, 44)}</div>
-          <div class="exrow-body"><div class="exrow-name">${esc(ex.name)}</div><div class="exrow-meta">${esc(ex.nameEn)} · ${esc(ex.muscles.slice(0, 2).join(', '))}</div></div>
+          <div class="exrow-thumb lg" aria-hidden="true">${illustration(ex, 56)}</div>
+          <div class="exrow-body"><div class="exrow-name">${esc(ex.name)}</div><div class="exrow-meta">${esc(ex.muscles.slice(0, 2).join(' · '))}</div></div>
           <div class="exrow-right">${prog ? `<span class="pill ${isCurrent ? 'pill-now' : ''}">N${ex.level}</span>` : ''}</div>
         </li>`;
       }).join('')}</ul>
-    </section>`).join('')}`;
+    </section>`).join('') : '<p class="foot muted">Nada encontrado. Limpa a procura ou muda o filtro.</p>'}`;
 }
 
 export function renderExercise(nav, id) {
@@ -207,9 +218,11 @@ export function renderExercise(nav, id) {
     <div><div class="eyebrow">${esc(patternLabel(ex.pattern))}</div><h1>${esc(ex.name)}</h1></div>
   </header>
   <p class="lead">${esc(ex.nameEn)} · ${esc(ex.muscles.join(' · '))}</p>
-  ${hasPose(ex.id) ? `<figure class="hero"><div class="hero-fig" data-fig="${ex.id}"></div><figcaption class="hero-cap">Toca no vídeo se quiseres ver em pessoa</figcaption></figure>`
+  ${ex.knee === 'care' ? `<div class="notice notice-warn"><strong>Atenção ao joelho.</strong> ${esc(ex.mistakes.find(m => /joelho/i.test(m)) || 'Joelho alinhado com o pé em todas as repetições. Se doer, para.')}</div>` : ''}
+  ${hasPose(ex.id) ? `<figure class="hero"><div class="hero-fig" data-fig="${ex.id}"></div>
+      <figcaption class="hero-cap"><button class="link hero-toggle" data-anim-toggle>Parar o movimento</button></figcaption></figure>`
     : `<figure class="hero"><div class="hero-ph">${illustration(ex, 150)}<span>Ilustração a caminho. Por agora, o vídeo e os passos abaixo.</span></div></figure>`}
-  <div class="chips">${rx ? chip(rx) : ''}${ex.rest ? chip(`${ex.rest}s pausa`) : ''}${ex.tempo ? chip(ex.tempo) : ''}${load ? chip(`${load} kg`, 'chip-load') : ''}${ex.optionalLoad ? chip('Peso opcional') : ''}${ex.knee === 'care' ? chip('Atenção ao joelho', 'chip-warn') : ''}</div>
+  <div class="chips">${rx ? chip(rx) : ''}${ex.rest ? chip(`${ex.rest}s pausa`) : ''}${ex.tempo ? chip(ex.tempo) : ''}${load ? chip(`${load} kg`, 'chip-load') : ''}${ex.optionalLoad ? chip('Peso opcional') : ''}</div>
   ${hasPose(ex.id) ? `<section class="block"><h3 class="block-title">Passo a passo</h3>${stepsStrip(ex.id, { size: 150 })}</section>` : ''}
   <section class="block"><h3 class="block-title">Como fazer</h3><ol class="steps">${ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol></section>
   ${ex.mistakes.length ? `<section class="block"><h3 class="block-title">Erros comuns</h3><ul class="mistakes">${ex.mistakes.map(m => `<li>${esc(m)}</li>`).join('')}</ul></section>` : ''}
@@ -220,7 +233,8 @@ export function renderExercise(nav, id) {
       <button class="btn btn-ghost btn-sm" data-level="${ex.chain}" data-dir="-1" ${cur <= 1 ? 'disabled' : ''}>Descer nível</button>
       <button class="btn btn-ghost btn-sm" data-level="${ex.chain}" data-dir="1" ${cur >= levels.length ? 'disabled' : ''}>Subir nível</button>
     </div></section>` : ''}
-  <a class="btn btn-yt" href="${ytUrl(ex)}" target="_blank" rel="noopener">▶ Ver vídeo no YouTube</a>`;
+  <a class="btn btn-yt" href="${ytUrl(ex)}" target="_blank" rel="noopener">▶ Ver vídeo no YouTube</a>
+  <p class="foot muted">Se a ilustração não bastar, o vídeo mostra o movimento com uma pessoa.</p>`;
 }
 
 // ─────────────────────────── PROGRESSO ───────────────────────────
@@ -230,20 +244,35 @@ export function renderProgress(nav) {
   const totalMin = logs.reduce((a, l) => a + (l.minutes || 0), 0);
   const { cycle } = cycleInfo(state.profile);
   // sessões por semana (últimas 8)
+  // só semanas a partir da primeira com registo: colunas a zero antes disso
+  // ocupavam espaço sem dizer nada
+  const primeiro = logs.length ? logs[0].date : null;
   const weeks = [];
   for (let i = 7; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i * 7);
     const wk = buildWeek(state, d);
     const start = iso(wk.monday); const end = new Date(wk.monday); end.setDate(end.getDate() + 6);
+    if (primeiro && iso(end) < primeiro) continue;
     const n = logs.filter(l => l.date >= start && l.date <= iso(end)).length;
-    weeks.push({ n, planned: wk.sessions.filter(s => s.type !== 'rest').length, label: `${wk.monday.getDate()}/${wk.monday.getMonth() + 1}` });
+    weeks.push({ n, planned: wk.sessions.filter(s => s.type !== 'rest').length, label: `${String(wk.monday.getDate()).padStart(2, '0')}/${String(wk.monday.getMonth() + 1).padStart(2, '0')}` });
   }
   const streak = computeStreak(state);
   const levels = Object.entries(state.chainLevels).map(([chain, lvl]) => {
     const ls = chainLevels(chain); const cur = ls.find(l => l.level === Math.min(lvl, ls.length));
     return { chain, lvl, max: ls.length, name: cur?.name || chain };
   });
-  const loads = Object.entries(state.loads).map(([id, kg]) => ({ ex: BY_ID[id], kg })).filter(x => x.ex);
+  // variação da carga: o primeiro peso registado nos treinos versus o atual
+  const primeiraCarga = {};
+  for (const l of logs) {
+    for (const [id, r] of Object.entries(l.results || {})) {
+      if (r && r.kg != null && primeiraCarga[id] == null) primeiraCarga[id] = { kg: r.kg, date: l.date };
+    }
+  }
+  const loads = Object.entries(state.loads).map(([id, kg]) => {
+    const p = primeiraCarga[id];
+    const delta = p && p.kg !== kg ? kg - p.kg : 0;
+    return { ex: BY_ID[id], kg, delta, since: p?.date };
+  }).filter(x => x.ex);
   const runs = logs.filter(l => (l.cardio?.dist ?? l.cardio?.km)).slice(-6);
 
   return `
@@ -251,15 +280,15 @@ export function renderProgress(nav) {
   <section class="grid2">
     <div class="card stat-card"><span class="stat-n">${logs.length}</span><span class="stat-l">sessões feitas</span></div>
     <div class="card stat-card"><span class="stat-n">${Math.round(totalMin / 60 * 10) / 10}</span><span class="stat-l">horas de treino</span></div>
-    <div class="card stat-card"><span class="stat-n">${streak}</span><span class="stat-l">semanas seguidas ≥ 4 sessões</span></div>
-    <div class="card stat-card"><span class="stat-n">${levels.length}</span><span class="stat-l">cadeias progredidas</span></div>
+    <div class="card stat-card"><span class="stat-n">${streak}</span><span class="stat-l">semanas seguidas com 4 ou mais treinos</span></div>
+    <div class="card stat-card"><span class="stat-n">${levels.length}</span><span class="stat-l">exercícios em que subiste de nível</span></div>
   </section>
   <section class="card">
     <h3>Sessões por semana</h3>
     <div class="bars">${weeks.map(w => `<div class="bar"><div class="bar-fill" style="height:${w.planned ? Math.round(w.n / w.planned * 100) : 0}%"></div><span class="bar-n">${w.n}</span><span class="bar-l">${w.label}</span></div>`).join('')}</div>
   </section>
-  ${levels.length ? `<section class="card"><h3>Níveis nas cadeias</h3><ul class="kv">${levels.map(l => `<li><span>${esc(l.name)}</span><strong>N${l.lvl}<small>/${l.max}</small></strong></li>`).join('')}</ul></section>` : ''}
-  ${loads.length ? `<section class="card"><h3>Cargas atuais</h3><ul class="kv">${loads.map(l => `<li><span>${esc(l.ex.name)}</span><strong>${l.kg} kg</strong></li>`).join('')}</ul></section>` : ''}
+  ${levels.length ? `<section class="card"><h3>Onde estás em cada progressão</h3><ul class="kv">${levels.map(l => `<li><span>${esc(l.name)}</span><strong>nível ${l.lvl}<small> de ${l.max}</small></strong></li>`).join('')}</ul></section>` : ''}
+  ${loads.length ? `<section class="card"><h3>Cargas</h3><ul class="kv">${loads.map(l => `<li><span>${esc(l.ex.name)}</span><strong>${l.kg} kg${l.delta ? `<small class="delta ${l.delta > 0 ? 'up' : 'down'}"> ${l.delta > 0 ? '+' : ''}${l.delta} desde ${esc(fmtDate(l.since))}</small>` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${runs.length ? `<section class="card"><h3>Últimos treinos de cardio</h3><ul class="kv">${runs.map(l => `<li><span>${esc(fmtDate(l.date))}</span><strong>${esc(distLabel(l.cardio))} · ${l.cardio.minutes} min${pace(l.cardio) ? ` · ${pace(l.cardio)}` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${!logs.length ? `<p class="foot muted">Ainda sem registos. Depois da primeira sessão isto ganha vida.</p>` : ''}`;
 }
@@ -325,6 +354,10 @@ export function renderSettings(nav, onboarding = false) {
       <label class="toggle"><input type="checkbox" data-knee-flag ${state.kneeFlag ? 'checked' : ''}><span>Joelho a queixar-se esta semana (troca corrida por piscina, pernas por isometrias)</span></label>
       <label class="field"><span>Nome</span><input type="text" value="${esc(p.name)}" data-text="name" autocomplete="off"></label>
     </section>
+    <section class="card">
+      <h3>Figuras</h3>
+      <label class="toggle"><input type="checkbox" data-bool-inv="animate" ${p.animate !== false ? 'checked' : ''}><span>Animar o movimento<small>Desliga se preferires as figuras paradas</small></span></label>
+    </section>
     ${onboarding ? `<button type="button" class="btn btn-primary btn-big" data-finish-onboarding>Gerar o meu plano</button>` : `
     <section class="card">
       <h3>Dados</h3>
@@ -361,6 +394,7 @@ export function bindSettings(root, nav, onboarding) {
     update(s => { s.profile.equipment[c.dataset.eq] = c.checked; });
   }));
   root.querySelectorAll('[data-bool]').forEach(c => c.addEventListener('change', () => setProfile({ [c.dataset.bool]: c.checked })));
+  root.querySelectorAll('[data-bool-inv]').forEach(c => c.addEventListener('change', () => setProfile({ [c.dataset.boolInv]: c.checked })));
   root.querySelector('[data-knee-flag]')?.addEventListener('change', e => update(s => { s.kneeFlag = e.target.checked; }));
   root.querySelectorAll('[data-num]').forEach(i => i.addEventListener('change', () => setProfile({ [i.dataset.num]: Number(i.value) || 0 })));
   root.querySelectorAll('[data-text]').forEach(i => i.addEventListener('change', () => setProfile({ [i.dataset.text]: i.value.trim() || 'João' })));

@@ -1,9 +1,10 @@
 // Sessão guiada: transforma os blocos em passos e conduz com temporizador. No fim, registo simples.
 import { getState, saveLog, update, findLog } from '../store.js';
-import { sessionFor } from '../engine/planner.js';
+import { sessionFor, buildWeek } from '../engine/planner.js';
 import { applyProgression, RPE } from '../engine/progression.js';
 import { BY_ID } from '../data/exercises.js';
 import { countdown, beep, unlockAudio, keepAwake, fmt, fmtLong } from '../timer.js';
+import { timerRing, setRing } from './components.js';
 import { esc, illustration, ytUrl, toast, prescription } from './components.js';
 import { hasPose, mountFigure } from './figure.js';
 import { applyAlt } from './views.js';
@@ -60,11 +61,23 @@ export function mountSession(root, nav, dateISO, altIndex) {
   keepAwake(true);
 
   function stopTimer() { if (timer) { timer.stop(); timer = null; } }
+
+  // o que este treino faz à semana: dá sentido a guardar
+  function weekAfter() {
+    const st = getState();
+    const wk = buildWeek(st, new Date(dateISO));
+    const previstos = wk.sessions.filter(x => x.type !== 'rest').length;
+    const feitos = wk.sessions.filter(x => {
+      const l = st.logs.find(y => y.date === x.date);
+      return (l && l.completed) || x.date === dateISO;
+    }).length;
+    return `<div class="stat"><span class="stat-n">${feitos}<small>/${previstos}</small></span><span class="stat-l">na semana</span></div>`;
+  }
   function stopFig() { if (figOff) { figOff(); figOff = null; } }
   function mountFigs() {
     stopFig();
     const host = root.querySelector('[data-fig]');
-    if (host) figOff = mountFigure(host, host.dataset.fig, { size: 280, period: 3400 });
+    if (host) figOff = mountFigure(host, host.dataset.fig, { size: 280, maxH: host.classList.contains('srun-illu-sm') ? 168 : 208, period: 3400, animate: getState().profile.animate !== false });
   }
 
   function renderStep() {
@@ -84,24 +97,37 @@ export function mountSession(root, nav, dateISO, altIndex) {
       root.innerHTML = `${header}
         <div class="srun srun-rest">
           <div class="srun-kicker">${esc(st.label)}</div>
-          <div class="srun-big" data-clock>${fmt(st.seconds)}</div>
-          <div class="srun-sub">pausa</div>
-          ${st.next ? `<div class="srun-next"><span class="muted">A seguir</span><strong>${esc(st.next.name)}</strong><div class="srun-next-thumb">${illustration(st.next, 64)}</div></div>` : ''}
+          <div class="srun-timer srun-timer-rest">
+            ${timerRing('sky')}
+            <div class="srun-timer-in">
+              <div class="srun-big" data-clock>${fmt(st.seconds)}</div>
+              <div class="srun-sub">pausa</div>
+            </div>
+          </div>
+          ${st.next ? `<div class="srun-next"><span class="muted">A seguir</span><strong>${esc(st.next.name)}</strong><div class="srun-next-thumb">${illustration(st.next, 124)}</div></div>` : ''}
           <div class="srun-actions">
             <button class="btn btn-ghost" data-add="-10">−10s</button>
             <button class="btn btn-ghost" data-pause>Pausar</button>
             <button class="btn btn-ghost" data-add="10">+10s</button>
           </div>
-          <button class="btn btn-primary btn-big" data-next>Saltar pausa</button>
+          <button class="link srun-skip" data-next>Saltar pausa</button>
         </div>`;
-      timer = countdown(st.seconds, { tone: 'rest', onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.textContent = fmt(s); }, onDone: () => advance() });
+      timer = countdown(st.seconds, {
+        tone: 'rest',
+        onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.textContent = fmt(s); },
+        onFrame: f => setRing(root, f),
+        onDone: () => advance(),
+      });
     } else if (st.mode === 'cardio') {
       const kicker = st.label && st.label.toLowerCase() !== st.ex.name.toLowerCase() ? st.label : 'Bloco principal';
       root.innerHTML = `${header}
         <div class="srun srun-cardio">
           <div class="srun-kicker">${esc(kicker)}</div>
           <h2 class="srun-title">${esc(st.ex.name)}</h2>
-          <div class="srun-big" data-clock>${fmtLong(st.seconds)}</div>
+          <div class="srun-timer srun-timer-lg">
+            ${timerRing('sky')}
+            <div class="srun-timer-in"><div class="srun-big" data-clock>${fmtLong(st.seconds)}</div></div>
+          </div>
           <p class="srun-note">${esc(st.note || '')}</p>
           <ul class="cues">${st.ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
           <div class="srun-actions">
@@ -110,7 +136,12 @@ export function mountSession(root, nav, dateISO, altIndex) {
           </div>
           <button class="btn btn-primary btn-big" data-next>Terminei</button>
         </div>`;
-      timer = countdown(st.seconds, { tone: 'work', onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.textContent = fmtLong(s); }, onDone: () => { beep('done'); } });
+      timer = countdown(st.seconds, {
+        tone: 'work',
+        onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.textContent = fmtLong(s); },
+        onFrame: f => setRing(root, f),
+        onDone: () => { beep('done'); },
+      });
     } else {
       const isTime = st.mode === 'time';
       const rx = isTime ? `${st.seconds}s` : (st.reps ? (st.reps[0] === st.reps[1] ? `${st.reps[0]} reps` : `${st.reps[0]}–${st.reps[1]} reps`) : '');
@@ -119,20 +150,32 @@ export function mountSession(root, nav, dateISO, altIndex) {
         <div class="srun srun-work">
           <div class="srun-kicker">${esc(st.label)}${st.side ? ` · ${esc(st.side)}` : ''}</div>
           <h2 class="srun-title">${esc(st.ex.name)}</h2>
-          <div class="srun-illu" data-info role="button" tabindex="0" aria-label="Ver detalhes do exercício">
-            ${hasPose(st.ex.id) ? `<div data-fig="${st.ex.id}"></div>` : illustration(st.ex, 150)}
+          <div class="srun-illu${isTime ? ' srun-illu-sm' : ''}" data-info role="button" tabindex="0" aria-label="Ver detalhes do exercício">
+            ${hasPose(st.ex.id) ? `<div data-fig="${st.ex.id}" class="${isTime ? 'srun-illu-sm' : ''}"></div>` : illustration(st.ex, isTime ? 130 : 150)}
             <span class="srun-info">i</span>
           </div>
-          ${isTime ? `<div class="srun-big" data-clock>${fmt(st.seconds)}</div>` : `<div class="srun-big srun-reps">${esc(rx)}</div>`}
+          ${isTime ? `
+          <div class="srun-timer srun-timer-sm">
+            ${timerRing('mint')}
+            <div class="srun-timer-in"><div class="srun-big" data-clock>${fmt(st.seconds)}<small>s</small></div></div>
+          </div>
+          ` : `<div class="srun-big srun-reps">${esc(rx)}</div>`}
           <div class="srun-chips">${load}${st.ex.tempo ? `<span class="pill">${esc(st.ex.tempo)}</span>` : ''}</div>
           <ul class="cues">${st.ex.cues.slice(0, 3).map(c => `<li>${esc(c)}</li>`).join('')}</ul>
           ${isTime ? `<div class="srun-actions"><button class="btn btn-ghost" data-pause>Pausar</button><button class="btn btn-ghost" data-add="10">+10s</button></div>` : ''}
-          <button class="btn btn-primary btn-big" data-next>${isTime ? 'Saltar' : 'Feito'}</button>
+          ${isTime
+            ? `<button class="link srun-skip" data-next>Saltar exercício</button>`
+            : `<button class="btn btn-primary btn-big" data-next>Feito</button>`}
           ${st.item?.homeAlt ? `<button class="btn btn-ghost" data-swap-now="${st.ex.id}" data-alt="${st.item.homeAlt.id}">Trocar por ${esc(st.item.homeAlt.name)}</button>` : ''}
         </div>`;
       if (isTime) {
         beep('go');
-        timer = countdown(st.seconds, { tone: 'work', onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.textContent = fmt(s); }, onDone: () => advance() });
+        timer = countdown(st.seconds, {
+          tone: 'work',
+          onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.innerHTML = `${fmt(s)}<small>s</small>`; },
+          onFrame: f => setRing(root, f),
+          onDone: () => advance(),
+        });
       }
       if (st.item?.kind === 'strength') results[st.ex.id] = results[st.ex.id] || { done: true, top: true, rpe: null, kg: st.load?.kg ?? null };
     }
@@ -207,7 +250,7 @@ export function mountSession(root, nav, dateISO, altIndex) {
       <div class="srun srun-log">
         <div class="srun-kicker">${early ? 'Sessão interrompida' : 'Sessão terminada'}</div>
         <h2 class="srun-title">${esc(session.title)}</h2>
-        <div class="stats"><div class="stat"><span class="stat-n">${minutes}</span><span class="stat-l">min</span></div></div>
+        <div class="stats"><div class="stat"><span class="stat-n">${minutes}</span><span class="stat-l">min</span></div>${weekAfter()}</div>
         ${strength.length ? `<ul class="loglist">${strength.map(it => {
           const r = results[it.ex.id] || { done: false, top: true, rpe: null, kg: it.load?.kg ?? null };
           return `<li class="logrow" data-log="${it.ex.id}">
@@ -232,8 +275,8 @@ export function mountSession(root, nav, dateISO, altIndex) {
           <label class="toggle small"><input type="checkbox" data-knee-pain><span>O joelho queixou-se</span></label>
         </div>` : ''}
         <label class="field"><span>Nota (opcional)</span><input type="text" data-note placeholder="Como te sentiste"></label>
-        <button class="btn btn-primary btn-big" data-save>Guardar</button>
-        <button class="btn btn-ghost" data-discard>Não guardar</button>
+        <button class="btn btn-primary btn-big" data-save>Guardar treino</button>
+        <button class="link srun-discard" data-discard>Sair sem guardar</button>
       </div>`;
 
     // bindings do registo
