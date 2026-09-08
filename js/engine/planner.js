@@ -123,6 +123,24 @@ function estimateStrengthSeconds(item) {
   return item.sets * (work + item.rest);
 }
 
+// Segundos de um bloco já montado (usado para orçamentar o que resta).
+export function blockSeconds(b) {
+  if (!b) return 0;
+  if (b.kind === 'hiit' || b.kind === 'circuit') {
+    return b.rounds * b.items.reduce((a, i) => a + i.work + i.rest, 0) + (b.rounds - 1) * b.betweenRounds;
+  }
+  if (b.kind === 'cardio') return b.items.reduce((a, i) => a + i.time, 0);
+  return b.items.reduce((a, i) => a + (i.kind === 'strength'
+    ? estimateStrengthSeconds(i)
+    : ((i.time || (i.reps ? i.reps[1] * 3 : 30)) * (i.perSide ? 2 : 1) + 10) * (i.sets || 1)), 0);
+}
+
+// Semana de deload treina menos: encurta o orçamento em vez de só cortar séries.
+function budgetFor(profile, week, usedSec) {
+  const total = (profile.minutes || 30) * 60 * (week === 4 ? 0.65 : 1);
+  return Math.max(5 * 60, total - usedSec);
+}
+
 // Corta séries a partir do fim até caber no tempo disponível.
 function fitToBudget(items, budgetSec) {
   let total = items.reduce((s, i) => s + estimateStrengthSeconds(i), 0);
@@ -152,12 +170,36 @@ function cooldownBlock(ids, state) {
   return { kind: 'cooldown', title: 'Arrefecimento', items };
 }
 
+// Monta um bloco de força que ENCHE o tempo disponível: junta exercícios da lista
+// por ordem de prioridade enquanto couberem e, se sobrar tempo, acrescenta séries.
 function strengthBlock(title, chains, state, week, budgetSec, opts = {}) {
+  const minItems = opts.min ?? 3;
+  const maxItems = opts.max ?? 7;
+  const maxSets = opts.maxSets ?? (week === 4 ? 3 : 5);
   const items = [];
+  const used = new Set();
+  const total = () => items.reduce((a, i) => a + estimateStrengthSeconds(i), 0);
+
   for (const c of chains) {
+    if (items.length >= maxItems) break;
     const ex = typeof c === 'string' ? pickFromChain(c, state) : pickId(c.id, state);
-    if (ex && !items.some(i => i.ex.id === ex.id)) items.push(strengthItem(ex, state, week, opts.sets));
+    if (!ex || used.has(ex.id)) continue;
+    const item = strengthItem(ex, state, week, opts.sets);
+    if (items.length >= minItems && total() + estimateStrengthSeconds(item) > budgetSec) break;
+    items.push(item);
+    used.add(ex.id);
   }
+
+  // sobra tempo: acrescenta séries, sempre ao exercício com menos séries
+  let guard = 40;
+  while (guard-- > 0) {
+    const cand = items.filter(i => i.sets < maxSets).sort((a, b) => a.sets - b.sets)[0];
+    if (!cand) break;
+    const cost = estimateStrengthSeconds({ ...cand, sets: 1 });
+    if (total() + cost > budgetSec) break;
+    cand.sets += 1;
+  }
+
   fitToBudget(items, budgetSec);
   return { kind: 'strength', title, items };
 }
@@ -170,12 +212,14 @@ function hiitBlock(state, week, budgetSec) {
   const wantRounds = week === 4 ? 3 : 4;
   // prefere manter as rondas e cortar exercícios (6 → 5 → 4) antes de cortar rondas
   let items = [];
-  let rounds = wantRounds;
   for (const n of [6, 5, 4]) {
     items = rotated.slice(0, n).map(ex => ({ kind: 'interval', ex, work: 40, rest: 20 }));
     if (wantRounds * n * 60 + (wantRounds - 1) * between <= budgetSec) break;
   }
-  while (rounds > 2 && rounds * items.length * 60 + (rounds - 1) * between > budgetSec) rounds -= 1;
+  const cost = r => r * items.length * 60 + (r - 1) * between;
+  let rounds = wantRounds;
+  while (rounds > 2 && cost(rounds) > budgetSec) rounds -= 1;
+  while (rounds < (week === 4 ? 4 : 7) && cost(rounds + 1) <= budgetSec) rounds += 1;
   return { kind: 'hiit', title: `${rounds} rondas · 40s trabalho / 20s pausa`, items, rounds, betweenRounds: between };
 }
 
@@ -183,9 +227,11 @@ function circuitBlock(title, ids, state, week, budgetSec) {
   const items = ids.map(id => pickId(id, state) || pickFromChain(id, state)).filter(Boolean)
     .map(ex => ({ kind: 'interval', ex, work: 40, rest: 15, load: loadHint(ex, state, week) }));
   const between = 60;
-  let rounds = week === 4 ? 2 : (week === 3 ? 4 : 3);
   const per = items.length * 55;
-  while (rounds > 2 && rounds * per + (rounds - 1) * between > budgetSec) rounds -= 1;
+  const cost = r => r * per + (r - 1) * between;
+  let rounds = week === 4 ? 2 : (week === 3 ? 4 : 3);
+  while (rounds > 2 && cost(rounds) > budgetSec) rounds -= 1;
+  while (rounds < (week === 4 ? 3 : 8) && cost(rounds + 1) <= budgetSec) rounds += 1;
   return { kind: 'circuit', title: `${title} · ${rounds} rondas · 40s / 15s`, items, rounds, betweenRounds: between };
 }
 
@@ -193,84 +239,112 @@ function cardioBlock(ex, minutes, note) {
   return { kind: 'cardio', title: ex.name, items: [{ kind: 'cardio', ex, time: minutes * 60, note }] };
 }
 
-function mobilityBlock(ids, state) {
-  const items = ids.map(id => pickId(id, state)).filter(Boolean).map(ex => ({
+function mobilityBlock(ids, state, budgetSec = Infinity) {
+  const all = ids.map(id => pickId(id, state)).filter(Boolean).map(ex => ({
     kind: 'mobility', ex, sets: 1, reps: ex.reps || null, time: ex.time || null, rest: 0, perSide: !!ex.perSide,
   }));
+  const cost = it => (it.time || (it.reps ? it.reps[1] * 3 : 30)) * (it.perSide ? 2 : 1) + 10;
+  const items = [];
+  let sec = 0;
+  for (const it of all) {
+    if (items.length >= 3 && sec + cost(it) > budgetSec) break;
+    items.push(it); sec += cost(it);
+  }
+  // sobra bastante tempo: segura cada posição duas vezes em vez de deixar folga
+  if (items.length && sec * 2 <= budgetSec) { items.forEach(i => { i.sets = 2; }); sec *= 2; }
   return { kind: 'mobility', title: 'Mobilidade', items };
 }
 
 // ---------- sessões ----------
+// O orçamento de tempo é o que sobra depois do aquecimento e do arrefecimento.
+// Os blocos principais ENCHEM esse tempo: mudar 30 para 45 minutos dá mais trabalho,
+// não mais folga. A semana de deload encurta o próprio orçamento.
 function buildSession(type, state, week, dateISO, cardioIndex) {
   const p = state.profile;
-  const total = p.minutes * 60;
   const meta = DAY_META[type];
   const s = { date: dateISO, type, title: meta.title, subtitle: meta.sub, tone: meta.tone, week, blocks: [], notes: [], alternatives: [] };
   const altB = (chainA, chainB) => (week % 2 === 1 ? chainA : chainB);
 
+  // monta aquecimento/arrefecimento primeiro para saber quanto tempo sobra
+  const frame = (warm, cool) => {
+    const w = warm ? warmupBlock(warm, state) : null;
+    const c = cool ? cooldownBlock(cool, state) : null;
+    const used = blockSeconds(w) + blockSeconds(c);
+    return { w, c, budget: budgetFor(p, week, used) };
+  };
+
   switch (type) {
     case 'forcaA': {
-      s.blocks.push(warmupBlock(['arm-circles', 'hip-circles', 'slow-pushup'], state));
-      s.blocks.push(strengthBlock('Principal', ['pushup', 'squat', 'thrust', 'press'], state, week, total - 6 * 60));
-      s.blocks.push(strengthBlock('Core', [altB('antiext', 'plank')], state, week, 3 * 60, { sets: 2 }));
-      s.blocks.push(cooldownBlock(['hip-flexor-stretch', 'downdog-cobra'], state));
+      const f = frame(['arm-circles', 'hip-circles', 'slow-pushup'], ['hip-flexor-stretch', 'downdog-cobra']);
+      s.blocks.push(f.w);
+      s.blocks.push(strengthBlock('Principal', ['pushup', 'squat', 'thrust', 'press', 'triceps', 'lateral'], state, week, f.budget * 0.75));
+      s.blocks.push(strengthBlock('Core', [altB('antiext', 'plank'), altB('sideplank', 'birddog')], state, week, f.budget * 0.25, { sets: 2, min: 1, max: 2, maxSets: 3 }));
+      s.blocks.push(f.c);
       break;
     }
     case 'forcaB': {
-      s.blocks.push(warmupBlock(['arm-circles', 'towel-pull-apart', 'hip-circles'], state));
-      s.blocks.push(strengthBlock('Principal', ['row', 'hinge', 'lunge', altB('kneeiso', 'stepdown')], state, week, total - 6 * 60));
-      s.blocks.push(strengthBlock('Core', [altB('sideplank', 'birddog')], state, week, 3 * 60, { sets: 2 }));
-      s.blocks.push(cooldownBlock(['figure-four', 'hamstring-stretch'], state));
-      s.notes.push('Se as barras estiverem ocupadas, cada exercício de barra tem versão em casa. Toca no exercício para trocar.');
+      const f = frame(['arm-circles', 'towel-pull-apart', 'hip-circles'], ['figure-four', 'hamstring-stretch']);
+      s.blocks.push(f.w);
+      s.blocks.push(strengthBlock('Principal', ['row', 'hinge', 'lunge', altB('kneeiso', 'stepdown'), 'curl', 'backext'], state, week, f.budget * 0.75));
+      s.blocks.push(strengthBlock('Core', [altB('sideplank', 'birddog'), altB('plank', 'antiext')], state, week, f.budget * 0.25, { sets: 2, min: 1, max: 2, maxSets: 3 }));
+      s.blocks.push(f.c);
       break;
     }
     case 'push': {
-      s.blocks.push(warmupBlock(['arm-circles', 'slow-pushup'], state));
-      s.blocks.push(strengthBlock('Principal', ['pushup', 'press', 'dips', 'pike', 'lateral'], state, week, total - 5 * 60));
-      s.blocks.push(cooldownBlock(['thoracic-rotation'], state));
+      const f = frame(['arm-circles', 'slow-pushup'], ['thoracic-rotation']);
+      s.blocks.push(f.w);
+      s.blocks.push(strengthBlock('Principal', ['pushup', 'press', 'dips', 'pike', 'lateral', 'triceps'], state, week, f.budget));
+      s.blocks.push(f.c);
       break;
     }
     case 'pull': {
-      s.blocks.push(warmupBlock(['arm-circles', 'towel-pull-apart'], state));
-      s.blocks.push(strengthBlock('Principal', ['row', 'curl', 'reardelt', 'backext', 'hangcore'], state, week, total - 5 * 60));
-      s.blocks.push(cooldownBlock(['cat-cow'], state));
+      const f = frame(['arm-circles', 'towel-pull-apart'], ['cat-cow']);
+      s.blocks.push(f.w);
+      s.blocks.push(strengthBlock('Principal', ['row', 'curl', 'reardelt', 'backext', 'hangcore'], state, week, f.budget));
+      s.blocks.push(f.c);
       break;
     }
     case 'pernas': {
-      s.blocks.push(warmupBlock(['hip-circles', 'bw-squat-warm'], state));
-      s.blocks.push(strengthBlock('Principal', ['squat', 'hinge', 'lunge', 'thrust', altB('calf', 'stepdown')], state, week, total - 5 * 60));
-      s.blocks.push(cooldownBlock(['hip-flexor-stretch', 'figure-four'], state));
+      const f = frame(['hip-circles', 'bw-squat-warm'], ['hip-flexor-stretch', 'figure-four']);
+      s.blocks.push(f.w);
+      s.blocks.push(strengthBlock('Principal', ['squat', 'hinge', 'lunge', 'thrust', altB('calf', 'stepdown'), 'kneeiso'], state, week, f.budget));
+      s.blocks.push(f.c);
       s.notes.push('Prioridade: joelho alinhado em todas as repetições. Se doer, troca por wall sit.');
       break;
     }
     case 'full': {
-      s.blocks.push(warmupBlock(['march-in-place', 'arm-circles', 'hip-circles'], state));
-      s.blocks.push(strengthBlock('Principal', ['swing', 'pushup', 'row', 'squat', 'antiext'], state, week, total - 5 * 60));
-      s.blocks.push(cooldownBlock(['worlds-greatest'], state));
+      const f = frame(['march-in-place', 'arm-circles', 'hip-circles'], ['worlds-greatest']);
+      s.blocks.push(f.w);
+      s.blocks.push(strengthBlock('Principal', ['swing', 'pushup', 'row', 'squat', 'antiext', 'press'], state, week, f.budget));
+      s.blocks.push(f.c);
       break;
     }
     case 'circuitoA': {
-      s.blocks.push(warmupBlock(['march-in-place', 'hip-circles'], state));
-      s.blocks.push(circuitBlock('Circuito', ['goblet-squat', 'pushup-board', 'db-swing', 'db-row-1arm', 'mountain-climber-slow', 'plank'], state, week, total - 5 * 60));
-      s.blocks.push(cooldownBlock(['hip-flexor-stretch', 'diaphragm-breathing'], state));
+      const f = frame(['march-in-place', 'hip-circles'], ['hip-flexor-stretch', 'diaphragm-breathing']);
+      s.blocks.push(f.w);
+      s.blocks.push(circuitBlock('Circuito', ['goblet-squat', 'pushup-board', 'db-swing', 'db-row-1arm', 'mountain-climber-slow', 'plank'], state, week, f.budget));
+      s.blocks.push(f.c);
       s.notes.push('Perder gordura decide-se na cozinha. O treino mantém o músculo e acelera o resto.');
       break;
     }
     case 'circuitoB': {
-      s.blocks.push(warmupBlock(['march-in-place', 'arm-circles'], state));
-      s.blocks.push(circuitBlock('Circuito', ['reverse-lunge', 'db-press-standing', 'db-rdl', 'renegade-row', 'shadow-boxing', 'dead-bug'], state, week, total - 5 * 60));
-      s.blocks.push(cooldownBlock(['figure-four', 'hamstring-stretch'], state));
+      const f = frame(['march-in-place', 'arm-circles'], ['figure-four', 'hamstring-stretch']);
+      s.blocks.push(f.w);
+      s.blocks.push(circuitBlock('Circuito', ['reverse-lunge', 'db-press-standing', 'db-rdl', 'renegade-row', 'shadow-boxing', 'dead-bug'], state, week, f.budget));
+      s.blocks.push(f.c);
       break;
     }
     case 'hiit': {
-      s.blocks.push(warmupBlock(['march-in-place', 'hip-circles'], state));
-      s.blocks.push(hiitBlock(state, week, total - 4 * 60));
-      s.blocks.push(cooldownBlock(['diaphragm-breathing'], state));
+      const f = frame(['march-in-place', 'hip-circles'], ['diaphragm-breathing']);
+      s.blocks.push(f.w);
+      s.blocks.push(hiitBlock(state, week, f.budget));
+      s.blocks.push(f.c);
       s.notes.push('Sem saltos. Escolhe pesos que aguentes com forma perfeita os 40 segundos inteiros.');
       break;
     }
     case 'cardio': {
-      const minutes = p.minutes;
+      const f = frame(['hip-circles', 'ankle-mobility'], ['hamstring-stretch', 'hip-flexor-stretch']);
+      const minutes = Math.max(10, Math.round(f.budget / 60));
       const wantsTempo = cardioIndex === 1 && (week === 2 || week === 3);
       const runsAllowed = p.runsPerWeek ?? 2;
       const deloadSwim = week === 4 && cardioIndex >= 1;
@@ -284,27 +358,29 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
         ex = BY_ID['run-tempo'];
         note = '5 min fáceis · 15 min firmes · 5 min fáceis. Só uma por semana.';
       }
-      s.title = ex.pattern === 'cardio' && ex.chain === 'swim' ? 'Natação' : (ex.id === 'run-tempo' ? 'Corrida tempo' : 'Corrida zona 2');
-      s.subtitle = ex.id === 'swim-easy' ? 'Contínua · zero impacto' : (ex.id === 'run-tempo' ? 'Piso regular · ritmo firme' : 'Piso regular · conversável');
-      s.blocks.push(warmupBlock(['hip-circles', 'ankle-mobility'], state));
-      s.blocks.push(cardioBlock(ex, minutes - 5, note));
-      s.blocks.push(cooldownBlock(['hamstring-stretch', 'hip-flexor-stretch'], state));
-      if (ex.id !== 'swim-easy') {
-        s.alternatives.push({ label: 'Trocar por natação', session: { blockOverride: cardioBlock(BY_ID['swim-easy'], minutes - 5, 'Zero impacto. Boa escolha.') } });
+      s.title = ex.chain === 'swim' ? 'Natação' : (ex.id === 'run-tempo' ? 'Corrida tempo' : 'Corrida zona 2');
+      s.subtitle = ex.chain === 'swim' ? 'Contínua · zero impacto' : (ex.id === 'run-tempo' ? 'Piso regular · ritmo firme' : 'Piso regular · conversável');
+      s.blocks.push(f.w);
+      s.blocks.push(cardioBlock(ex, minutes, note));
+      s.blocks.push(f.c);
+      if (ex.chain !== 'swim') {
+        s.alternatives.push({ label: 'Trocar por natação', session: { blockOverride: cardioBlock(BY_ID['swim-easy'], minutes, 'Zero impacto. Boa escolha.') } });
       }
       break;
     }
     case 'mobilidade': {
-      s.blocks.push(mobilityBlock(['cat-cow', 'worlds-greatest', 'ninety-ninety', 'hip-flexor-stretch', 'thoracic-rotation', 'deep-squat-hold', 'ankle-mobility'], state));
-      s.blocks.push(strengthBlock('Core', ['antiext', 'sideplank', 'birddog'], state, week, 8 * 60, { sets: 2 }));
-      s.blocks.push(cooldownBlock(['diaphragm-breathing'], state));
+      const f = frame(null, ['diaphragm-breathing']);
+      s.blocks.push(mobilityBlock(['cat-cow', 'worlds-greatest', 'ninety-ninety', 'hip-flexor-stretch', 'thoracic-rotation', 'deep-squat-hold', 'ankle-mobility', 'figure-four', 'hamstring-stretch'], state, f.budget * 0.65));
+      s.blocks.push(strengthBlock('Core', ['antiext', 'sideplank', 'birddog', 'plank'], state, week, f.budget * 0.35, { sets: 2, min: 2, max: 4, maxSets: 3 }));
+      s.blocks.push(f.c);
       break;
     }
     case 'ativo': {
+      const minutes = p.minutes;
       const walk = BY_ID['walk-brisk'];
-      s.blocks.push(cardioBlock(walk, p.minutes, 'Ritmo que aqueça sem ofegar. Ou escolhe outra opção em baixo.'));
-      s.alternatives.push({ label: 'Basket livre', session: { blockOverride: cardioBlock(BY_ID['basket-shoot'], p.minutes, 'Sem saltos nem travagens bruscas.') } });
-      s.alternatives.push({ label: 'Natação leve', session: { blockOverride: cardioBlock(BY_ID['swim-easy'], p.minutes, 'Zero impacto.') } });
+      s.blocks.push(cardioBlock(walk, minutes, 'Ritmo que aqueça sem ofegar. Ou escolhe outra opção em baixo.'));
+      s.alternatives.push({ label: 'Basket livre', session: { blockOverride: cardioBlock(BY_ID['basket-shoot'], minutes, 'Sem saltos nem travagens bruscas.') } });
+      s.alternatives.push({ label: 'Natação leve', session: { blockOverride: cardioBlock(BY_ID['swim-easy'], minutes, 'Zero impacto.') } });
       break;
     }
     case 'rest':
@@ -314,25 +390,34 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
     }
   }
 
+  s.blocks = s.blocks.filter(b => b && b.items && b.items.length);
+
+  // a nota das barras só faz sentido se o dia tiver mesmo exercício de barra
+  if (s.blocks.some(b => b.items.some(i => i.homeAlt))) {
+    s.notes.push('Se as barras estiverem ocupadas, os exercícios de barra têm o botão “casa” para trocar pela versão sem barra.');
+  }
+
   s.estMinutes = estimateMinutes(s);
   return s;
 }
 
 export function estimateMinutes(session) {
-  let sec = 0;
+  return Math.round(session.blocks.reduce((a, b) => a + blockSeconds(b), 0) / 60);
+}
+
+// Aplica as trocas por versao em casa guardadas para o dia. Fica registado de onde
+// veio a troca, para a interface poder oferecer o caminho de volta.
+export function applySwaps(session, state) {
+  const map = state.swaps && state.swaps[session.date];
+  if (!map) return session;
   for (const b of session.blocks) {
-    if (b.kind === 'hiit' || b.kind === 'circuit') {
-      sec += b.rounds * b.items.reduce((a, i) => a + i.work + i.rest, 0) + (b.rounds - 1) * b.betweenRounds;
-    } else if (b.kind === 'cardio') {
-      sec += b.items.reduce((a, i) => a + i.time, 0);
-    } else {
-      for (const i of b.items) {
-        if (i.kind === 'strength') sec += estimateStrengthSeconds(i);
-        else sec += (i.time || (i.reps ? i.reps[1] * 3 : 30)) * (i.perSide ? 2 : 1) + 10;
-      }
+    for (const it of b.items) {
+      const to = map[it.ex.id];
+      const alt = to && BY_ID[to];
+      if (alt) { it.swappedFrom = it.ex; it.ex = alt; it.homeAlt = null; }
     }
   }
-  return Math.round(sec / 60);
+  return session;
 }
 
 // ---------- semana ----------
@@ -347,6 +432,7 @@ export function buildWeek(state, date = new Date()) {
     const dateISO = iso(d);
     const sess = buildSession(type, state, week, dateISO, type === 'cardio' ? cardioIndex : 0);
     if (type === 'cardio') cardioIndex += 1;
+    applySwaps(sess, state);
     sess.weekday = WEEKDAYS[i];
     sess.weekdayShort = WEEKDAYS_SHORT[i];
     sess.dayIndex = i;

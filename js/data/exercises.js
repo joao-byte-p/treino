@@ -267,7 +267,7 @@ export const EXERCISES = [
   {
     id: 'step-up', name: 'Step-up controlado', nameEn: 'Step-up',
     pattern: 'squat', chain: 'lunge', level: 2, equipment: ['chair'], mode: 'reps',
-    sets: 3, reps: [10, 12], rest: 60, knee: 'care', load: true, perSide: true,
+    sets: 3, reps: [10, 12], rest: 60, knee: 'care', load: true, optionalLoad: true, perSide: true,
     muscles: ['Glúteos', 'Quadríceps'],
     cues: ['Degrau ou banco firme à altura do joelho ou abaixo', 'Sobe só com a perna de cima, sem impulso', 'Desce lento em 3 segundos'],
     mistakes: ['Empurrar com o pé de trás', 'Joelho a entrar'],
@@ -294,7 +294,7 @@ export const EXERCISES = [
   {
     id: 'spanish-squat-iso', name: 'Agachamento isométrico parcial', nameEn: 'Partial squat iso hold',
     pattern: 'knee', chain: 'kneeiso', level: 2, equipment: ['body'], mode: 'time',
-    sets: 3, time: 45, rest: 45, knee: 'safe', load: true,
+    sets: 3, time: 45, rest: 45, knee: 'safe', load: true, optionalLoad: true,
     muscles: ['Quadríceps', 'Tendão patelar'],
     cues: ['Agacha até 60° e para', 'Tronco vertical, joelhos empurram para fora', 'Segura com halter ao peito se for fácil'],
     mistakes: ['Descer demasiado', 'Bloquear a respiração'],
@@ -321,7 +321,7 @@ export const EXERCISES = [
   {
     id: 'calf-raise-single', name: 'Elevação de gémeos unilateral', nameEn: 'Single-leg calf raise',
     pattern: 'knee', chain: 'calf', level: 1, equipment: ['chair'], mode: 'reps',
-    sets: 3, reps: [12, 20], rest: 30, knee: 'safe', load: true, perSide: true,
+    sets: 3, reps: [12, 20], rest: 30, knee: 'safe', load: true, optionalLoad: true, perSide: true,
     muscles: ['Gémeos', 'Tendão de Aquiles'],
     cues: ['Ponta do pé no degrau, calcanhar livre', 'Sobe alto, 1 segundo em cima', 'Desce abaixo do degrau devagar'],
     mistakes: ['Amplitude curta', 'Saltitar'],
@@ -359,7 +359,7 @@ export const EXERCISES = [
   {
     id: 'glute-bridge', name: 'Ponte de glúteos', nameEn: 'Glute bridge',
     pattern: 'glute', chain: 'thrust', level: 1, equipment: ['body'], mode: 'reps',
-    sets: 3, reps: [12, 15], rest: 45, knee: 'safe', load: true,
+    sets: 3, reps: [12, 15], rest: 45, knee: 'safe', load: true, optionalLoad: true,
     muscles: ['Glúteos', 'Isquiotibiais'],
     cues: ['Deitado, pés à largura da anca', 'Empurra pelos calcanhares até a anca ficar em linha', 'Aperta o glúteo 2 segundos em cima'],
     mistakes: ['Arquear o lombar em cima', 'Pés demasiado longe'],
@@ -377,7 +377,7 @@ export const EXERCISES = [
   {
     id: 'single-leg-hip-thrust', name: 'Hip thrust unilateral', nameEn: 'Single-leg hip thrust',
     pattern: 'glute', chain: 'thrust', level: 3, equipment: ['chair'], mode: 'reps',
-    sets: 3, reps: [8, 12], rest: 60, knee: 'safe', load: true, perSide: true,
+    sets: 3, reps: [8, 12], rest: 60, knee: 'safe', load: true, optionalLoad: true, perSide: true,
     muscles: ['Glúteos', 'Estabilidade da anca'],
     cues: ['Uma perna no ar, joelho a 90°', 'Anca sobe nivelada, sem rodar', 'Pausa em cima'],
     mistakes: ['Anca a cair para o lado da perna livre', 'Usar o lombar'],
@@ -777,6 +777,14 @@ export const BY_ID = Object.fromEntries(EXERCISES.map(e => [e.id, e]));
 
 export function chainLevels(chain) {
   return EXERCISES.filter(e => e.chain === chain).sort((a, b) => a.level - b.level);
+}
+
+// Cadeias como 'mob', 'wu', 'hiit' ou 'run' são só agrupamentos: todos os exercícios
+// estão no nível 1. Só as verdadeiras cadeias de progressão têm níveis distintos,
+// e só essas devem mostrar níveis e botões de subir/descer.
+export function isProgression(chain) {
+  const ls = EXERCISES.filter(e => e.chain === chain).map(e => e.level);
+  return ls.length > 1 && new Set(ls).size > 1;
 }
 
 export const PATTERN_LABEL = {

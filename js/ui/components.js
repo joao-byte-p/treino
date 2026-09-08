@@ -28,7 +28,11 @@ export function prescription(item) {
 export function exerciseRow(item, { showLoad = true, swappable = false, linked = false } = {}) {
   const ex = item.ex;
   const load = showLoad && item.load ? (item.load.kg ? `<span class="pill pill-load">${item.load.kg} kg</span>` : '') : '';
-  const alt = swappable && item.homeAlt ? `<button class="swap" data-swap="${ex.id}" data-alt="${item.homeAlt.id}" aria-label="Trocar por ${esc(item.homeAlt.name)}">⇄ casa</button>` : '';
+  const alt = swappable && item.homeAlt
+    ? `<button class="swap" data-swap="${ex.id}" data-alt="${item.homeAlt.id}" aria-label="Trocar por ${esc(item.homeAlt.name)}">⇄ casa</button>`
+    : (swappable && item.swappedFrom
+      ? `<button class="swap swap-back" data-unswap="${item.swappedFrom.id}" aria-label="Voltar a ${esc(item.swappedFrom.name)}">⇄ barra</button>`
+      : '');
   const chev = linked ? '<span class="exrow-chev" aria-hidden="true">›</span>' : '';
   return `
   <li class="exrow" data-ex="${ex.id}"${linked ? ` data-nav="exercise"` : ''}>

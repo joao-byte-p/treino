@@ -9,7 +9,7 @@ import { hasPose, mountFigure } from './figure.js';
 import { applyAlt } from './views.js';
 
 // ---- passos ----
-function buildSteps(session) {
+export function buildSteps(session) {
   const steps = [];
   const push = s => steps.push(s);
   for (const b of session.blocks) {
@@ -45,10 +45,8 @@ function buildSteps(session) {
 
 export function mountSession(root, nav, dateISO, altIndex) {
   const state = getState();
+  // sessionFor já aplica as trocas por versão em casa guardadas para o dia
   const session = applyAlt(sessionFor(state, new Date(dateISO)), altIndex);
-  // aplica trocas por versão em casa guardadas para o dia
-  const swaps = state.swaps[dateISO] || {};
-  for (const b of session.blocks) for (const it of b.items) if (swaps[it.ex.id] && BY_ID[swaps[it.ex.id]]) it.ex = BY_ID[swaps[it.ex.id]];
 
   const steps = buildSteps(session);
   let i = 0;
@@ -228,7 +226,7 @@ export function mountSession(root, nav, dateISO, altIndex) {
           <h4>${esc(cardio.ex.name)}</h4>
           <div class="grid2">
             <label class="field"><span>Minutos</span><input type="number" inputmode="numeric" value="${Math.round(cardio.time / 60)}" data-c-min></label>
-            <label class="field"><span>${cardio.ex.chain === 'swim' ? 'Metros' : 'Km'}</span><input type="number" inputmode="decimal" step="0.1" placeholder="${cardio.ex.chain === 'swim' ? '800' : '5.0'}" data-c-km></label>
+            <label class="field"><span>${cardio.ex.chain === 'swim' ? 'Metros' : 'Km'}</span><input type="number" inputmode="decimal" step="${cardio.ex.chain === 'swim' ? '50' : '0.1'}" placeholder="${cardio.ex.chain === 'swim' ? '800' : '5.0'}" data-c-dist></label>
           </div>
           <div class="rpe" data-cardio-rpe>${RPE.map(x => `<button type="button" data-rpe="${x.value}">${esc(x.label)}</button>`).join('')}</div>
           <label class="toggle small"><input type="checkbox" data-knee-pain><span>O joelho queixou-se</span></label>
@@ -273,8 +271,9 @@ export function mountSession(root, nav, dateISO, altIndex) {
         sessionRpe,
       };
       if (cardio) {
-        const km = Number(root.querySelector('[data-c-km]')?.value) || null;
-        log.cardio = { ex: cardio.ex.id, minutes: Number(root.querySelector('[data-c-min]')?.value) || Math.round(cardio.time / 60), km, rpe: cardioRpe, kneePain: !!root.querySelector('[data-knee-pain]')?.checked };
+        const dist = Number(root.querySelector('[data-c-dist]')?.value) || null;
+        const unit = cardio.ex.chain === 'swim' ? 'm' : 'km';
+        log.cardio = { ex: cardio.ex.id, minutes: Number(root.querySelector('[data-c-min]')?.value) || Math.round(cardio.time / 60), dist, unit, rpe: cardioRpe, kneePain: !!root.querySelector('[data-knee-pain]')?.checked };
         if (log.cardio.kneePain) { update(s => { s.kneeFlag = true; }); events.push('Joelho a queixar-se: a próxima corrida passa a piscina'); }
       }
       update(s => {

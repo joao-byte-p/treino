@@ -81,6 +81,16 @@ function render(scrollTop = true) {
     update(s => { s.swaps[date] = { ...(s.swaps[date] || {}), [b.dataset.swap]: b.dataset.alt }; });
     toast('Trocado pela versão em casa'); render(false);
   }));
+  view.querySelectorAll('[data-unswap]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const date = route.params.date; if (!date) return;
+    update(s => {
+      if (!s.swaps[date]) return;
+      delete s.swaps[date][b.dataset.unswap];
+      if (!Object.keys(s.swaps[date]).length) delete s.swaps[date];
+    });
+    toast('Voltou ao exercício de barra'); render(false);
+  }));
 }
 
 // navegação por delegação

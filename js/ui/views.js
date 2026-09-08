@@ -1,6 +1,6 @@
 import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso } from '../store.js';
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META } from '../engine/planner.js';
-import { EXERCISES, BY_ID, chainLevels, PATTERN_LABEL } from '../data/exercises.js';
+import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { esc, ring, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip } from './figure.js';
 import { CONFIG } from '../config.js';
@@ -181,12 +181,13 @@ export function renderLibrary(nav, query = '') {
     <section class="block">
       <h3 class="block-title">${esc(PATTERN_LABEL[g.p])} <span class="muted">${g.items.length}</span></h3>
       <ul class="exlist">${g.items.map(ex => {
+        const prog = isProgression(ex.chain);
         const lvl = state.chainLevels[ex.chain] || 1;
         const isCurrent = ex.level === Math.min(lvl, chainLevels(ex.chain).length);
         return `<li class="exrow" data-nav="exercise" data-ex="${ex.id}">
           <div class="exrow-thumb">${illustration(ex, 44)}</div>
           <div class="exrow-body"><div class="exrow-name">${esc(ex.name)}</div><div class="exrow-meta">${esc(ex.nameEn)} · ${esc(ex.muscles.slice(0, 2).join(', '))}</div></div>
-          <div class="exrow-right">${chainLevels(ex.chain).length > 1 ? `<span class="pill ${isCurrent ? 'pill-now' : ''}">N${ex.level}</span>` : ''}</div>
+          <div class="exrow-right">${prog ? `<span class="pill ${isCurrent ? 'pill-now' : ''}">N${ex.level}</span>` : ''}</div>
         </li>`;
       }).join('')}</ul>
     </section>`).join('')}`;
@@ -208,12 +209,12 @@ export function renderExercise(nav, id) {
   <p class="lead">${esc(ex.nameEn)} · ${esc(ex.muscles.join(' · '))}</p>
   ${hasPose(ex.id) ? `<figure class="hero"><div class="hero-fig" data-fig="${ex.id}"></div><figcaption class="hero-cap">Toca no vídeo se quiseres ver em pessoa</figcaption></figure>`
     : `<figure class="hero"><div class="hero-ph">${illustration(ex, 150)}<span>Ilustração a caminho. Por agora, o vídeo e os passos abaixo.</span></div></figure>`}
-  <div class="chips">${rx ? chip(rx) : ''}${ex.rest ? chip(`${ex.rest}s pausa`) : ''}${ex.tempo ? chip(ex.tempo) : ''}${load ? chip(`${load} kg`, 'chip-load') : ''}${ex.knee === 'care' ? chip('Atenção ao joelho', 'chip-warn') : ''}</div>
+  <div class="chips">${rx ? chip(rx) : ''}${ex.rest ? chip(`${ex.rest}s pausa`) : ''}${ex.tempo ? chip(ex.tempo) : ''}${load ? chip(`${load} kg`, 'chip-load') : ''}${ex.optionalLoad ? chip('Peso opcional') : ''}${ex.knee === 'care' ? chip('Atenção ao joelho', 'chip-warn') : ''}</div>
   ${hasPose(ex.id) ? `<section class="block"><h3 class="block-title">Passo a passo</h3>${stepsStrip(ex.id, { size: 150 })}</section>` : ''}
   <section class="block"><h3 class="block-title">Como fazer</h3><ol class="steps">${ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol></section>
   ${ex.mistakes.length ? `<section class="block"><h3 class="block-title">Erros comuns</h3><ul class="mistakes">${ex.mistakes.map(m => `<li>${esc(m)}</li>`).join('')}</ul></section>` : ''}
   <section class="block"><h3 class="block-title">Equipamento</h3><div class="chips">${ex.equipment.map(e => chip(equipmentLabel(e))).join('')}</div></section>
-  ${levels.length > 1 ? `<section class="block"><h3 class="block-title">Cadeia de progressão</h3>
+  ${isProgression(ex.chain) ? `<section class="block"><h3 class="block-title">Cadeia de progressão</h3>
     <ol class="chain">${levels.map(l => `<li class="${l.level === cur ? 'now' : l.level < cur ? 'past' : ''} ${l.id === ex.id ? 'this' : ''}" data-nav="exercise" data-ex="${l.id}"><span class="chain-n">${l.level}</span><span>${esc(l.name)}</span></li>`).join('')}</ol>
     <div class="row-between" style="margin-top:10px">
       <button class="btn btn-ghost btn-sm" data-level="${ex.chain}" data-dir="-1" ${cur <= 1 ? 'disabled' : ''}>Descer nível</button>
@@ -243,7 +244,7 @@ export function renderProgress(nav) {
     return { chain, lvl, max: ls.length, name: cur?.name || chain };
   });
   const loads = Object.entries(state.loads).map(([id, kg]) => ({ ex: BY_ID[id], kg })).filter(x => x.ex);
-  const runs = logs.filter(l => l.cardio?.km).slice(-6);
+  const runs = logs.filter(l => (l.cardio?.dist ?? l.cardio?.km)).slice(-6);
 
   return `
   <header class="top"><div><div class="eyebrow">Progresso</div><h1>Ciclo ${cycle}</h1></div></header>
@@ -259,13 +260,21 @@ export function renderProgress(nav) {
   </section>
   ${levels.length ? `<section class="card"><h3>Níveis nas cadeias</h3><ul class="kv">${levels.map(l => `<li><span>${esc(l.name)}</span><strong>N${l.lvl}<small>/${l.max}</small></strong></li>`).join('')}</ul></section>` : ''}
   ${loads.length ? `<section class="card"><h3>Cargas atuais</h3><ul class="kv">${loads.map(l => `<li><span>${esc(l.ex.name)}</span><strong>${l.kg} kg</strong></li>`).join('')}</ul></section>` : ''}
-  ${runs.length ? `<section class="card"><h3>Últimas corridas</h3><ul class="kv">${runs.map(l => `<li><span>${esc(fmtDate(l.date))}</span><strong>${l.cardio.km} km · ${l.cardio.minutes} min · ${pace(l.cardio)}</strong></li>`).join('')}</ul></section>` : ''}
+  ${runs.length ? `<section class="card"><h3>Últimos treinos de cardio</h3><ul class="kv">${runs.map(l => `<li><span>${esc(fmtDate(l.date))}</span><strong>${esc(distLabel(l.cardio))} · ${l.cardio.minutes} min${pace(l.cardio) ? ` · ${pace(l.cardio)}` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${!logs.length ? `<p class="foot muted">Ainda sem registos. Depois da primeira sessão isto ganha vida.</p>` : ''}`;
 }
 
+function distLabel(c) {
+  const d = c.dist != null ? c.dist : c.km;
+  if (!d) return '';
+  return (c.unit || 'km') === 'm' ? `${d} m` : `${d} km`;
+}
+
+// O ritmo so faz sentido em km. Registos em metros (natacao) mostram so distancia.
 function pace(c) {
-  if (!c.km || !c.minutes) return '';
-  const p = c.minutes / c.km; const m = Math.floor(p); const s = Math.round((p - m) * 60);
+  const d = c.dist != null ? c.dist : c.km;
+  if (!d || !c.minutes || (c.unit || 'km') !== 'km') return '';
+  const p = c.minutes / d; const m = Math.floor(p); const s = Math.round((p - m) * 60);
   return `${m}:${String(s).padStart(2, '0')}/km`;
 }
 
