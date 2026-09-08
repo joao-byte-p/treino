@@ -1,5 +1,5 @@
 // Service worker: cache-first para a app, network-first para fontes externas. Sobe a versão a cada deploy.
-const VERSION = 'treino-v0.3.0';
+const VERSION = 'treino-v0.3.1';
 const CORE = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/config.js', './js/store.js', './js/timer.js',
@@ -19,6 +19,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
+  if (url.search) return; // não guardar variantes com query string na cache
   if (url.origin === location.origin) {
     // rede primeiro: online mostra sempre a versão mais recente; offline cai na cache
     e.respondWith(caches.open(VERSION).then(async c => {
