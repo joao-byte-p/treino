@@ -65,6 +65,22 @@ function glyph(ex, size = 120) {
 
 export function chip(text, cls = '') { return `<span class="chip ${cls}">${esc(text)}</span>`; }
 
+// Anel de contagem: comunica tempo a esvaziar-se, que se lê de relance melhor
+// do que um número a decrescer.
+const RING_R = 54;
+export const RING_C = 2 * Math.PI * RING_R;
+export function timerRing(tone = 'mint') {
+  return `<svg class="tring tring-${tone}" viewBox="0 0 120 120" aria-hidden="true">
+    <circle class="tring-track" cx="60" cy="60" r="${RING_R}"/>
+    <circle class="tring-fill" cx="60" cy="60" r="${RING_R}"
+      stroke-dasharray="${RING_C.toFixed(1)}" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+  </svg>`;
+}
+export function setRing(root, frac) {
+  const el = root.querySelector('.tring-fill');
+  if (el) el.setAttribute('stroke-dashoffset', (RING_C * (1 - Math.max(0, Math.min(1, frac)))).toFixed(1));
+}
+
 export function patternLabel(p) { return PATTERN_LABEL[p] || p; }
 export function equipmentLabel(e) { return EQUIPMENT_LABEL[e] || e; }
 
