@@ -17,6 +17,7 @@
     .count { color: var(--text-3); font-size: 13px; margin-left: auto; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
     .cell { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px; }
+    .vid { display: block; margin-top: 10px; font-size: 12px; line-height: 1.35; color: #ff8b96; }
     .cell h3 { font-size: 15px; margin-bottom: 2px; }
     .cell .sub { color: var(--text-3); font-size: 12px; margin-bottom: 10px; }
     .anim { display: grid; place-items: center; background: #1b1f26; border-radius: 14px; padding: 6px; margin-bottom: 8px; min-height: 150px; }
@@ -62,8 +63,13 @@
         cell.className = 'cell';
         let strip = '';
         try { strip = stepsStrip(id, { size: 110 }); } catch (e) { strip = `<p class="err">${e.message}</p>`; }
-        cell.innerHTML = `<h3>${ex ? ex.name : id}</h3><div class="sub">${id} · ${PATTERN_LABEL[patternOf(id)] || ''}</div>
-          <div class="anim" data-anim></div>${strip}`;
+        const nFrames = POSES[id]?.frames?.length || 0;
+        const estado = nFrames < 2 ? 'posição fixa (isometria)' : nFrames + ' poses';
+        const video = ex?.ytId
+          ? `<a class="vid" href="https://www.youtube.com/watch?v=${ex.ytId}" target="_blank" rel="noopener">▶ ${ex.ytTitle || ex.ytId}</a>`
+          : `<span class="vid err">sem vídeo</span>`;
+        cell.innerHTML = `<h3>${ex ? ex.name : id}</h3><div class="sub">${id} · ${PATTERN_LABEL[patternOf(id)] || ''} · ${estado}</div>
+          <div class="anim" data-anim></div>${strip}${video}`;
         grid.appendChild(cell);
         try { disposers.push(mountFigure(cell.querySelector('[data-anim]'), id, { size: 230, period: 3200 })); }
         catch (e) { cell.querySelector('[data-anim]').innerHTML = `<p class="err">${e.message}</p>`; }
