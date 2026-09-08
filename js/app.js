@@ -3,6 +3,7 @@ import { applyPendingGoal } from './engine/planner.js';
 import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, bindSettings } from './ui/views.js';
 import { mountSession } from './ui/session.js';
 import { toast } from './ui/components.js';
+import { mountFigure } from './ui/figure.js';
 import { chainLevels } from './data/exercises.js';
 
 const view = document.getElementById('view');
@@ -12,6 +13,7 @@ const app = document.getElementById('app');
 let route = { name: 'home' };
 const history = [];
 let cleanup = null;
+let figOffs = [];
 let planOffset = 0;
 let libQuery = '';
 
@@ -30,6 +32,8 @@ const nav = {
 
 function render(scrollTop = true) {
   if (cleanup) { cleanup(); cleanup = null; }
+  figOffs.forEach(fn => fn());
+  figOffs = [];
   const state = getState();
   if (!state.onboarded && route.name !== 'onboarding') { route = { name: 'onboarding' }; }
   const inSession = route.name === 'session';
@@ -52,6 +56,9 @@ function render(scrollTop = true) {
       return;
   }
   view.innerHTML = html;
+  view.querySelectorAll('[data-fig]').forEach(hostEl => {
+    figOffs.push(mountFigure(hostEl, hostEl.dataset.fig, { size: 300, period: 3400 }));
+  });
   view.classList.remove('enter'); void view.offsetWidth; view.classList.add('enter');
   if (scrollTop) window.scrollTo(0, 0);
 

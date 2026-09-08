@@ -238,6 +238,7 @@ body::before {
 .toggle.small { font-size: 14px; padding: 6px 0; }
 .toggle.small input { width: 18px; height: 18px; }
 
+/* sw update banner */
 /* ---- tabs ---- */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; padding: 8px 8px calc(var(--sab) + 8px); background: rgba(11, 13, 16, 0.82); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); border-top: 1px solid var(--line); z-index: 10; }
 .tabs button { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--text-3); font-size: 11px; font-weight: 700; padding: 6px 10px; border-radius: 12px; min-width: 60px; }
@@ -252,9 +253,9 @@ body::before {
 .srun-count { font-size: 12px; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; }
 .srun { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px 20px calc(var(--sab) + 24px); min-height: calc(100dvh - 70px); max-width: 560px; margin: 0 auto; animation: rise 0.25s ease; }
 .srun-kicker { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); }
-.srun-title { font-size: 26px; margin: 6px 0 12px; line-height: 1.1; cursor: pointer; }
-.srun-info { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); font-size: 12px; font-weight: 800; vertical-align: middle; margin-left: 4px; color: var(--text-2); }
-.srun-illu { margin: 4px 0 8px; }
+.srun-title { font-size: 26px; margin: 6px 0 4px; line-height: 1.12; }
+.srun-info { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); font-size: 12px; font-weight: 800; color: var(--text-2); }
+
 .srun-big { font-size: 96px; font-weight: 800; letter-spacing: -0.06em; line-height: 1; font-variant-numeric: tabular-nums; margin: 6px 0; }
 .srun-reps { font-size: 56px; letter-spacing: -0.04em; }
 .srun-sub { color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px; }
@@ -317,3 +318,42 @@ body::before {
   .tabs { left: 50%; right: auto; transform: translateX(-50%); width: 560px; bottom: 16px; border-radius: 24px; border: 1px solid var(--line); padding-bottom: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---- figuras dos exercícios ---- */
+.fig { display: block; overflow: visible; --fig: #eef1f5; --fig-bg: #1b1f26; }
+.fig-limb, .fig-halo, .fig-foot, .fig-halo-foot, .fig-neck, .fig-halo-neck { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fig-limb { stroke: var(--fig); stroke-width: 4.4; }
+.fig-halo { stroke: var(--fig-bg); stroke-width: 8.4; }
+.fig-foot { stroke: var(--fig); stroke-width: 5.2; }
+.fig-halo-foot { stroke: var(--fig-bg); stroke-width: 9.2; }
+.fig-neck { stroke: var(--fig); stroke-width: 4.6; }
+.fig-halo-neck { stroke: var(--fig-bg); stroke-width: 8.6; }
+.fig-hand { fill: var(--fig); }
+.fig-halo-dot { fill: var(--fig-bg); }
+.fig-torso { fill: var(--fig); stroke: var(--fig); stroke-width: 4.4; stroke-linejoin: round; }
+.fig-torso-halo { fill: var(--fig-bg); stroke: var(--fig-bg); stroke-width: 8.6; stroke-linejoin: round; }
+.fig-head { fill: var(--fig); }
+.fig-head-halo { fill: var(--fig-bg); }
+.fig-limb.far, .fig-foot.far, .fig-hand.far { opacity: 0.45; }
+.fig-mark { fill: none; stroke: var(--accent, var(--mint)); stroke-width: 1.8; opacity: 0.9; }
+.fig-mark.warn { stroke: var(--coral); }
+.fig-floor { stroke: var(--fig); stroke-width: 1.2; opacity: 0.2; stroke-linecap: round; }
+.fig-prop { fill: rgba(255, 255, 255, 0.09); stroke: var(--fig); stroke-width: 1; stroke-opacity: 0.28; }
+.fig-prop-line { stroke: var(--fig); stroke-width: 2.4; opacity: 0.28; stroke-linecap: round; }
+.fig-db { fill: var(--amber); }
+.fig-arrow { fill: none; stroke: var(--accent, var(--mint)); stroke-width: 2; stroke-linecap: round; opacity: 0.9; }
+.fig-arrow-head { fill: var(--accent, var(--mint)); stroke: none; }
+
+.figstrip { display: flex; gap: 8px; }
+.figstrip li { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.figstrip-art { position: relative; background: #1b1f26; border-radius: 16px; padding: 6px; display: grid; place-items: center; }
+.figstrip-art .fig { width: 100%; height: auto; }
+.figstrip-n { position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; border-radius: 50%; background: var(--accent, var(--mint)); color: var(--bg); font-size: 12px; font-weight: 800; display: grid; place-items: center; }
+.figstrip-l { font-size: 12px; color: var(--text-2); line-height: 1.25; text-align: center; }
+.hero-fig { background: #1b1f26; border-radius: var(--radius); display: grid; place-items: center; padding: 10px; }
+.hero-fig .fig { width: 100%; max-width: 270px; height: auto; }
+.hero-cap { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 8px; }
+.hero { margin-bottom: 14px; }
+.srun-illu { position: relative; margin: 4px 0 8px; width: 100%; display: grid; place-items: center; cursor: pointer; }
+.srun-illu .fig { width: 100%; max-width: 290px; height: auto; }
+.srun-illu .srun-info { position: absolute; right: 2px; top: 2px; margin: 0; }

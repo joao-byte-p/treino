@@ -5,6 +5,7 @@ import { applyProgression, RPE } from '../engine/progression.js';
 import { BY_ID } from '../data/exercises.js';
 import { countdown, beep, unlockAudio, keepAwake, fmt, fmtLong } from '../timer.js';
 import { esc, illustration, ytUrl, toast, prescription } from './components.js';
+import { hasPose, mountFigure } from './figure.js';
 import { applyAlt } from './views.js';
 
 // ---- passos ----
@@ -52,6 +53,7 @@ export function mountSession(root, nav, dateISO, altIndex) {
   const steps = buildSteps(session);
   let i = 0;
   let timer = null;
+  let figOff = null;
   const startedAt = Date.now();
   const results = {};
   let finished = false;
@@ -60,6 +62,12 @@ export function mountSession(root, nav, dateISO, altIndex) {
   keepAwake(true);
 
   function stopTimer() { if (timer) { timer.stop(); timer = null; } }
+  function stopFig() { if (figOff) { figOff(); figOff = null; } }
+  function mountFigs() {
+    stopFig();
+    const host = root.querySelector('[data-fig]');
+    if (host) figOff = mountFigure(host, host.dataset.fig, { size: 280, period: 3400 });
+  }
 
   function renderStep() {
     stopTimer();
@@ -80,7 +88,7 @@ export function mountSession(root, nav, dateISO, altIndex) {
           <div class="srun-kicker">${esc(st.label)}</div>
           <div class="srun-big" data-clock>${fmt(st.seconds)}</div>
           <div class="srun-sub">pausa</div>
-          ${st.next ? `<div class="srun-next"><span class="muted">A seguir</span><strong>${esc(st.next.name)}</strong>${st.next ? `<div class="srun-next-thumb">${illustration(st.next, 56)}</div>` : ''}</div>` : ''}
+          ${st.next ? `<div class="srun-next"><span class="muted">A seguir</span><strong>${esc(st.next.name)}</strong><div class="srun-next-thumb">${illustration(st.next, 64)}</div></div>` : ''}
           <div class="srun-actions">
             <button class="btn btn-ghost" data-add="-10">−10s</button>
             <button class="btn btn-ghost" data-pause>Pausar</button>
@@ -90,9 +98,10 @@ export function mountSession(root, nav, dateISO, altIndex) {
         </div>`;
       timer = countdown(st.seconds, { tone: 'rest', onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.textContent = fmt(s); }, onDone: () => advance() });
     } else if (st.mode === 'cardio') {
+      const kicker = st.label && st.label.toLowerCase() !== st.ex.name.toLowerCase() ? st.label : 'Bloco principal';
       root.innerHTML = `${header}
         <div class="srun srun-cardio">
-          <div class="srun-kicker">${esc(st.label)}</div>
+          <div class="srun-kicker">${esc(kicker)}</div>
           <h2 class="srun-title">${esc(st.ex.name)}</h2>
           <div class="srun-big" data-clock>${fmtLong(st.seconds)}</div>
           <p class="srun-note">${esc(st.note || '')}</p>
@@ -111,8 +120,11 @@ export function mountSession(root, nav, dateISO, altIndex) {
       root.innerHTML = `${header}
         <div class="srun srun-work">
           <div class="srun-kicker">${esc(st.label)}${st.side ? ` · ${esc(st.side)}` : ''}</div>
-          <h2 class="srun-title" data-nav="exercise" data-ex="${st.ex.id}">${esc(st.ex.name)} <span class="srun-info">i</span></h2>
-          <div class="srun-illu">${illustration(st.ex, 150)}</div>
+          <h2 class="srun-title">${esc(st.ex.name)}</h2>
+          <div class="srun-illu" data-info role="button" tabindex="0" aria-label="Ver detalhes do exercício">
+            ${hasPose(st.ex.id) ? `<div data-fig="${st.ex.id}"></div>` : illustration(st.ex, 150)}
+            <span class="srun-info">i</span>
+          </div>
           ${isTime ? `<div class="srun-big" data-clock>${fmt(st.seconds)}</div>` : `<div class="srun-big srun-reps">${esc(rx)}</div>`}
           <div class="srun-chips">${load}${st.ex.tempo ? `<span class="pill">${esc(st.ex.tempo)}</span>` : ''}</div>
           <ul class="cues">${st.ex.cues.slice(0, 3).map(c => `<li>${esc(c)}</li>`).join('')}</ul>
@@ -127,6 +139,7 @@ export function mountSession(root, nav, dateISO, altIndex) {
       if (st.item?.kind === 'strength') results[st.ex.id] = results[st.ex.id] || { done: true, top: true, rpe: null, kg: st.load?.kg ?? null };
     }
     bind();
+    mountFigs();
   }
 
   function bind() {
@@ -150,10 +163,12 @@ export function mountSession(root, nav, dateISO, altIndex) {
       toast('Trocado pela versão em casa');
       renderStep();
     });
-    root.querySelector('.srun-title[data-nav]')?.addEventListener('click', e => {
-      const ex = BY_ID[e.currentTarget.dataset.ex];
-      showInfo(ex);
-    });
+    const info = root.querySelector('[data-info]');
+    if (info) {
+      const open = () => showInfo(steps[i].ex);
+      info.addEventListener('click', open);
+      info.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    }
   }
 
   function showInfo(ex) {
@@ -182,6 +197,7 @@ export function mountSession(root, nav, dateISO, altIndex) {
     if (finished) return;
     finished = true;
     stopTimer();
+    stopFig();
     keepAwake(false);
     beep('done');
     const minutes = Math.max(1, Math.round((Date.now() - startedAt) / 60000));
@@ -274,5 +290,5 @@ export function mountSession(root, nav, dateISO, altIndex) {
   }
 
   renderStep();
-  return () => { stopTimer(); keepAwake(false); };
+  return () => { stopTimer(); stopFig(); keepAwake(false); };
 }

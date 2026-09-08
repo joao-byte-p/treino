@@ -2,6 +2,7 @@ import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, r
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, PATTERN_LABEL } from '../data/exercises.js';
 import { esc, ring, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
+import { hasPose, stepsStrip } from './figure.js';
 import { CONFIG } from '../config.js';
 
 // ─────────────────────────── HOJE ───────────────────────────
@@ -205,10 +206,10 @@ export function renderExercise(nav, id) {
     <div><div class="eyebrow">${esc(patternLabel(ex.pattern))}</div><h1>${esc(ex.name)}</h1></div>
   </header>
   <p class="lead">${esc(ex.nameEn)} · ${esc(ex.muscles.join(' · '))}</p>
-  <figure class="hero">
-    ${ex.img ? `<img src="img/${esc(ex.img)}" alt="Ilustração de ${esc(ex.name)}">` : `<div class="hero-ph">${illustration(ex, 160)}<span>Ilustração passo a passo chega na fase 2</span></div>`}
-  </figure>
+  ${hasPose(ex.id) ? `<figure class="hero"><div class="hero-fig" data-fig="${ex.id}"></div><figcaption class="hero-cap">Toca no vídeo se quiseres ver em pessoa</figcaption></figure>`
+    : `<figure class="hero"><div class="hero-ph">${illustration(ex, 150)}<span>Ilustração a caminho. Por agora, o vídeo e os passos abaixo.</span></div></figure>`}
   <div class="chips">${rx ? chip(rx) : ''}${ex.rest ? chip(`${ex.rest}s pausa`) : ''}${ex.tempo ? chip(ex.tempo) : ''}${load ? chip(`${load} kg`, 'chip-load') : ''}${ex.knee === 'care' ? chip('Atenção ao joelho', 'chip-warn') : ''}</div>
+  ${hasPose(ex.id) ? `<section class="block"><h3 class="block-title">Passo a passo</h3>${stepsStrip(ex.id, { size: 150 })}</section>` : ''}
   <section class="block"><h3 class="block-title">Como fazer</h3><ol class="steps">${ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol></section>
   ${ex.mistakes.length ? `<section class="block"><h3 class="block-title">Erros comuns</h3><ul class="mistakes">${ex.mistakes.map(m => `<li>${esc(m)}</li>`).join('')}</ul></section>` : ''}
   <section class="block"><h3 class="block-title">Equipamento</h3><div class="chips">${ex.equipment.map(e => chip(equipmentLabel(e))).join('')}</div></section>
