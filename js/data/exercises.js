@@ -15,7 +15,8 @@ export const EXERCISES = [
     muscles: ['Peito', 'Ombros', 'Tríceps'],
     cues: ['Corpo em linha do calcanhar à cabeça', 'Cotovelos a 45° do tronco', 'Desce em 3 segundos, sobe forte', 'Omoplatas a deslizar, não a encolher'],
     mistakes: ['Anca a cair', 'Cabeça a espreitar para a frente', 'Amplitude curta'],
-    yt: 'push up board wide grip chest proper form',
+    yt: 'perfect push up form technique tutorial',
+    ytId: 'IODxDxX7oi4', ytTitle: 'Calisthenicmovement — The Perfect Push Up | Do it right!',
   },
   {
     id: 'pushup-decline', name: 'Flexão declinada (pés elevados)', nameEn: 'Decline push-up',
@@ -25,6 +26,7 @@ export const EXERCISES = [
     cues: ['Pés numa cadeira ou sofá', 'Mãos ligeiramente à frente dos ombros', 'Core apertado para não arquear'],
     mistakes: ['Lombar a ceder', 'Queixo a tocar antes do peito'],
     yt: 'decline push up proper form',
+    ytId: 'SKPab2YC8BE', ytTitle: 'ScottHermanFitness — How To: Decline Push-Up',
   },
   {
     id: 'pushup-archer', name: 'Flexão archer', nameEn: 'Archer push-up',
@@ -34,6 +36,7 @@ export const EXERCISES = [
     cues: ['Mãos bem afastadas', 'Desce para um lado, braço oposto estica', 'Anca não roda'],
     mistakes: ['Rodar o tronco', 'Deixar o braço esticado dobrar'],
     yt: 'archer push up tutorial',
+    ytId: 'A0r8ploEnZY', ytTitle: 'Victory Calisthenics — Archer Push Ups | Correct Form Tutorial',
   },
   {
     id: 'pushup-pseudo-planche', name: 'Flexão pseudo planche', nameEn: 'Pseudo planche push-up',
@@ -43,6 +46,7 @@ export const EXERCISES = [
     cues: ['Mãos ao nível da anca, dedos para trás ou para fora', 'Inclina os ombros bem à frente das mãos', 'Protrai as omoplatas no topo'],
     mistakes: ['Mãos demasiado à frente (vira flexão normal)', 'Anca a subir'],
     yt: 'pseudo planche push up progression',
+    ytId: 'i-gSmqe9tNw', ytTitle: 'Minus The Gym — Pseudo Planche Push Ups Tutorial for Beginners',
   },
   {
     id: 'pike-pushup', name: 'Pike push-up', nameEn: 'Pike push-up',
@@ -52,6 +56,7 @@ export const EXERCISES = [
     cues: ['Anca bem alta, corpo em V invertido', 'Cabeça vai para a frente das mãos, entre os braços', 'Cotovelos ligeiramente para fora'],
     mistakes: ['Anca a baixar (vira flexão)', 'Amplitude curta'],
     yt: 'pike push up proper form technique',
+    ytId: '66x0qQiJ-MA', ytTitle: 'Minus The Gym — Pike Push Up Beginner Tutorial (With Progressions!)',
   },
   {
     id: 'pike-elevated', name: 'Pike push-up com pés elevados', nameEn: 'Elevated pike push-up',
@@ -61,6 +66,7 @@ export const EXERCISES = [
     cues: ['Pés numa cadeira, anca por cima das mãos', 'Quanto mais vertical, mais próximo do handstand push-up', 'Toca com a testa entre as mãos'],
     mistakes: ['Descer a olhar para a frente', 'Perder a linha ombro-anca'],
     yt: 'elevated pike push up feet on chair',
+    ytId: 'Z7QvNiUtjwQ', ytTitle: 'Lance Goyke — Pike Push Up with Feet Elevated',
   },
   {
     id: 'wall-handstand-hold', name: 'Parada de mãos na parede (isometria)', nameEn: 'Wall handstand hold',
@@ -70,6 +76,7 @@ export const EXERCISES = [
     cues: ['Peito para a parede, mãos a um palmo', 'Empurra o chão, ombros nas orelhas', 'Costelas para dentro, glúteos apertados'],
     mistakes: ['Banana (lombar arqueado)', 'Cotovelos a dobrar'],
     yt: 'chest to wall handstand hold tutorial',
+    ytId: 'udZZb1mif_I', ytTitle: 'NASHI STRENGTH — Chest to Wall Handstand - Tutorial',
   },
   {
     id: 'db-press-seated', name: 'Press de ombros sentado, halteres', nameEn: 'Seated dumbbell shoulder press',
@@ -79,6 +86,7 @@ export const EXERCISES = [
     cues: ['Costas apoiadas ou tronco firme', 'Halteres começam à altura das orelhas', 'Sobe até os braços esticarem sem trancar'],
     mistakes: ['Hiperextender o lombar', 'Empurrar a cabeça para a frente'],
     yt: 'seated dumbbell shoulder press form',
+    ytId: 'rO_iEImwHyo', ytTitle: 'Max Euceda — How to do the SEATED DUMBBELL SHOULDER PRESS! | 2 Minute Tutorial',
   },
   {
     id: 'db-press-standing', name: 'Press de ombros em pé, halteres', nameEn: 'Standing dumbbell press',
@@ -88,6 +96,7 @@ export const EXERCISES = [
     cues: ['Pés à largura da anca, glúteos apertados', 'Costelas para baixo, sem arquear', 'Cabeça passa entre os braços no topo'],
     mistakes: ['Usar as pernas para ajudar', 'Lombar a arquear'],
     yt: 'standing dumbbell overhead press form',
+    ytId: 'bmy7tIopNt4', ytTitle: 'Vivian Ngo — Standing Dumbbell Shoulder Press (Tutorial + Tips) | Team Evolve',
   },
   {
     id: 'db-push-press', name: 'Push press, halteres', nameEn: 'Dumbbell push press',
@@ -97,6 +106,7 @@ export const EXERCISES = [
     cues: ['Mini-agachamento de 10 cm, joelhos alinhados', 'Explode com as pernas e transfere para os braços', 'Termina esticado e estável'],
     mistakes: ['Agachar demasiado', 'Inclinar o tronco para trás'],
     yt: 'dumbbell push press technique',
+    ytId: 'DhSkCaVO-KE', ytTitle: 'Smugs Fitness — Dumbbell Push Press Demonstration',
   },
   {
     id: 'diamond-pushup', name: 'Flexão diamante', nameEn: 'Diamond push-up',
@@ -106,6 +116,7 @@ export const EXERCISES = [
     cues: ['Mãos juntas em losango sob o peito', 'Cotovelos colados ao tronco', 'Sobe apertando os tríceps'],
     mistakes: ['Cotovelos a abrir', 'Pulsos a doer: afasta um pouco as mãos'],
     yt: 'diamond push up proper form',
+    ytId: 'J0DnG1_S92I', ytTitle: 'ScottHermanFitness — How To: Diamond Push-Up',
   },
   {
     id: 'chair-dips', name: 'Dips em cadeira', nameEn: 'Bench dips',
@@ -115,6 +126,7 @@ export const EXERCISES = [
     cues: ['Mãos na borda, dedos para a frente', 'Desce até 90° no cotovelo, não mais', 'Ombros afastados das orelhas'],
     mistakes: ['Descer demasiado (ombro)', 'Anca a afastar-se da cadeira'],
     yt: 'bench dips proper form common mistakes',
+    ytId: 'e5Gyc1D_BxM', ytTitle: 'Get Exercise Confident — Tricep Bench Dips | Technique and Most Common Mistakes',
   },
   {
     id: 'bar-dips', name: 'Dips em paralelas', nameEn: 'Parallel bar dips',
@@ -124,6 +136,7 @@ export const EXERCISES = [
     cues: ['Inclina ligeiramente o tronco', 'Desce até o ombro ficar ao nível do cotovelo', 'Sobe com controlo e sem encolher os ombros'],
     mistakes: ['Descer demasiado depressa', 'Balançar as pernas'],
     yt: 'parallel bar dips proper form beginner',
+    ytId: '85u_8mz5lBA', ytTitle: 'One Minute Tutorial — Parallel Bars Dips: Perfect Form & Common Mistakes',
   },
   {
     id: 'db-lateral-raise', name: 'Elevações laterais, halteres', nameEn: 'Dumbbell lateral raise',
@@ -133,6 +146,7 @@ export const EXERCISES = [
     cues: ['Peso leve, braços ligeiramente à frente', 'Sobe até à altura dos ombros', 'Mindinho um pouco acima do polegar no topo'],
     mistakes: ['Balançar o tronco', 'Encolher os ombros'],
     yt: 'dumbbell lateral raise proper form',
+    ytId: '3VcKaXpzqRo', ytTitle: 'ScottHermanFitness — How To: Dumbbell Side Lateral Raise',
   },
 
   // ───────────────────────── PULL ─────────────────────────
@@ -144,6 +158,7 @@ export const EXERCISES = [
     cues: ['Mão livre apoiada na cadeira, costas neutras', 'Puxa o cotovelo em direção à anca', 'Pausa de 1 segundo no topo'],
     mistakes: ['Rodar o tronco para levantar', 'Puxar com o bíceps em vez das costas'],
     yt: 'one arm dumbbell row proper form',
+    ytId: 'dFzUjzfih7k', ytTitle: 'Max Euceda — How to do the SINGLE ARM DUMBBELL ROW! | 2 Minute Tutorial',
   },
   {
     id: 'renegade-row', name: 'Remo renegado (em prancha)', nameEn: 'Renegade row',
@@ -153,6 +168,7 @@ export const EXERCISES = [
     cues: ['Prancha alta sobre os halteres, pés afastados', 'Puxa um halter até à anca sem rodar', 'Anca fixa como uma mesa'],
     mistakes: ['Anca a rodar', 'Pés demasiado juntos'],
     yt: 'renegade row proper form',
+    ytId: '4qEIChzM4ZA', ytTitle: 'BarBend — Renegade Row Guide | Form Tips, Muscles Worked, and Variations',
   },
   {
     id: 'inverted-row-bars', name: 'Remo invertido na barra baixa', nameEn: 'Inverted row',
@@ -162,6 +178,7 @@ export const EXERCISES = [
     cues: ['Corpo em linha, calcanhares no chão', 'Puxa o peito até à barra', 'Quanto mais horizontal, mais difícil'],
     mistakes: ['Anca a cair', 'Queixo a esticar para a barra'],
     yt: 'inverted row bar proper form',
+    ytId: 'GdyhjXlxE-U', ytTitle: 'Colossus Fitness — How To PROPERLY Inverted Row For Muscle Gain',
   },
   {
     id: 'pullup-negative', name: 'Elevações negativas', nameEn: 'Negative pull-up',
@@ -171,6 +188,7 @@ export const EXERCISES = [
     cues: ['Salta ou sobe até o queixo passar a barra', 'Desce em 5 segundos controlados', 'Omoplatas ativas até ao fim'],
     mistakes: ['Deixar cair', 'Encolher os ombros no topo'],
     yt: 'negative pull ups progression',
+    ytId: 'IQZqPqkpdFE', ytTitle: 'Michael Eckert — The Best Pull Up Exercise | The Negative',
   },
   {
     id: 'pullup', name: 'Elevações', nameEn: 'Pull-up',
@@ -180,6 +198,7 @@ export const EXERCISES = [
     cues: ['Começa de braços esticados com ombros ativos', 'Puxa os cotovelos para baixo e para trás', 'Queixo passa a barra sem esticar o pescoço'],
     mistakes: ['Kipping', 'Meia amplitude'],
     yt: 'pull up proper form strict',
+    ytId: 'eGo4IYlbE5g', ytTitle: 'Calisthenicmovement — The Perfect Pull Up  - Do it right!',
   },
   {
     id: 'db-curl', name: 'Curl de bíceps, halteres', nameEn: 'Dumbbell curl',
@@ -189,6 +208,7 @@ export const EXERCISES = [
     cues: ['Cotovelos colados ao tronco', 'Roda a palma para cima ao subir', 'Desce em 2 segundos'],
     mistakes: ['Balançar o tronco', 'Cotovelos a avançar'],
     yt: 'dumbbell bicep curl proper form',
+    ytId: 'XE_pHwbst04', ytTitle: 'Fit Father Project - Fitness For Busy Fathers — Bicep Curls — (DUMBBELL FORM & TECHNIQUE)',
   },
   {
     id: 'db-hammer-curl', name: 'Curl martelo, halteres', nameEn: 'Hammer curl',
@@ -198,6 +218,7 @@ export const EXERCISES = [
     cues: ['Pega neutra, polegar para cima', 'Sobe até o halter tocar quase o ombro', 'Controlo total na descida'],
     mistakes: ['Usar impulso', 'Pulso a dobrar'],
     yt: 'hammer curl proper form',
+    ytId: 'OPqe0kCxmR8', ytTitle: 'One Minute Tutorial — Dumbbell Hammer Curls Tutorial | CORRECT TECHNIQUE (!)',
   },
   {
     id: 'db-rear-delt-fly', name: 'Fly posterior inclinado, halteres', nameEn: 'Bent-over rear delt fly',
@@ -207,6 +228,7 @@ export const EXERCISES = [
     cues: ['Tronco inclinado a 45°, joelhos suaves', 'Abre os braços com cotovelos ligeiramente dobrados', 'Aperta as omoplatas no topo'],
     mistakes: ['Peso demasiado alto', 'Levantar o tronco a cada rep'],
     yt: 'bent over rear delt fly dumbbells form',
+    ytId: 'buuYPLVXsJg', ytTitle: 'Colossus Fitness — How to PROPERLY Dumbbell Rear Delt Fly | Reverse Dumbbell Fly Tutorial',
   },
   {
     id: 'superman', name: 'Superman', nameEn: 'Superman',
@@ -216,6 +238,7 @@ export const EXERCISES = [
     cues: ['Deitado de barriga para baixo, braços à frente', 'Levanta braços e pernas 2 segundos', 'Olhar para o chão, pescoço neutro'],
     mistakes: ['Esticar o pescoço para cima', 'Movimento rápido'],
     yt: 'superman exercise back proper form',
+    ytId: 'cZxtPxeR2H8', ytTitle: 'Fit Father Project - Fitness For Busy Fathers — Superman Exercise For The Back — (LOW BACK AND CORE EXERCISES)',
   },
 
   // ───────────────────────── SQUAT / KNEE ─────────────────────────
@@ -227,6 +250,7 @@ export const EXERCISES = [
     cues: ['Halter ao peito, cotovelos para baixo', 'Joelhos seguem a direção do 2.º dedo do pé', 'Desce até onde o joelho estiver confortável'],
     mistakes: ['Joelhos a fechar (valgo)', 'Calcanhares a levantar'],
     yt: 'goblet squat dumbbell proper form',
+    ytId: 'CkFzgR55gho', ytTitle: 'Physique Development — How to Perform Dumbbell Goblet Squat',
   },
   {
     id: 'split-squat', name: 'Agachamento dividido, halteres', nameEn: 'Split squat',
@@ -236,6 +260,7 @@ export const EXERCISES = [
     cues: ['Pés fixos, um à frente do outro', 'Desce a direito, joelho da frente sobre o pé', 'Tronco alto, peso no pé da frente'],
     mistakes: ['Joelho a ultrapassar muito o pé', 'Inclinar o tronco'],
     yt: 'dumbbell split squat proper form',
+    ytId: 'la0pLPq-3A8', ytTitle: 'Get Exercise Confident — How to do the perfect SPLIT SQUAT: technique and common mistakes',
   },
   {
     id: 'bulgarian-split-squat', name: 'Agachamento búlgaro', nameEn: 'Bulgarian split squat',
@@ -245,6 +270,7 @@ export const EXERCISES = [
     cues: ['Pé de trás numa cadeira, peso na frente', 'Desce vertical, controlado', 'Joelho alinhado, sem tremer para dentro'],
     mistakes: ['Cadeira demasiado longe', 'Impulso com o pé de trás'],
     yt: 'bulgarian split squat proper form',
+    ytId: 'hiLF_pF3EJM', ytTitle: 'ATHLEAN-X™ — Stop F*cking Up Bulgarian Split Squats (PROPER FORM!)',
   },
   {
     id: 'pistol-assisted', name: 'Pistol squat assistido', nameEn: 'Assisted pistol squat',
@@ -254,6 +280,7 @@ export const EXERCISES = [
     cues: ['Segura numa porta ou mesa para assistir', 'Desce lento até onde o joelho aceita', 'Sobe apertando o glúteo'],
     mistakes: ['Deixar o joelho colapsar para dentro', 'Usar só os braços'],
     yt: 'assisted pistol squat progression',
+    ytId: 'vq5-vdgJc0I', ytTitle: 'Squat University — How to Get Your First PISTOL SQUAT (Step-by-Step Progression)',
   },
   {
     id: 'reverse-lunge', name: 'Afundo para trás, halteres', nameEn: 'Reverse lunge',
@@ -263,6 +290,7 @@ export const EXERCISES = [
     cues: ['Passo largo para trás, mais amigo do joelho que o afundo para a frente', 'Joelho da frente a 90° e alinhado', 'Volta empurrando o pé da frente'],
     mistakes: ['Passo curto', 'Joelho de trás a bater no chão'],
     yt: 'reverse lunge dumbbell proper form',
+    ytId: 'sjlsISvHyZs', ytTitle: 'ScottHermanFitness — How To: Dumbbell Reverse Lunge',
   },
   {
     id: 'step-up', name: 'Step-up controlado', nameEn: 'Step-up',
@@ -272,6 +300,7 @@ export const EXERCISES = [
     cues: ['Degrau ou banco firme à altura do joelho ou abaixo', 'Sobe só com a perna de cima, sem impulso', 'Desce lento em 3 segundos'],
     mistakes: ['Empurrar com o pé de trás', 'Joelho a entrar'],
     yt: 'step up exercise controlled proper form',
+    ytId: 'WCFCdxzFBa4', ytTitle: 'Get Exercise Confident — How to do the STEP UP: technique and common mistakes',
   },
   {
     id: 'walking-lunge', name: 'Afundo caminhando, halteres', nameEn: 'Walking lunge',
@@ -281,6 +310,7 @@ export const EXERCISES = [
     cues: ['Passos longos, tronco vertical', 'Joelho de trás quase toca o chão', 'Pausa em cima antes do próximo passo'],
     mistakes: ['Passos curtos e rápidos', 'Tronco a inclinar'],
     yt: 'walking lunge dumbbells proper form',
+    ytId: 'Pbmj6xPo-Hw', ytTitle: 'Buff Dudes Workouts — Walking Lunges Exercise Tutorial | Build Legendary Legs & Cardio',
   },
   {
     id: 'wall-sit', name: 'Wall sit (isometria)', nameEn: 'Wall sit',
@@ -290,6 +320,7 @@ export const EXERCISES = [
     cues: ['Costas na parede, joelhos a 90°', 'Peso nos calcanhares', 'Respira normalmente'],
     mistakes: ['Joelhos à frente dos pés', 'Mãos nas coxas'],
     yt: 'wall sit exercise knee health',
+    ytId: 'pjbGm5EQd1s', ytTitle: 'Dr. Carl Baird — How To Perform The Wall Sit Exercise for Knee Pain Relief',
   },
   {
     id: 'spanish-squat-iso', name: 'Agachamento isométrico parcial', nameEn: 'Partial squat iso hold',
@@ -299,6 +330,7 @@ export const EXERCISES = [
     cues: ['Agacha até 60° e para', 'Tronco vertical, joelhos empurram para fora', 'Segura com halter ao peito se for fácil'],
     mistakes: ['Descer demasiado', 'Bloquear a respiração'],
     yt: 'isometric squat hold patellar tendon',
+    ytId: 'c3PIrvb96UU', ytTitle: '3CB Performance — Patellar Tendon Isometric Holds',
   },
   {
     id: 'slow-step-down', name: 'Step-down excêntrico lento', nameEn: 'Slow eccentric step-down',
@@ -308,6 +340,7 @@ export const EXERCISES = [
     cues: ['Em pé num degrau baixo, desce a outra perna em 4 segundos', 'Toca com o calcanhar no chão e sobe', 'Joelho de apoio aponta para o pé, anca nivelada'],
     mistakes: ['Anca a cair para o lado', 'Deixar cair rápido'],
     yt: 'eccentric step down knee rehab',
+    ytId: 'Or4C-UQ63Xc', ytTitle: 'Dr. Carl Baird — Single Leg Step Down | Eccentric Knee Strengthening Exercise',
   },
   {
     id: 'tibialis-raise', name: 'Elevação de tibial', nameEn: 'Tibialis raise',
@@ -317,6 +350,7 @@ export const EXERCISES = [
     cues: ['Costas na parede, pés a um passo à frente', 'Levanta as pontas dos pés o máximo possível', 'Desce lento'],
     mistakes: ['Dobrar os joelhos', 'Fazer rápido'],
     yt: 'tibialis raise wall knees over toes',
+    ytId: 'O8ZcXfwFuqs', ytTitle: 'Peter Feysa - The Seattle Personal Trainer — Wall tibialis raise - knees over toes program',
   },
   {
     id: 'calf-raise-single', name: 'Elevação de gémeos unilateral', nameEn: 'Single-leg calf raise',
@@ -326,6 +360,7 @@ export const EXERCISES = [
     cues: ['Ponta do pé no degrau, calcanhar livre', 'Sobe alto, 1 segundo em cima', 'Desce abaixo do degrau devagar'],
     mistakes: ['Amplitude curta', 'Saltitar'],
     yt: 'single leg calf raise proper form',
+    ytId: 'ORT4oJ_R8Qs', ytTitle: 'ScottHermanFitness — How To: Single-Leg Calf Raise',
   },
 
   // ───────────────────────── HINGE / GLUTE ─────────────────────────
@@ -337,6 +372,7 @@ export const EXERCISES = [
     cues: ['Joelhos suaves, anca vai para trás', 'Halteres deslizam pelas coxas', 'Para quando as costas quiserem arredondar'],
     mistakes: ['Agachar em vez de dobrar a anca', 'Arredondar o lombar'],
     yt: 'dumbbell romanian deadlift proper form',
+    ytId: 'hQgFixeXdZo', ytTitle: 'Mike | J2FIT Strength & Conditioning — Dumbbell Romanian (RDL) Deadlift |TECHNIQUE for Beginners',
   },
   {
     id: 'db-single-leg-rdl', name: 'Peso morto romeno unilateral', nameEn: 'Single-leg RDL',
@@ -346,6 +382,7 @@ export const EXERCISES = [
     cues: ['Halter na mão oposta à perna de apoio', 'Anca quadrada, perna de trás estica como contrapeso', 'Toca a mão livre na parede se precisares'],
     mistakes: ['Anca a abrir para o lado', 'Joelho de apoio trancado'],
     yt: 'single leg romanian deadlift dumbbell form',
+    ytId: 'GY3xKrda3U4', ytTitle: 'Lift With Michelle - Exercise Form Tutorials — Dumbbell Single Leg Deadlift Variations Tutorial | RDL',
   },
   {
     id: 'db-staggered-rdl', name: 'Peso morto romeno em posição desfasada, pesado', nameEn: 'Staggered-stance RDL',
@@ -355,6 +392,7 @@ export const EXERCISES = [
     cues: ['Pé de trás só com a ponta no chão, 90% do peso à frente', 'Dois halteres, o mais pesado que a técnica aguentar', 'Anca para trás, costas neutras'],
     mistakes: ['Dividir o peso entre os pés', 'Arredondar as costas'],
     yt: 'staggered stance romanian deadlift dumbbells',
+    ytId: 'Th4QdA2BOyg', ytTitle: 'Mike | J2FIT Strength & Conditioning — Staggered Stance Dumbbell Romanian Deadlift | RDL Variations',
   },
   {
     id: 'glute-bridge', name: 'Ponte de glúteos', nameEn: 'Glute bridge',
@@ -364,6 +402,7 @@ export const EXERCISES = [
     cues: ['Deitado, pés à largura da anca', 'Empurra pelos calcanhares até a anca ficar em linha', 'Aperta o glúteo 2 segundos em cima'],
     mistakes: ['Arquear o lombar em cima', 'Pés demasiado longe'],
     yt: 'glute bridge proper form',
+    ytId: 'wPM8icPu6H8', ytTitle: 'Well+Good — How To Do A Glute Bridge | The Right Way | Well+Good',
   },
   {
     id: 'db-hip-thrust', name: 'Hip thrust com halter', nameEn: 'Dumbbell hip thrust',
@@ -373,6 +412,7 @@ export const EXERCISES = [
     cues: ['Ombros no sofá ou banco, halter na anca', 'Queixo para o peito, olhar para a frente', 'Extensão completa, sem arquear'],
     mistakes: ['Hiperextender o lombar', 'Amplitude curta'],
     yt: 'dumbbell hip thrust proper form',
+    ytId: '29OfN4ztW_g', ytTitle: 'Mike | J2FIT Strength & Conditioning — Dumbbell Hip Thrust (FULL TUTORIAL) - Glute Exercises for Beginners',
   },
   {
     id: 'single-leg-hip-thrust', name: 'Hip thrust unilateral', nameEn: 'Single-leg hip thrust',
@@ -382,6 +422,7 @@ export const EXERCISES = [
     cues: ['Uma perna no ar, joelho a 90°', 'Anca sobe nivelada, sem rodar', 'Pausa em cima'],
     mistakes: ['Anca a cair para o lado da perna livre', 'Usar o lombar'],
     yt: 'single leg hip thrust proper form',
+    ytId: 'L4nTaesNm0E', ytTitle: 'Mike | J2FIT Strength & Conditioning — Single Leg Dumbbell Hip Thrust (Full Tutorial) - Glute Exercises for Beginners',
   },
   {
     id: 'db-swing', name: 'Swing com halter (estilo kettlebell)', nameEn: 'Dumbbell swing',
@@ -391,6 +432,7 @@ export const EXERCISES = [
     cues: ['Halter na vertical, pega em cima', 'Anca dispara para a frente, braços só acompanham', 'Halter até à altura do peito, não mais'],
     mistakes: ['Levantar com os braços', 'Agachar em vez de dobrar a anca'],
     yt: 'dumbbell swing kettlebell style proper form',
+    ytId: 'v1LoYk4qdLc', ytTitle: 'Strong Made Simple — Kettlebell Swings with a Dumbbell, How To',
   },
 
   // ───────────────────────── CORE ─────────────────────────
@@ -402,6 +444,7 @@ export const EXERCISES = [
     cues: ['Lombar colado ao chão o tempo todo', 'Estende braço e perna opostos devagar', 'Expira ao esticar'],
     mistakes: ['Lombar a descolar', 'Ir rápido'],
     yt: 'dead bug exercise proper form',
+    ytId: '4XLEnwUr1d8', ytTitle: 'Bodybuilding.com — Dead Bug - Abdominal / Core Exercise Guide',
   },
   {
     id: 'hollow-hold', name: 'Hollow hold', nameEn: 'Hollow body hold',
@@ -411,6 +454,7 @@ export const EXERCISES = [
     cues: ['Lombar pressiona o chão, ombros e pernas levantam', 'Braços junto às orelhas se for fácil', 'Costelas para dentro'],
     mistakes: ['Lombar arqueia', 'Queixo colado ao peito'],
     yt: 'hollow body hold tutorial',
+    ytId: 'HAfUt2Cco74', ytTitle: 'Zack Henderson — HOLLOW BODY HOLD Progressions (Beginner to Advanced)',
   },
   {
     id: 'hollow-rock', name: 'Hollow rocks', nameEn: 'Hollow rocks',
@@ -420,6 +464,7 @@ export const EXERCISES = [
     cues: ['Mantém a forma do hollow e balança', 'Movimento vem do core, não do impulso', 'Pequeno e controlado'],
     mistakes: ['Perder a posição hollow', 'Dobrar os joelhos'],
     yt: 'hollow rocks core proper form',
+    ytId: 'hbsljZvfp6E', ytTitle: 'BarBend — Hollow Rock Guide | How To, Benefits, and Mistakes',
   },
   {
     id: 'plank', name: 'Prancha frontal', nameEn: 'Front plank',
@@ -429,6 +474,7 @@ export const EXERCISES = [
     cues: ['Cotovelos sob os ombros', 'Glúteos apertados, anca em linha', 'Empurra o chão para longe'],
     mistakes: ['Anca alta ou a cair', 'Olhar para a frente'],
     yt: 'plank proper form',
+    ytId: 'A2b2EmIg0dA', ytTitle: 'E3 Rehab — How To Plank (Proper Form | Cues | Progressions)',
   },
   {
     id: 'plank-reach', name: 'Prancha com toque no ombro', nameEn: 'Plank shoulder taps',
@@ -438,6 +484,7 @@ export const EXERCISES = [
     cues: ['Prancha alta, pés afastados', 'Toca o ombro oposto sem a anca rodar', 'Lento'],
     mistakes: ['Anca a balançar', 'Ritmo rápido'],
     yt: 'plank shoulder taps proper form',
+    ytId: 'gKA5LBy7WAI', ytTitle: 'Wellen — How To Properly Do a Plank with Shoulder Taps - Strength Exercises - Wellen',
   },
   {
     id: 'rkc-plank', name: 'Prancha RKC (máxima tensão)', nameEn: 'RKC plank',
@@ -447,6 +494,7 @@ export const EXERCISES = [
     cues: ['Punhos fechados, cotovelos puxam para os pés', 'Glúteos e quadríceps ao máximo', 'Expira com força, 10 a 20 segundos bastam'],
     mistakes: ['Relaxar', 'Anca alta'],
     yt: 'rkc plank tutorial',
+    ytId: 'feE0RCgWAUs', ytTitle: 'BarbellBombshell — How to do the RKC plank',
   },
   {
     id: 'side-plank', name: 'Prancha lateral', nameEn: 'Side plank',
@@ -456,6 +504,7 @@ export const EXERCISES = [
     cues: ['Cotovelo sob o ombro', 'Anca alta, corpo em linha', 'Pé de cima à frente se precisares de equilíbrio'],
     mistakes: ['Anca a cair', 'Rodar o tronco para a frente'],
     yt: 'side plank proper form',
+    ytId: 'XeN4pEZZJNI', ytTitle: 'Well+Good — How To Do A Side Plank | The Right Way | Well+Good',
   },
   {
     id: 'copenhagen-plank', name: 'Prancha de Copenhague (curta)', nameEn: 'Copenhagen plank',
@@ -465,6 +514,7 @@ export const EXERCISES = [
     cues: ['Joelho de cima apoiado na cadeira, versão curta', 'Anca sobe em linha', 'Perna de baixo dobrada por baixo da cadeira'],
     mistakes: ['Apoiar só o pé (versão longa, demasiado dura)', 'Tronco a rodar'],
     yt: 'copenhagen plank short lever adductor',
+    ytId: 'u6WE3Fu-TTk', ytTitle: 'The Physiobot — Adductor Plank | How to do a Short Lever Copenhagen Plank',
   },
   {
     id: 'bird-dog', name: 'Bird dog', nameEn: 'Bird dog',
@@ -474,6 +524,7 @@ export const EXERCISES = [
     cues: ['Quatro apoios, costas neutras', 'Estende braço e perna opostos até ficarem em linha', '2 segundos parado sem a anca rodar'],
     mistakes: ['Anca a rodar', 'Arquear o lombar ao esticar a perna'],
     yt: 'bird dog exercise proper form',
+    ytId: 'QABW99qPiNM', ytTitle: 'Muscle & Motion — Bird Dog Exercise | Improve Your Core and Balance',
   },
   {
     id: 'hanging-knee-raise', name: 'Elevação de joelhos suspenso', nameEn: 'Hanging knee raise',
@@ -483,6 +534,7 @@ export const EXERCISES = [
     cues: ['Suspenso, ombros ativos', 'Sobe os joelhos ao peito enrolando a anca', 'Desce sem balançar'],
     mistakes: ['Balanço', 'Só dobrar a anca sem enrolar'],
     yt: 'hanging knee raise proper form',
+    ytId: 'X-ACS9vpRyU', ytTitle: 'ScottHermanFitness — How To: Hanging Knee / Leg Raise | BUILD A “SCIENCED BASED” 6-PACK!',
   },
 
   // ───────────────────────── HIIT (sem impacto, joelho ok) ─────────────────────────
@@ -494,6 +546,7 @@ export const EXERCISES = [
     cues: ['Mãos no chão, pés para trás um de cada vez', 'Flexão controlada', 'Volta um pé de cada vez e levanta'],
     mistakes: ['Saltar', 'Lombar a ceder na descida'],
     yt: 'step out burpee no jump modification',
+    ytId: '61C19vuklec', ytTitle: 'Badger Crossfit — Burpee Progressions // Badger CrossFit',
   },
   {
     id: 'db-thruster', name: 'Thruster, halteres', nameEn: 'Dumbbell thruster',
@@ -503,6 +556,7 @@ export const EXERCISES = [
     cues: ['Agachamento confortável para o joelho', 'Sobe e continua para o press num só movimento', 'Peso leve e ritmo constante'],
     mistakes: ['Parar entre agachamento e press', 'Joelhos a fechar'],
     yt: 'dumbbell thruster tutorial',
+    ytId: '0RJXwEZmcCg', ytTitle: 'Lift With Michelle - Exercise Form Tutorials — Dumbbell Thruster (Squat and Press) | Exercise Tutorial',
   },
   {
     id: 'mountain-climber-slow', name: 'Mountain climbers controlados', nameEn: 'Slow mountain climbers',
@@ -512,6 +566,7 @@ export const EXERCISES = [
     cues: ['Prancha alta, anca baixa', 'Joelho ao peito alternado, ritmo constante', 'Não é uma corrida'],
     mistakes: ['Anca a subir', 'Ombros a recuar'],
     yt: 'mountain climbers proper form controlled',
+    ytId: 'cnyTQDSE884', ytTitle: 'Well+Good — How to Do Mountain Climbers | The Right Way | Well+Good',
   },
   {
     id: 'plank-row-alt', name: 'Remo alternado em prancha', nameEn: 'Alternating plank row',
@@ -521,6 +576,7 @@ export const EXERCISES = [
     cues: ['Prancha alta sobre halteres leves', 'Puxa um, pousa, puxa o outro', 'Anca não roda'],
     mistakes: ['Peso demasiado alto', 'Rodar'],
     yt: 'renegade row alternating hiit',
+    ytId: '1lNYe6Co-WM', ytTitle: 'Sven Koch — The Best Dumbbell Core Exercise for Fighters? (Renegade Row Tutorial)',
   },
   {
     id: 'shadow-boxing', name: 'Shadow boxing', nameEn: 'Shadow boxing',
@@ -530,6 +586,7 @@ export const EXERCISES = [
     cues: ['Postura de guarda, joelhos suaves', 'Jab, direto, gancho, roda a anca', 'Mexe os pés sem saltar'],
     mistakes: ['Ficar parado', 'Trancar os cotovelos nos socos'],
     yt: 'shadow boxing workout beginner',
+    ytId: 'J4j3AOVWuHE', ytTitle: 'Tony Jeffries — Quick Shadow Boxing Tutorial by Olympian',
   },
   {
     id: 'bear-crawl', name: 'Bear crawl', nameEn: 'Bear crawl',
@@ -539,6 +596,7 @@ export const EXERCISES = [
     cues: ['Quatro apoios, joelhos a 2 cm do chão', 'Avança mão e pé opostos', 'Costas planas, anca baixa'],
     mistakes: ['Anca alta', 'Passos largos'],
     yt: 'bear crawl proper form',
+    ytId: 'qZinJ8u-iXI', ytTitle: 'Andrew Linn — How to perform a Bear Crawl properly',
   },
   {
     id: 'rope-skip-light', name: 'Corda de saltar (saltos baixos)', nameEn: 'Light rope skipping',
@@ -548,6 +606,7 @@ export const EXERCISES = [
     cues: ['Saltos de 2 a 3 cm, só o suficiente', 'Aterra na ponta dos pés, joelhos suaves', 'Se o joelho se queixar, troca por shadow boxing'],
     mistakes: ['Saltar alto', 'Aterrar de calcanhar'],
     yt: 'jump rope beginner low impact technique',
+    ytId: 'u3zgHI8QnqE', ytTitle: 'Well+Good — How To Jump Rope | The Right Way | Well+Good',
   },
   {
     id: 'db-swing-hiit', name: 'Swing com halter (intervalo)', nameEn: 'Dumbbell swing (interval)',
@@ -556,7 +615,8 @@ export const EXERCISES = [
     muscles: ['Glúteos', 'Isquiotibiais', 'Cardio'],
     cues: ['Ritmo constante os 40 segundos', 'Anca manda, braços seguem', 'Peso que aguentes com forma perfeita'],
     mistakes: ['Puxar com os braços', 'Arredondar as costas'],
-    yt: 'dumbbell swing hiit',
+    yt: 'dumbbell swing hip hinge technique how to',
+    ytId: 'v1LoYk4qdLc', ytTitle: 'Strong Made Simple — Kettlebell Swings with a Dumbbell, How To',
   },
   {
     id: 'squat-to-stand', name: 'Agachamento ao ar rápido controlado', nameEn: 'Air squat (tempo)',
@@ -566,6 +626,7 @@ export const EXERCISES = [
     cues: ['Profundidade confortável para o joelho', 'Braços à frente, calcanhares no chão', 'Ritmo firme, não explosivo'],
     mistakes: ['Joelhos a fechar', 'Cair no fundo'],
     yt: 'air squat proper form',
+    ytId: 'ckvHymGK3s0', ytTitle: 'Dr. Carl Baird — The Air Squat | Beginner Bodyweight Squat Variation',
   },
 
   // ───────────────────────── MOBILITY ─────────────────────────
@@ -577,6 +638,7 @@ export const EXERCISES = [
     cues: ['Afundo baixo, joelho de trás no chão (almofada)', 'Glúteo de trás apertado, anca para a frente', 'Tronco alto, respira'],
     mistakes: ['Arquear o lombar', 'Torcer o joelho'],
     yt: 'hip flexor stretch kneeling proper form',
+    ytId: 'gqoPYLUgP48', ytTitle: '[P]rehab — Bulletproof Step-by-step Guide to the Half Kneeling Hip Flexor Stretch" [stretching advice]',
   },
   {
     id: 'figure-four', name: 'Figura 4 deitado (glúteo)', nameEn: 'Supine figure-four stretch',
@@ -586,6 +648,7 @@ export const EXERCISES = [
     cues: ['Deitado, tornozelo sobre o joelho oposto', 'Puxa a perna de baixo para o peito', 'Joelho de cima afasta-se, sem forçar'],
     mistakes: ['Puxar pelo joelho', 'Ombros a levantar'],
     yt: 'figure four stretch supine glute',
+    ytId: 'THeoEsh_Trw', ytTitle: 'FitLife Fitness, Aquatics and Physical Therapy — Supine Piriformis Stretch (figure four stretch)',
   },
   {
     id: 'ninety-ninety', name: '90/90 da anca', nameEn: '90/90 hip switch',
@@ -595,6 +658,7 @@ export const EXERCISES = [
     cues: ['Sentado, ambas as pernas a 90°', 'Inclina o tronco sobre a perna da frente, costas retas', 'Troca de lado com controlo, sem forçar o joelho'],
     mistakes: ['Arredondar as costas', 'Forçar o joelho para o chão'],
     yt: '90 90 hip stretch tutorial',
+    ytId: 't4Zz6-aG8Iw', ytTitle: 'Jack Hanrahan Fitness  — 90 90 Hip Stretch (Best Hip Mobility Exercise!)',
   },
   {
     id: 'worlds-greatest', name: 'World’s greatest stretch', nameEn: 'World’s greatest stretch',
@@ -604,6 +668,7 @@ export const EXERCISES = [
     cues: ['Afundo longo, mão no chão por dentro do pé', 'Roda o tronco e aponta o braço ao céu', 'Recua e estica a perna da frente'],
     mistakes: ['Apressar', 'Joelho de trás a bater'],
     yt: 'worlds greatest stretch tutorial',
+    ytId: 'PhsjXgD5A_c', ytTitle: 'Advanced Physical Therapy — Exercise - Stretching - World greatest stretch',
   },
   {
     id: 'thoracic-rotation', name: 'Rotação torácica em quatro apoios', nameEn: 'Quadruped thoracic rotation',
@@ -613,6 +678,7 @@ export const EXERCISES = [
     cues: ['Mão atrás da cabeça', 'Leva o cotovelo ao cotovelo oposto e abre para o céu', 'Anca fixa, olhar segue o cotovelo'],
     mistakes: ['Rodar pelo lombar', 'Rápido'],
     yt: 'quadruped thoracic rotation',
+    ytId: '3ZZpWdpYbTQ', ytTitle: 'Mobility Doc — How To: Quadruped thoracic rotations',
   },
   {
     id: 'ankle-mobility', name: 'Mobilidade de tornozelo na parede', nameEn: 'Ankle wall mobilization',
@@ -622,6 +688,7 @@ export const EXERCISES = [
     cues: ['Pé a um palmo da parede', 'Leva o joelho à parede sem levantar o calcanhar', 'Recua o pé quando conseguires tocar'],
     mistakes: ['Calcanhar a levantar', 'Joelho a entrar'],
     yt: 'ankle mobility wall knee to wall',
+    ytId: 'xoZWOR1a1zU', ytTitle: 'Anthony Monetti — knee to wall ankle mobility exercise',
   },
   {
     id: 'cat-cow', name: 'Gato e vaca', nameEn: 'Cat-cow',
@@ -631,6 +698,7 @@ export const EXERCISES = [
     cues: ['Inspira ao arquear, expira ao arredondar', 'Move vértebra a vértebra', 'Lento'],
     mistakes: ['Só mexer o pescoço'],
     yt: 'cat cow stretch proper form',
+    ytId: '1Y0YjXS9sKI', ytTitle: 'Hinge Health — How to Do a Cat Cow Stretch: A Guide from Physical Therapists',
   },
   {
     id: 'downdog-cobra', name: 'Fluxo cão e cobra', nameEn: 'Down dog to cobra flow',
@@ -640,6 +708,7 @@ export const EXERCISES = [
     cues: ['Do cão para baixo, desce em prancha e abre o peito na cobra', 'Anca no chão na cobra, ombros longe das orelhas', 'Volta ao cão com calcanhares para o chão'],
     mistakes: ['Espremer o lombar na cobra', 'Bloquear os cotovelos'],
     yt: 'downward dog to cobra flow',
+    ytId: 'I-gGJkWHo2M', ytTitle: 'Redefined Yoga — How to Go from Downward Dog to Cobra Safely!',
   },
   {
     id: 'hamstring-stretch', name: 'Alongamento de isquiotibiais em pé', nameEn: 'Standing hamstring stretch',
@@ -649,6 +718,7 @@ export const EXERCISES = [
     cues: ['Calcanhar numa cadeira baixa, perna esticada', 'Anca para trás, costas retas', 'Sente atrás da coxa, não atrás do joelho'],
     mistakes: ['Arredondar as costas', 'Trancar o joelho'],
     yt: 'standing hamstring stretch chair',
+    ytId: 'OWm__OVwOCA', ytTitle: 'ExerciseNow — Standing hamstring stretch on chair',
   },
   {
     id: 'deep-squat-hold', name: 'Agachamento profundo com apoio', nameEn: 'Supported deep squat hold',
@@ -658,6 +728,7 @@ export const EXERCISES = [
     cues: ['Segura numa porta ou mesa', 'Desce até onde o joelho estiver confortável', 'Joelhos empurram para fora, respira'],
     mistakes: ['Forçar profundidade com dor', 'Calcanhares a levantar'],
     yt: 'deep squat hold mobility supported',
+    ytId: 'IHApHfNA2Ag', ytTitle: 'Hinge Health — How to Do a Deep Squat According to Physical Therapists',
   },
   {
     id: 'diaphragm-breathing', name: 'Respiração diafragmática', nameEn: 'Diaphragmatic breathing',
@@ -667,6 +738,7 @@ export const EXERCISES = [
     cues: ['Deitado, mão na barriga', 'Inspira 4 segundos pelo nariz, só a barriga sobe', 'Expira 6 segundos pela boca'],
     mistakes: ['Peito a subir', 'Apressar'],
     yt: 'diaphragmatic breathing exercise',
+    ytId: 'kgTL5G1ibIo', ytTitle: 'Cioffredi & Associates Physical Therapy — Learn the Diaphragmatic Breathing Technique',
   },
 
   // ───────────────────────── WARM-UP ─────────────────────────
@@ -677,7 +749,8 @@ export const EXERCISES = [
     muscles: ['Ombros'],
     cues: ['Pequenos a grandes, ambas as direções', 'Depois rotações de ombro para trás'],
     mistakes: [],
-    yt: 'arm circles warm up',
+    yt: 'arm circles exercise how to shoulder mobility',
+    ytId: '35h5gdlm46w', ytTitle: 'Invictus Performance Therapy — Dynamic Arm Circles',
   },
   {
     id: 'hip-circles', name: 'Círculos de anca e balanços de perna', nameEn: 'Hip circles & leg swings',
@@ -687,6 +760,7 @@ export const EXERCISES = [
     cues: ['Mãos na anca, círculos amplos', 'Balanços frente-trás e laterais com apoio na parede', 'Amplitude progressiva'],
     mistakes: ['Balançar com força'],
     yt: 'hip circles leg swings warm up',
+    ytId: 'QH0SRdCGXHU', ytTitle: 'Food and Mood Lab — Legs Swings and Hip Circles',
   },
   {
     id: 'slow-pushup', name: 'Flexões lentas de ativação', nameEn: 'Slow tempo push-ups',
@@ -695,7 +769,8 @@ export const EXERCISES = [
     muscles: ['Peito', 'Ombros'],
     cues: ['3 segundos a descer, 3 a subir', 'Sente as omoplatas a mexer'],
     mistakes: [],
-    yt: 'slow tempo push up warm up',
+    yt: 'tempo push up slow eccentric technique',
+    ytId: 'uMdJ1NMEOGY', ytTitle: 'Cody Taggart Exercise Demonstrations — How to perform: Eccentric push up',
   },
   {
     id: 'bw-squat-warm', name: 'Agachamentos lentos sem carga', nameEn: 'Bodyweight squats (tempo)',
@@ -705,6 +780,7 @@ export const EXERCISES = [
     cues: ['Lento, joelhos alinhados', 'Profundidade que o joelho aceite sem dor'],
     mistakes: [],
     yt: 'bodyweight squat warm up tempo',
+    ytId: 'CRzsDkgJvvI', ytTitle: 'Vital Training Systems — Vital Training Systems: Bodyweight Tempo Squats',
   },
   {
     id: 'towel-pull-apart', name: 'Pull-aparts com toalha', nameEn: 'Towel pull-aparts',
@@ -714,6 +790,7 @@ export const EXERCISES = [
     cues: ['Toalha esticada à frente, puxa para os lados', 'Aperta as omoplatas 1 segundo'],
     mistakes: [],
     yt: 'towel pull apart warm up',
+    ytId: 'qwp3hZGziqQ', ytTitle: 'THATLIFESTYLECOACH — ISOMETRIC TOWEL PULL APARTS',
   },
   {
     id: 'march-in-place', name: 'Marcha no lugar com joelhos altos', nameEn: 'High-knee march',
@@ -722,7 +799,8 @@ export const EXERCISES = [
     muscles: ['Cardio', 'Anca'],
     cues: ['Sem saltar, joelho à altura da anca', 'Braços a acompanhar', 'Aumenta o ritmo gradualmente'],
     mistakes: [],
-    yt: 'high knee march warm up no impact',
+    yt: 'marching in place exercise how to demonstration',
+    ytId: 'u1gmWFvEluM', ytTitle: 'Margaret Martin, Physical Therapist — Marching in Place Demonstrated by a Physical Therapist',
   },
 
   // ───────────────────────── CARDIO ─────────────────────────
@@ -734,6 +812,7 @@ export const EXERCISES = [
     cues: ['Consegues falar frases completas', 'Cerca de 60 a 90 segundos por km mais lento que o teu ritmo normal', 'Piso regular, passos curtos e rápidos para poupar o joelho'],
     mistakes: ['Ir ao ritmo de sempre', 'Passadas longas a bater de calcanhar'],
     yt: 'zone 2 running explained',
+    ytId: 'Mh5oNMDCucQ', ytTitle: 'The Movement System — How to Train with Heart Rate Zones - The Science Explained',
   },
   {
     id: 'run-tempo', name: 'Corrida tempo', nameEn: 'Tempo run',
@@ -743,6 +822,7 @@ export const EXERCISES = [
     cues: ['5 minutos fáceis, 15 a ritmo firme, 5 fáceis', 'Ritmo firme: só consegues dizer palavras soltas', 'Uma por semana, no máximo'],
     mistakes: ['Começar rápido de mais', 'Fazer duas por semana'],
     yt: 'tempo run explained threshold pace',
+    ytId: 'k5vqiyry2z8', ytTitle: 'Global Triathlon Network — How To Do A Tempo Run | What Is Tempo Running & Why Should You Do It?',
   },
   {
     id: 'swim-easy', name: 'Natação contínua', nameEn: 'Continuous swim',
@@ -752,6 +832,7 @@ export const EXERCISES = [
     cues: ['Zero impacto: a melhor alternativa quando o joelho se queixa', 'Alterna crol e costas se cansares', 'Ritmo conversável, 30 minutos'],
     mistakes: ['Ir a sprintar e parar', 'Só bruços (joelho)'],
     yt: 'swimming for fitness beginner continuous',
+    ytId: 'nrkbFvAb6vg', ytTitle: 'Global Triathlon Network — How To Swim Further | Increase Your Swimming Distance',
   },
   {
     id: 'walk-brisk', name: 'Caminhada rápida', nameEn: 'Brisk walk',
@@ -760,7 +841,8 @@ export const EXERCISES = [
     muscles: ['Recuperação ativa'],
     cues: ['Ritmo que aqueça sem ofegar', 'Braços a acompanhar', 'Ideal em dia de descanso ativo'],
     mistakes: [],
-    yt: 'brisk walking benefits pace',
+    yt: 'brisk walking technique posture arm swing form',
+    ytId: 'PXHWMt5nvcE', ytTitle: 'Transform Chiropractic — How to walk properly - arm swing technique during walking shoulder swing by Chiropractor Dr. Mackay',
   },
   {
     id: 'basket-shoot', name: 'Basket livre (recuperação ativa)', nameEn: 'Basketball shootaround',
@@ -770,6 +852,7 @@ export const EXERCISES = [
     cues: ['Lançamentos e dribles, sem jogo a sério', 'Evita saltos e travagens bruscas', 'Diverte-te, conta como ativo leve'],
     mistakes: ['Saltar para o cesto', 'Mudanças de direção bruscas'],
     yt: 'basketball shooting drills solo',
+    ytId: 'ss10AxV3OzI', ytTitle: 'TJL Training — Improve Your Shooting By Yourself | Full Solo Basketball Shooting Workout',
   },
 ];
 

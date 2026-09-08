@@ -37,6 +37,9 @@ function ik(root, target, l1, l2, bend = 1) {
 
 export function hasPose(id) { return !!POSES[id]; }
 export function poseOf(id) { return POSES[id] || null; }
+// Quantas poses tem a figura. 1 = posição fixa (isometria), não há nada para animar.
+export function frameCount(id) { return POSES[id]?.frames?.length || 0; }
+export function prefersStill() { return !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches; }
 
 function joints(f, farOff = FAR, wide = false) {
   const hip = f.hip;

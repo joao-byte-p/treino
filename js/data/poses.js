@@ -488,22 +488,24 @@ export const POSES = {
   },
 
   // ── Elevação de joelhos suspenso ─────────────────────────────
+  // Vista de LADO, ao contrário das outras suspensões: a subida do joelho acontece no
+  // plano sagital, por isso de frente não se veria movimento nenhum.
   'hanging-knee-raise': {
-    viewBox: '10 -2 80 100',
-    wide: true, far: [0, 0],
-    props: [{ type: 'bar', x1: 24, y1: 4, x2: 76, y2: 4 }],
+    viewBox: '20 -4 60 100',
+    accent: 'core',
+    props: [{ type: 'bar', x1: 40, y1: 4, x2: 64, y2: 4 }],
     frames: [
       {
         label: 'Suspenso, ombros ativos',
         hip: [50, 52], torso: 90, head: 0,
-        arms: [{ pin: [60, 4], bend: 1, mirror: true, far: true }, { pin: [60, 4], bend: 1 }],
-        legs: [{ a: [-86, -88], foot: 6, mirror: true, far: true }, { a: [-86, -88], foot: -6 }],
+        arms: [{ pin: [52, 4], bend: 1, far: true }, { pin: [52, 4], bend: 1 }],
+        legs: [[-92, -90, -22, true], [-90, -90, -18]],
       },
       {
         label: 'Joelhos ao peito, sem balanço',
-        hip: [50, 52], torso: 90, head: 0,
-        arms: [{ pin: [60, 4], bend: 1, mirror: true, far: true }, { pin: [60, 4], bend: 1 }],
-        legs: [{ a: [-64, -116], foot: -80, mirror: true, far: true }, { a: [-64, -116], foot: -80 }],
+        hip: [50, 52], torso: 84, head: 0,
+        arms: [{ pin: [52, 4], bend: 1, far: true }, { pin: [52, 4], bend: 1 }],
+        legs: [[2, -104, -44, true], [6, -100, -40]],
       },
     ],
   },

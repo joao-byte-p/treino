@@ -397,6 +397,7 @@ body::before {
 .hero-fig { background: #1b1f26; border-radius: var(--radius); display: grid; place-items: center; padding: 10px; }
 .hero-fig .fig { max-width: 100%; }
 .hero-cap { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 8px; }
+.hero-still { display: block; max-width: 30ch; margin: 0 auto; line-height: 1.35; }
 .hero { margin-bottom: 14px; }
 .srun-illu { position: relative; margin: 4px auto 8px; width: fit-content; max-width: 290px; display: grid; place-items: center; cursor: pointer; }
 .srun-illu .srun-info { position: absolute; right: -8px; top: -8px; margin: 0; }
