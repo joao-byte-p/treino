@@ -138,7 +138,7 @@ export function renderDay(nav, dateISO, altIndex = null) {
   const blocks = s.blocks.map(b => `
     <section class="block">
       <h3 class="block-title">${esc(b.title)}${b.rounds ? '' : ''}</h3>
-      <ul class="exlist">${b.items.map(i => exerciseRow(i, { swappable: true })).join('')}</ul>
+      <ul class="exlist">${b.items.map(i => exerciseRow(i, { swappable: true, linked: true })).join('')}</ul>
     </section>`).join('');
   return `
   <header class="top">

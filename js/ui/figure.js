@@ -16,6 +16,25 @@ const n = v => Math.round(v * 10) / 10;
 const xy = p => `${n(p[0])} ${n(p[1])}`;
 const pts = a => a.map(p => `${n(p[0])},${n(p[1])}`).join(' ');
 
+// IK de dois segmentos: dada a raiz (ombro/anca) e um alvo fixo (mão/pé no chão),
+// resolve a posição do cotovelo/joelho. É isto que mantém a mão pregada ao chão
+// enquanto o resto do corpo se move, em vez de a arrastar.
+function ik(root, target, l1, l2, bend = 1) {
+  let dx = target[0] - root[0];
+  let dy = target[1] - root[1];
+  let d = Math.hypot(dx, dy) || 0.001;
+  const min = Math.abs(l1 - l2) + 0.01;
+  const max = l1 + l2 - 0.01;
+  if (d < min || d > max) {
+    const k = (d < min ? min : max) / d;
+    dx *= k; dy *= k; d = d < min ? min : max;
+  }
+  const end = [root[0] + dx, root[1] + dy];
+  const cosA = Math.min(1, Math.max(-1, (l1 * l1 + d * d - l2 * l2) / (2 * l1 * d)));
+  const th = Math.atan2(dy, dx) + bend * Math.acos(cosA);
+  return { mid: [root[0] + l1 * Math.cos(th), root[1] + l1 * Math.sin(th)], end };
+}
+
 export function hasPose(id) { return !!POSES[id]; }
 export function poseOf(id) { return POSES[id] || null; }
 
@@ -30,17 +49,31 @@ function joints(f, farOff = FAR) {
   // ombro assenta na frente do tronco, para o braço não se fundir com o corpo
   const perp = [-dir[1], dir[0]];
   const shoulderFront = [shoulder[0] + perp[0] * SEG.shoulderFront, shoulder[1] + perp[1] * SEG.shoulderFront];
-  const arms = (f.arms || []).map(([u, fo, far]) => {
+  const arms = (f.arms || []).map(spec => {
+    if (Array.isArray(spec)) {
+      const [u, fo, far] = spec;
+      const s = off(shoulderFront, far);
+      const e = step(s, SEG.upper, u);
+      const w = step(e, SEG.fore, fo);
+      return { pts: [s, e, w], wrist: w, far: !!far };
+    }
+    const far = !!spec.far;
     const s = off(shoulderFront, far);
-    const e = step(s, SEG.upper, u);
-    const w = step(e, SEG.fore, fo);
-    return { pts: [s, e, w], wrist: w, far: !!far };
+    const r = ik(s, off(spec.pin, far), SEG.upper, SEG.fore, spec.bend ?? 1);
+    return { pts: [s, r.mid, r.end], wrist: r.end, far };
   });
-  const legs = (f.legs || []).map(([th, sh, ft, far]) => {
+  const legs = (f.legs || []).map(spec => {
+    if (Array.isArray(spec)) {
+      const [th, sh, ft, far] = spec;
+      const h = off(hip, far);
+      const k = step(h, SEG.thigh, th);
+      const a = step(k, SEG.shin, sh);
+      return { pts: [h, k, a], ankle: a, toe: ft == null ? null : step(a, SEG.foot, ft), far: !!far };
+    }
+    const far = !!spec.far;
     const h = off(hip, far);
-    const k = step(h, SEG.thigh, th);
-    const a = step(k, SEG.shin, sh);
-    return { pts: [h, k, a], ankle: a, toe: ft == null ? null : step(a, SEG.foot, ft), far: !!far };
+    const r = ik(h, off(spec.pin, far), SEG.thigh, SEG.shin, spec.bend ?? 1);
+    return { pts: [h, r.mid, r.end], ankle: r.end, toe: spec.foot == null ? null : step(r.end, SEG.foot, spec.foot), far };
   });
   return { hip, neck, shoulder, headC, arms, legs, dir, torsoAngle: t };
 }
@@ -64,14 +97,30 @@ function resolve(name, j) {
 }
 
 // ---- interpolação entre poses ----
+// Ângulos interpolam pelo arco mais curto: de -90° para 180° o braço desce por trás
+// (-90 → -180) em vez de dar a volta por cima do ombro (-90 → 0 → 90 → 180).
+const lerpAngle = (a, b, u) => {
+  const d = ((((b - a + 180) % 360) + 360) % 360) - 180;
+  return a + d * u;
+};
+
 function lerpFrame(a, b, u) {
   const L = (x, y) => x + (y - x) * u;
+  const A = (x, y) => lerpAngle(x, y, u);
   return {
     hip: [L(a.hip[0], b.hip[0]), L(a.hip[1], b.hip[1])],
-    torso: L(a.torso, b.torso),
-    head: L(a.head || 0, b.head || 0),
-    arms: (a.arms || []).map((ar, i) => ar.map((v, k) => (k < 2 ? L(v, b.arms[i][k]) : v))),
-    legs: (a.legs || []).map((lg, i) => lg.map((v, k) => (k < 3 && v != null && b.legs[i]?.[k] != null ? L(v, b.legs[i][k]) : v))),
+    torso: A(a.torso, b.torso),
+    head: A(a.head || 0, b.head || 0),
+    arms: (a.arms || []).map((ar, i) => {
+      const br = b.arms[i];
+      if (Array.isArray(ar)) return ar.map((v, k) => (k < 2 ? A(v, br[k]) : v));
+      return { ...ar, pin: [L(ar.pin[0], br.pin[0]), L(ar.pin[1], br.pin[1])] };
+    }),
+    legs: (a.legs || []).map((lg, i) => {
+      const br = b.legs[i];
+      if (Array.isArray(lg)) return lg.map((v, k) => (k < 3 && v != null && br?.[k] != null ? A(v, br[k]) : v));
+      return { ...lg, pin: [L(lg.pin[0], br.pin[0]), L(lg.pin[1], br.pin[1])], foot: lg.foot == null ? null : A(lg.foot, br.foot) };
+    }),
     items: a.items, marks: a.marks,
   };
 }
@@ -202,7 +251,7 @@ export function figureSVG(id, { frame = 0, size = 120, showProps = true, arrow =
   const [, , vw, vh] = vb.split(' ').map(Number);
   return `<svg class="fig ${className}" viewBox="${vb}" width="${size}" height="${Math.round((size * vh) / vw)}" aria-hidden="true">
     ${showProps ? propsSVG(P.props) : ''}
-    ${b.far}${b.torso}${b.near}${b.head}${b.marks}
+    ${b.far}${b.torso}${b.head}${b.near}${b.marks}
     ${itemsSVG(f.items, b.j)}
     ${arrow ? arrowSVG(f.arrow || P.arrow) : ''}
   </svg>`;
@@ -220,8 +269,8 @@ export function mountFigure(host, id, { size = 200, period = 3200, animate = tru
     ${propsSVG(P.props)}
     <g data-far>${b0.far}</g>
     <g data-torso>${b0.torso}</g>
-    <g data-near>${b0.near}</g>
     <g data-head>${b0.head}</g>
+    <g data-near>${b0.near}</g>
     <g data-marks>${b0.marks}</g>
     <g data-items>${itemsSVG(f0.items, b0.j)}</g>
     ${arrow ? arrowSVG(f0.arrow || P.arrow) : ''}
