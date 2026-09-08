@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Figuras — banco de provas</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    body { padding: 24px; }
+    .lab { max-width: 1100px; margin: 0 auto; }
+    .lab h1 { margin-bottom: 4px; }
+    .lab > p { color: var(--text-2); margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .cell { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 16px; }
+    .cell h3 { margin-bottom: 2px; }
+    .cell .sub { color: var(--text-3); font-size: 13px; margin-bottom: 10px; }
+    .anim { display: grid; place-items: center; background: #1b1f26; border-radius: 16px; padding: 8px; margin-bottom: 10px; }
+    .thumbs { display: flex; gap: 8px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .thumbs span { font-size: 12px; color: var(--text-3); }
+  </style>
+</head>
+<body>
+  <div class="lab">
+    <h1>Figuras — banco de provas</h1>
+    <p>Lote 1. Cada figura é o mesmo corpo em ângulos diferentes, animada entre poses.</p>
+    <div class="grid" id="grid"></div>
+  </div>
+  <script type="module">
+    import { POSES } from './js/data/poses.js';
+    import { BY_ID } from './js/data/exercises.js';
+    import { mountFigure, stepsStrip, figureSVG } from './js/ui/figure.js';
+
+    const grid = document.getElementById('grid');
+    for (const id of Object.keys(POSES)) {
+      const ex = BY_ID[id];
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.innerHTML = `
+        <h3>${ex ? ex.name : id}</h3>
+        <div class="sub">${ex ? ex.nameEn : ''}</div>
+        <div class="anim" data-anim></div>
+        ${stepsStrip(id, { size: 118 })}
+        <div class="thumbs"><span>Miniatura</span>${figureSVG(id, { size: 44, showProps: false })}${figureSVG(id, { size: 64, showProps: false })}</div>`;
+      grid.appendChild(cell);
+      mountFigure(cell.querySelector('[data-anim]'), id, { size: 230, period: 3200 });
+    }
+  </script>
+</body>
+</html>

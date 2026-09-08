@@ -1,4 +1,5 @@
 import { PATTERN_LABEL, EQUIPMENT_LABEL } from '../data/exercises.js';
+import { hasPose, figureSVG } from './figure.js';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -39,16 +40,21 @@ export function exerciseRow(item, { showLoad = true, swappable = false } = {}) {
   </li>`;
 }
 
-// Fase 1: silhueta genérica por padrão. Fase 2 substitui por img/<id>.png
+// Figura articulada quando o exercício já tem pose; senão, glifo genérico.
 export function illustration(ex, size = 120) {
-  const glyph = {
+  if (hasPose(ex.id)) return figureSVG(ex.id, { size, showProps: size >= 90 });
+  return glyph(ex, size);
+}
+
+function glyph(ex, size = 120) {
+  const path = {
     push: 'M6 30 L26 18 L44 22 M26 18 L28 8', pull: 'M8 10 L24 22 L44 18 M24 22 L22 34', squat: 'M14 8 L24 8 L28 22 L18 30 L28 40', knee: 'M20 6 L24 22 L18 40',
     hinge: 'M8 12 L26 16 L40 34 M26 16 L36 8', glute: 'M6 30 L20 20 L40 24 L44 34', core: 'M6 26 L44 26 M24 26 L24 14', hiit: 'M8 40 L20 10 L30 30 L42 6',
     mobility: 'M10 40 Q24 4 40 40', cardio: 'M6 34 L18 20 L26 30 L44 10', warmup: 'M10 26 Q24 10 38 26 Q24 42 10 26',
   }[ex.pattern] || 'M8 24 L44 24';
   return `<svg class="illu illu-${ex.pattern}" viewBox="0 0 50 48" width="${size}" height="${size * 0.96}" aria-hidden="true">
     <circle cx="25" cy="24" r="22" class="illu-bg"/>
-    <path d="${glyph}" class="illu-line"/>
+    <path d="${path}" class="illu-line"/>
   </svg>`;
 }
 
