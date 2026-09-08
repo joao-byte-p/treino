@@ -1,0 +1,25 @@
+<meta charset="utf-8"><title>Revisão de pés</title>
+<link rel="stylesheet" href="css/app.css">
+<style>
+  body { padding: 12px; background: #0b0d10; }
+  .g { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .c { background: #161a21; border-radius: 16px; padding: 10px; }
+  .c h3 { font-size: 13px; margin: 0 0 6px; }
+  .c .n { font-size: 11px; color: #868e9c; }
+</style>
+<div class="g" id="g"></div>
+<script type="module">
+  const v = '?v=' + Date.now();
+  const { POSES } = await import('./js/data/poses.js' + v);
+  const { BY_ID } = await import('./js/data/exercises.js' + v);
+  const { mountFigure, stepsStrip } = await import('./js/ui/figure.js' + v);
+  const TAM = Number(new URLSearchParams(location.search).get('tam') || 300);
+  const ids = (new URLSearchParams(location.search).get('ids') || '').split(',').filter(Boolean);
+  const g = document.getElementById('g');
+  for (const id of ids) {
+    const d = document.createElement('div');
+    d.className = 'c';
+    d.innerHTML = `<h3>${BY_ID[id]?.name || id}</h3><div class="n">${id} · ${POSES[id].frames.length} poses</div>${stepsStrip(id, { size: TAM })}`;
+    g.appendChild(d);
+  }
+</script>

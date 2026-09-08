@@ -25,13 +25,14 @@ As ilustrações não são imagens: são SVG desenhado a partir de um modelo de 
 - `js/ui/figure.js` — comprimentos dos segmentos, cinemática direta e inversa, desenho.
 - `js/data/poses.js` — 2 poses por exercício (1 nas isometrias), definidas por ângulos.
 - `figuras.html` — banco de provas para revisão em lote, com filtro por padrão.
+- `revisao.html?ids=a,b&tam=250` — as mesmas figuras, mas só as que se pedem e em grande.
 - `tools/solve.js` — resolve a geometria de apoios fixos (`node tools/solve.js`).
 - `tools/check.mjs` — valida todas as poses (`node tools/check.mjs`).
 
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
 ```bash
-node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/check.mjs
+node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/check.mjs && node tools/anklecheck.mjs
 ```
 | Ficheiro | O que verifica |
 |---|---|
@@ -43,6 +44,7 @@ node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node t
 | `check.mjs` | poses renderizam e os frames têm formas de membro compatíveis |
 | `fitframes.mjs` | mede a caixa real de cada figura e propõe o viewBox |
 | `figcheck.mjs` | inventário das figuras: poses em falta, isometrias, animações paradas |
+| `anklecheck.mjs` | ângulo do tornozelo em cada pé: apanha pés dobrados contra a canela |
 | `ytcheck.mjs` | confirma que cada vídeo referido ainda existe (pede ao YouTube) |
 | `diag.mjs` | `node tools/diag.mjs <id>` imprime as articulações de uma pose |
 
@@ -54,6 +56,9 @@ Regras que evitam os erros mais comuns:
 - Ângulos interpolam pelo **arco mais curto**, senão os membros dão a volta por cima do ombro.
 - Membros apoiados usam `{ pin }` (cinemática inversa): a mão e o pé ficam fixos.
 - Os dois frames de um exercício têm de usar a **mesma forma** de membro (`[ang]`, `{a}` ou `{pin}`).
+- O ângulo do pé é `foot:`. Escrito como terceiro valor de `a: [x, y, z]` é **silenciosamente ignorado**, e o pé desaparece: aconteceu em 46 pernas. `anklecheck.mjs` conta os pés desenhados.
+- **Plano de vista tem de coincidir com o plano do movimento.** Uma elevação de joelhos de frente não mostra flexão da anca.
+- O `foot:` também interpola pelo arco mais curto: se o caminho passar por baixo, a ponta atravessa o chão a meio da animação (foi o caso do cão-cobra).
 - `mirror: true` + `wide: true` dão vista de frente (elevações laterais, elevações, pull-aparts).
 
 ## Fases
