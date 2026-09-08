@@ -28,6 +28,22 @@ As ilustrações não são imagens: são SVG desenhado a partir de um modelo de 
 - `tools/solve.js` — resolve a geometria de apoios fixos (`node tools/solve.js`).
 - `tools/check.mjs` — valida todas as poses (`node tools/check.mjs`).
 
+## Auditorias
+Correr depois de mexer no motor, nas poses ou no registo:
+```bash
+node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/check.mjs
+```
+| Ficheiro | O que verifica |
+|---|---|
+| `audit.mjs` | 2016 sessões: joelho, equipamento, duração, séries, progressão |
+| `audit2.mjs` | 5343 passos da sessão guiada, armazenamento, fuso horário |
+| `audit3.mjs` | geometria das figuras ao longo da animação: enquadramento, chão, apoios |
+| `audit4.mjs` | integridade do registo, ciclos, viragem de ano, objetivo agendado |
+| `audit5.mjs` | temporizador com relógio controlado, incluindo ecrã bloqueado |
+| `check.mjs` | poses renderizam e os frames têm formas de membro compatíveis |
+| `fitframes.mjs` | mede a caixa real de cada figura e propõe o viewBox |
+| `diag.mjs` | `node tools/diag.mjs <id>` imprime as articulações de uma pose |
+
 Regras que evitam os erros mais comuns:
 - Ângulos interpolam pelo **arco mais curto**, senão os membros dão a volta por cima do ombro.
 - Membros apoiados usam `{ pin }` (cinemática inversa): a mão e o pé ficam fixos.

@@ -84,7 +84,7 @@ export function renderHome(nav) {
         const l = findLog(x.date);
         const isToday = x.date === s.date;
         const cls = [x.type === 'rest' ? 'rest' : '', l?.completed ? 'done' : '', isToday ? 'today' : '', x.date < s.date && !l?.completed && x.type !== 'rest' ? 'missed' : ''].join(' ');
-        return `<li class="${cls}" data-nav="day" data-date="${x.date}"><span class="ws-d">${esc(x.weekdayShort)}</span><span class="ws-i">${esc(DAY_META[x.type].icon)}</span></li>`;
+        return `<li class="${cls}" data-nav="day" data-date="${x.date}" role="button" tabindex="0" aria-label="${esc(x.weekday)}: ${esc(x.title)}"><span class="ws-d">${esc(x.weekdayShort)}</span><span class="ws-i" aria-hidden="true">${esc(DAY_META[x.type].icon)}</span></li>`;
       }).join('')}
     </ol>
   </section>`;
@@ -101,7 +101,7 @@ export function renderPlan(nav, offsetWeeks = 0) {
     const status = s.type === 'rest' ? '' : l?.completed ? 'done' : (s.date < todayISO ? 'missed' : (s.date === todayISO ? 'today' : ''));
     const mainBlock = s.blocks.find(b => ['strength', 'hiit', 'circuit', 'cardio', 'mobility'].includes(b.kind));
     return `
-    <li class="dayrow ${status} tone-${s.tone}" data-nav="day" data-date="${s.date}">
+    <li class="dayrow ${status} tone-${s.tone}" data-nav="day" data-date="${s.date}" role="button" tabindex="0" aria-label="${esc(s.weekday)}: ${esc(s.title)}">
       <div class="dayrow-date"><span>${esc(s.weekdayShort)}</span><strong>${new Date(s.date).getDate()}</strong></div>
       <div class="dayrow-body">
         <div class="dayrow-title">${esc(s.title)}</div>
@@ -184,8 +184,8 @@ export function renderLibrary(nav, query = '') {
         const prog = isProgression(ex.chain);
         const lvl = state.chainLevels[ex.chain] || 1;
         const isCurrent = ex.level === Math.min(lvl, chainLevels(ex.chain).length);
-        return `<li class="exrow" data-nav="exercise" data-ex="${ex.id}">
-          <div class="exrow-thumb">${illustration(ex, 44)}</div>
+        return `<li class="exrow" data-nav="exercise" data-ex="${ex.id}" role="button" tabindex="0" aria-label="Ver ${esc(ex.name)}">
+          <div class="exrow-thumb" aria-hidden="true">${illustration(ex, 44)}</div>
           <div class="exrow-body"><div class="exrow-name">${esc(ex.name)}</div><div class="exrow-meta">${esc(ex.nameEn)} · ${esc(ex.muscles.slice(0, 2).join(', '))}</div></div>
           <div class="exrow-right">${prog ? `<span class="pill ${isCurrent ? 'pill-now' : ''}">N${ex.level}</span>` : ''}</div>
         </li>`;

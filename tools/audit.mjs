@@ -100,9 +100,11 @@ for (const off of [...eqKeys.map(k => [k]), ['bars', 'chair'], ['dumbbells', 'ba
   if (!strength.length) warn('progressao', 'sessão de força sem exercícios');
   const results = {};
   for (const it of strength) results[it.ex.id] = { done: true, top: true, rpe: 8, kg: 10 };
+  const proxima = new Date(mondayOf()); proxima.setDate(proxima.getDate() + 7);
+  const sess2 = sessionFor(s, proxima);
   const ev1 = applyProgression(s, sess, results);
   if (ev1.length) warn('progressao', `subiu logo na 1.ª sessão: ${JSON.stringify(ev1)}`);
-  const ev2 = applyProgression(s, sess, results);
+  const ev2 = applyProgression(s, sess2, results);
   if (!ev2.length) warn('progressao', 'não subiu na 2.ª sessão consecutiva');
   // duas cadeias iguais na mesma sessão não devem contar duas vezes
   const chains = strength.map(i => i.ex.chain);
@@ -111,10 +113,14 @@ for (const off of [...eqKeys.map(k => [k]), ['bars', 'chair'], ['dumbbells', 'ba
   // falha deve zerar
   const s2 = defaultState();
   applyProgression(s2, sess, results);
+  // a falha tem de ser registada nos exercícios da PRÓPRIA sessão 2
+  const strength2 = sess2.blocks.flatMap(b => (b.kind === 'strength' ? b.items : []));
   const bad = {};
-  for (const it of strength) bad[it.ex.id] = { done: false, top: false, rpe: 10, kg: 10 };
-  applyProgression(s2, sess, bad);
-  for (const c of Object.keys(s2.chainStreak)) if (s2.chainStreak[c] !== 0) warn('progressao', `falha não zerou a cadeia ${c}`);
+  for (const it of strength2) bad[it.ex.id] = { done: false, top: false, rpe: 10, kg: 10 };
+  applyProgression(s2, sess2, bad);
+  // só as cadeias presentes na sessão falhada devem zerar (o core alterna por semana)
+  const cadeiasFalhadas = new Set(sess2.blocks.flatMap(b => (b.kind === 'strength' ? b.items.map(i => i.ex.chain) : [])));
+  for (const c of cadeiasFalhadas) if (s2.chainStreak[c] !== 0) warn('progressao', `falha não zerou a cadeia ${c}`);
 }
 
 // ── 4. Níveis no topo da cadeia: não deve estourar nem parar de treinar ────
@@ -131,8 +137,9 @@ for (const off of [...eqKeys.map(k => [k]), ['bars', 'chair'], ['dumbbells', 'ba
   const strength = sess.blocks.flatMap(b => (b.kind === 'strength' ? b.items : []));
   const results = {};
   for (const it of strength) results[it.ex.id] = { done: true, top: true, rpe: 8, kg: 10 };
+  const d2 = new Date(mondayOf()); d2.setDate(d2.getDate() + 7);
   applyProgression(s, sess, results);
-  const ev = applyProgression(s, sess, results);
+  const ev = applyProgression(s, sessionFor(s, d2), results);
   const loads = ev.filter(e => e.type === 'load');
   if (!loads.length && strength.some(i => i.ex.load)) warn('nivel maximo', 'no topo da cadeia não passou a somar carga');
 }

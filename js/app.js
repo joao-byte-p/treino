@@ -93,6 +93,15 @@ function render(scrollTop = true) {
   }));
 }
 
+// teclado: o que é tocável mas não é <button> responde a Enter e espaço
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('[data-nav][role="button"]');
+  if (!el) return;
+  e.preventDefault();
+  el.click();
+});
+
 // navegação por delegação
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-nav]');

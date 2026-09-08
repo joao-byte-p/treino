@@ -191,13 +191,13 @@ export const POSES = {
       {
         label: 'Mãos à altura da anca, ombros à frente',
         hip: [47.3, 64.8], torso: 31.6, head: 0,
-        arms: [{ pin: [60, 84], bend: 1, far: true }, { pin: [60, 84], bend: 1 }],
+        arms: [{ pin: [62, 83], bend: 1, far: true }, { pin: [62, 83], bend: 1 }],
         legs: [{ pin: [16.6, 83.6], foot: -42, bend: 1, far: true }, { pin: [16.6, 83.6], foot: -45, bend: 1 }],
       },
       {
         label: 'Desce sem perder a inclinação',
         hip: [51.8, 76.1], torso: 12, head: 0,
-        arms: [{ pin: [60, 84], bend: 1, far: true }, { pin: [60, 84], bend: 1 }],
+        arms: [{ pin: [62, 83], bend: 1, far: true }, { pin: [62, 83], bend: 1 }],
         legs: [{ pin: [16.6, 83.6], foot: -37, bend: 1, far: true }, { pin: [16.6, 83.6], foot: -40, bend: 1 }],
       },
     ],
@@ -352,7 +352,7 @@ export const POSES = {
 
   // ── Dips em paralelas ──
   'bar-dips': {
-    viewBox: '18 6 72 92',
+    viewBox: '28 -4 44 104',
     props: [{ type: 'bar', x1: 40, y1: 48, x2: 66, y2: 48 }, { type: 'bar', x1: 36, y1: 52, x2: 62, y2: 52 }],
     arrow: { from: [76, 32], to: [76, 46] },
     frames: [
@@ -595,7 +595,7 @@ export const POSES = {
 
   // ── Superman ─────────────────────────────────────────────────
   'superman': {
-    viewBox: '6 50 104 42',
+    viewBox: '-4 56 108 30',
     props: [{ type: 'floor', y: 78, x1: 8, x2: 108 }],
     arrow: { from: [96, 84], to: [96, 72] },
     frames: [
@@ -665,19 +665,19 @@ export const POSES = {
   // ── Pistol squat assistido ───────────────────────────────────
   'pistol-assisted': {
     viewBox: '10 10 88 86',
-    props: [{ type: 'floor', y: 90, x1: 12, x2: 96 }, { type: 'wall', x: 88, y1: 20, y2: 90 }],
+    props: [{ type: 'floor', y: 90, x1: 12, x2: 96 }, { type: 'wall', x: 78, y1: 20, y2: 90 }],
     arrow: { from: [24, 54], to: [24, 70] },
     frames: [
       {
         label: 'Segura numa porta ou mesa',
         hip: [50, 54], torso: 86, head: 0,
-        arms: [{ a: [-30, -12], far: true }, { pin: [84, 46], bend: -1 }],
+        arms: [{ a: [-30, -12], far: true }, { pin: [74, 48], bend: -1 }],
         legs: [{ a: [-16, -8, -20], far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
       },
       {
         label: 'Desce lento até onde o joelho aceita',
         hip: [50, 70], torso: 70, head: -10,
-        arms: [{ a: [-20, 0], far: true }, { pin: [84, 46], bend: -1 }],
+        arms: [{ a: [-20, 0], far: true }, { pin: [74, 48], bend: -1 }],
         legs: [{ a: [-4, 2, -20], far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
       },
@@ -710,7 +710,7 @@ export const POSES = {
 
   // ── Step-up controlado ───────────────────────────────────────
   'step-up': {
-    viewBox: '14 6 82 90',
+    viewBox: '29 -5 58 100',
     props: [{ type: 'floor', y: 90, x1: 16, x2: 94 }, { type: 'box', x: 56, y: 70, w: 26, h: 20 }],
     arrow: { from: [26, 60], to: [26, 46] },
     frames: [
@@ -788,7 +788,7 @@ export const POSES = {
 
   // ── Step-down excêntrico lento ───────────────────────────────
   'slow-step-down': {
-    viewBox: '28 16 62 82',
+    viewBox: '34 -3 49 98',
     props: [{ type: 'floor', y: 90, x1: 30, x2: 86 }, { type: 'box', x: 46, y: 78, w: 26, h: 12 }],
     arrow: { from: [36, 62], to: [36, 76] },
     frames: [
@@ -832,19 +832,19 @@ export const POSES = {
   // ── Elevação de gémeos unilateral ────────────────────────────
   'calf-raise-single': {
     viewBox: '20 6 64 92',
-    props: [{ type: 'floor', y: 92, x1: 22, x2: 80 }, { type: 'box', x: 38, y: 84, w: 28, h: 8 }, { type: 'wall', x: 76, y1: 20, y2: 92 }],
+    props: [{ type: 'floor', y: 92, x1: 22, x2: 80 }, { type: 'box', x: 38, y: 84, w: 28, h: 8 }, { type: 'wall', x: 74, y1: 18, y2: 92 }],
     arrow: { from: [30, 74], to: [30, 62] },
     frames: [
       {
         label: 'Calcanhar abaixo do degrau',
         hip: [50, 52], torso: 90, head: 0,
-        arms: [{ a: [-40, -20], far: true }, { pin: [74, 44], bend: -1 }],
+        arms: [{ a: [-40, -20], far: true }, { pin: [72, 46], bend: -1 }],
         legs: [{ a: [-100, -150, -30], far: true }, { pin: [50, 84], foot: 0, bend: -1 }],
       },
       {
         label: 'Sobe alto, 1 segundo em cima',
         hip: [50, 45], torso: 90, head: 0,
-        arms: [{ a: [-40, -20], far: true }, { pin: [74, 44], bend: -1 }],
+        arms: [{ a: [-40, -20], far: true }, { pin: [72, 42], bend: -1 }],
         legs: [{ a: [-100, -150, -30], far: true }, { pin: [50, 78], foot: -50, bend: -1 }],
       },
     ],
@@ -921,65 +921,65 @@ export const POSES = {
 
   // ── Ponte de glúteos ─────────────────────────────────────────
   'glute-bridge': {
-    viewBox: '14 48 82 44',
-    props: [{ type: 'floor', y: 86, x1: 16, x2: 94 }],
+    viewBox: '17 58 76 36',
+    props: [{ type: 'floor', y: 89, x1: 16, x2: 94 }],
     arrow: { from: [46, 62], to: [46, 52] },
     frames: [
       {
         label: 'Anca no chão, pés à largura da anca',
         hip: [46, 78], torso: -8, head: 0,
-        arms: [{ a: [-152, -162], far: true }, { a: [-150, -160] }],
-        legs: [{ pin: [30, 84], foot: 24, bend: 1, far: true }, { pin: [30, 84], foot: 20, bend: 1 }],
+        arms: [{ a: [-178, -181], far: true }, { a: [-180, -183] }],
+        legs: [{ pin: [30, 87], foot: 24, bend: 1, far: true }, { pin: [30, 87], foot: 20, bend: 1 }],
       },
       {
         label: 'Empurra pelos calcanhares até à linha',
         hip: [46, 66], torso: -26.6, head: 0,
-        arms: [{ a: [-152, -162], far: true }, { a: [-150, -160] }],
-        legs: [{ pin: [30, 84], foot: 24, bend: 1, far: true }, { pin: [30, 84], foot: 20, bend: 1 }],
+        arms: [{ a: [-178, -181], far: true }, { a: [-180, -183] }],
+        legs: [{ pin: [30, 87], foot: 24, bend: 1, far: true }, { pin: [30, 87], foot: 20, bend: 1 }],
       },
     ],
   },
 
   // ── Hip thrust com halter ────────────────────────────────────
   'db-hip-thrust': {
-    viewBox: '10 40 88 52',
-    props: [{ type: 'floor', y: 88, x1: 12, x2: 96 }, { type: 'box', x: 68, y: 68, w: 26, h: 20 }],
-    arrow: { from: [42, 60], to: [42, 50] },
+    viewBox: '16 54 84 40',
+    props: [{ type: 'floor', y: 90, x1: 18, x2: 98 }, { type: 'box', x: 68, y: 68, w: 26, h: 22 }],
+    arrow: { from: [46, 78], to: [46, 66] },
     frames: [
       {
         label: 'Ombros no banco, halter na anca',
-        hip: [42, 76], torso: -22, head: 0,
-        arms: [{ a: [-158, -172], far: true }, { a: [-155, -170] }],
-        legs: [{ pin: [26, 86], foot: 24, bend: 1, far: true }, { pin: [26, 86], foot: 20, bend: 1 }],
-        items: [{ type: 'db', at: [42, 70], rot: 90 }],
+        hip: [42, 80], torso: 20, head: -6,
+        arms: [{ a: [-174, -178], far: true }, { a: [-172, -176] }],
+        legs: [{ pin: [24, 86], foot: 22, bend: 1, far: true }, { pin: [24, 86], foot: 18, bend: 1 }],
+        items: [{ type: 'db', at: [42, 74], rot: 90 }],
       },
       {
         label: 'Extensão completa, glúteo apertado',
-        hip: [42, 64], torso: -34, head: 0,
-        arms: [{ a: [-158, -172], far: true }, { a: [-155, -170] }],
-        legs: [{ pin: [26, 86], foot: 24, bend: 1, far: true }, { pin: [26, 86], foot: 20, bend: 1 }],
-        items: [{ type: 'db', at: [42, 58], rot: 90 }],
+        hip: [42, 68], torso: 8, head: -6,
+        arms: [{ a: [-174, -178], far: true }, { a: [-172, -176] }],
+        legs: [{ pin: [24, 86], foot: 22, bend: 1, far: true }, { pin: [24, 86], foot: 18, bend: 1 }],
+        items: [{ type: 'db', at: [42, 62], rot: 90 }],
       },
     ],
   },
 
   // ── Hip thrust unilateral ────────────────────────────────────
   'single-leg-hip-thrust': {
-    viewBox: '10 40 88 52',
-    props: [{ type: 'floor', y: 88, x1: 12, x2: 96 }, { type: 'box', x: 68, y: 68, w: 26, h: 20 }],
-    arrow: { from: [42, 60], to: [42, 50] },
+    viewBox: '16 42 84 52',
+    props: [{ type: 'floor', y: 90, x1: 18, x2: 98 }, { type: 'box', x: 68, y: 68, w: 26, h: 22 }],
+    arrow: { from: [46, 78], to: [46, 66] },
     frames: [
       {
         label: 'Uma perna no ar, joelho a 90°',
-        hip: [42, 76], torso: -22, head: 0,
-        arms: [{ a: [-158, -172], far: true }, { a: [-155, -170] }],
-        legs: [{ a: [128, 40, 20], far: true }, { pin: [26, 86], foot: 20, bend: 1 }],
+        hip: [42, 80], torso: 20, head: -6,
+        arms: [{ a: [-174, -178], far: true }, { a: [-172, -176] }],
+        legs: [{ a: [112, 32, 16], far: true }, { pin: [24, 86], foot: 18, bend: 1 }],
       },
       {
         label: 'Anca sobe nivelada, sem rodar',
-        hip: [42, 64], torso: -34, head: 0,
-        arms: [{ a: [-158, -172], far: true }, { a: [-155, -170] }],
-        legs: [{ a: [128, 40, 20], far: true }, { pin: [26, 86], foot: 20, bend: 1 }],
+        hip: [42, 68], torso: 8, head: -6,
+        arms: [{ a: [-174, -178], far: true }, { a: [-172, -176] }],
+        legs: [{ a: [112, 32, 16], far: true }, { pin: [24, 86], foot: 18, bend: 1 }],
       },
     ],
   },
@@ -1062,7 +1062,7 @@ export const POSES = {
 
   // ── Bird dog ─────────────────────────────────────────────────
   'bird-dog': {
-    viewBox: '0 42 100 48',
+    viewBox: '-10 41 104 50',
     props: [{ type: 'floor', y: 86, x1: 2, x2: 98 }],
     frames: [
       {
@@ -1117,14 +1117,14 @@ export const POSES = {
 
   // ── HIIT: burpee step-out ────────────────────────────────────
   'burpee-stepout': {
-    viewBox: '0 20 100 74',
+    viewBox: '5 7 84 88',
     props: [{ type: 'floor', y: 90, x1: 2, x2: 98 }],
     arrow: { from: [92, 40], to: [92, 58] },
     frames: [
       {
         label: 'Em pé, pronto a descer',
         hip: [50, 54], torso: 90, head: 0,
-        arms: [{ pin: [55.8, 61], bend: 1, far: true }, { pin: [55.8, 61], bend: 1 }],
+        arms: [{ pin: [52.9, 54], bend: 1, far: true }, { pin: [52.9, 54], bend: 1 }],
         legs: [{ pin: [50, 90], foot: 4, bend: -1, far: true }, { pin: [50, 90], foot: 0, bend: -1 }],
       },
       {
@@ -1354,13 +1354,13 @@ export const POSES = {
         label: 'Passo firme, braços a acompanhar',
         hip: [50, 52], torso: 88, head: 0,
         arms: [{ a: [-72, -100], far: true }, { a: [-108, -74] }],
-        legs: [{ a: [-112, -92, -20], far: true }, { pin: [60, 88], foot: 20, bend: -1 }],
+        legs: [{ a: [-112, -92, -20], far: true }, { pin: [58, 88], foot: 18, bend: -1 }],
       },
       {
         label: 'Troca de perna',
         hip: [50, 52], torso: 88, head: 0,
         arms: [{ a: [-108, -74], far: true }, { a: [-72, -100] }],
-        legs: [{ a: [-72, -104, -20], far: true }, { pin: [44, 88], foot: -10, bend: -1 }],
+        legs: [{ a: [-72, -104, -20], far: true }, { pin: [46, 88], foot: -10, bend: -1 }],
       },
     ],
   },
@@ -1403,34 +1403,31 @@ export const POSES = {
 
   // ── Mobilidade: figura 4 deitado ─────────────────────────────
   'figure-four': {
-    viewBox: '10 48 92 46',
-    props: [{ type: 'floor', y: 88, x1: 12, x2: 100 }],
+    viewBox: '20 52 74 40',
+    far: [0, -3],
+    props: [{ type: 'floor', y: 88, x1: 22, x2: 92 }],
     frames: [
       {
         label: 'Tornozelo sobre o joelho oposto',
         hip: [66, 78], torso: 180, head: 0,
-        arms: [{ a: [140, 96], far: true }, { a: [136, 100] }],
-        legs: [{ a: [-40, -140, -80], far: true }, { a: [-64, -12, 20] }],
+        arms: [{ a: [-8, -4], far: true }, { a: [-30, -8] }],
+        legs: [{ a: [24, -150, 20], far: true }, { pin: [86, 84], foot: 40, bend: -1 }],
       },
     ],
   },
 
   // ── Mobilidade: 90/90 da anca ────────────────────────────────
+  // Uma pose só: interpolar a troca de lado fazia as pernas passarem esticadas
+  // pelo chão. A troca está descrita nas indicações do exercício.
   'ninety-ninety': {
-    viewBox: '14 24 76 70',
-    props: [{ type: 'floor', y: 88, x1: 16, x2: 86 }],
+    viewBox: '18 22 54 72',
+    props: [{ type: 'floor', y: 88, x1: 20, x2: 70 }],
     frames: [
       {
         label: 'Ambas as pernas a 90°, costas retas',
         hip: [46, 66], torso: 84, head: -6,
         arms: [{ a: [-64, -70], far: true }, { a: [-60, -74] }],
         legs: [{ a: [-8, -96, -170], far: true }, { a: [-172, -86, -10] }],
-      },
-      {
-        label: 'Troca de lado com controlo',
-        hip: [46, 66], torso: 84, head: -6,
-        arms: [{ a: [-64, -70], far: true }, { a: [-60, -74] }],
-        legs: [{ a: [-172, -86, -10], far: true }, { a: [-8, -96, -170] }],
       },
     ],
   },
@@ -1443,15 +1440,15 @@ export const POSES = {
     frames: [
       {
         label: 'Afundo longo, mão no chão',
-        hip: [46, 64], torso: 60, head: -14,
-        arms: [{ a: [-96, -92], far: true }, { pin: [56, 88], bend: 1 }],
-        legs: [{ a: [-156, -26, 0], far: true }, { pin: [66, 88], foot: 0, bend: -1 }],
+        hip: [46, 64], torso: 20, head: 10,
+        arms: [{ a: [-96, -92], far: true }, { pin: [64, 86], bend: 1 }],
+        legs: [{ pin: [20, 86], foot: -160, bend: -1, far: true }, { pin: [66, 88], foot: 0, bend: -1 }],
       },
       {
         label: 'Roda e aponta o braço ao céu',
-        hip: [46, 64], torso: 60, head: 20,
-        arms: [{ a: [74, 88], far: true }, { pin: [56, 88], bend: 1 }],
-        legs: [{ a: [-156, -26, 0], far: true }, { pin: [66, 88], foot: 0, bend: -1 }],
+        hip: [46, 64], torso: 20, head: 26,
+        arms: [{ a: [72, 86], far: true }, { pin: [64, 86], bend: 1 }],
+        legs: [{ pin: [20, 86], foot: -160, bend: -1, far: true }, { pin: [66, 88], foot: 0, bend: -1 }],
       },
     ],
   },
@@ -1479,21 +1476,21 @@ export const POSES = {
 
   // ── Mobilidade: tornozelo na parede ──────────────────────────
   'ankle-mobility': {
-    viewBox: '20 26 68 68',
-    props: [{ type: 'floor', y: 88, x1: 22, x2: 84 }, { type: 'wall', x: 78, y1: 30, y2: 88 }],
-    arrow: { from: [58, 58], to: [70, 58] },
+    viewBox: '18 10 60 82',
+    props: [{ type: 'floor', y: 88, x1: 20, x2: 76 }, { type: 'wall', x: 70, y1: 14, y2: 88 }],
+    arrow: { from: [56, 62], to: [66, 62] },
     frames: [
       {
         label: 'Pé a um palmo da parede',
         hip: [44, 58], torso: 86, head: 0,
-        arms: [{ pin: [76, 50], bend: -1, far: true }, { pin: [76, 54], bend: -1 }],
-        legs: [{ a: [-140, -50, 0], far: true }, { pin: [62, 88], foot: 0, bend: -1 }],
+        arms: [{ pin: [68, 48], bend: -1, far: true }, { pin: [68, 52], bend: -1 }],
+        legs: [{ a: [-140, -50, 0], far: true }, { pin: [60, 88], foot: 0, bend: -1 }],
       },
       {
         label: 'Joelho à parede sem levantar o calcanhar',
         hip: [48, 62], torso: 84, head: 0,
-        arms: [{ pin: [76, 50], bend: -1, far: true }, { pin: [76, 54], bend: -1 }],
-        legs: [{ a: [-140, -50, 0], far: true }, { pin: [62, 88], foot: 0, bend: -1 }],
+        arms: [{ pin: [68, 48], bend: -1, far: true }, { pin: [68, 52], bend: -1 }],
+        legs: [{ a: [-140, -50, 0], far: true }, { pin: [60, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
       },
     ],
@@ -1512,7 +1509,7 @@ export const POSES = {
       },
       {
         label: 'Expira e arredonda (gato)',
-        hip: [40, 61], torso: 24, head: -34,
+        hip: [40, 65], torso: 24, head: -34,
         arms: [{ pin: [62.8, 84.5], bend: 1, far: true }, { pin: [62.8, 84.5], bend: 1 }],
         legs: [{ pin: [22, 83], foot: 178, bend: -1, far: true }, { pin: [22, 83], foot: 178, bend: -1 }],
       },
@@ -1521,20 +1518,20 @@ export const POSES = {
 
   // ── Mobilidade: cão para baixo e cobra ───────────────────────
   'downdog-cobra': {
-    viewBox: '4 20 92 74',
-    props: [{ type: 'floor', y: 90, x1: 6, x2: 94 }],
+    viewBox: '2 26 94 68',
+    props: [{ type: 'floor', y: 90, x1: 4, x2: 94 }],
     frames: [
       {
         label: 'Cão para baixo, calcanhares para o chão',
-        hip: [50, 40], torso: -34, head: -30,
-        arms: [{ pin: [70, 88], bend: 1, far: true }, { pin: [70, 88], bend: 1 }],
-        legs: [{ pin: [26, 88], foot: 0, bend: 1, far: true }, { pin: [26, 88], foot: 0, bend: 1 }],
+        hip: [33.7, 52.2], torso: -44.6, head: -30,
+        arms: [{ pin: [69, 87], bend: 1, far: true }, { pin: [69, 87], bend: 1 }],
+        legs: [{ pin: [32, 87], foot: 10, bend: 1, far: true }, { pin: [32, 87], foot: 6, bend: 1 }],
       },
       {
         label: 'Cobra, anca no chão e peito aberto',
         hip: [44, 82], torso: 34, head: 24,
-        arms: [{ pin: [70, 88], bend: 1, far: true }, { pin: [70, 88], bend: 1 }],
-        legs: [{ pin: [12, 88], foot: -170, bend: 1, far: true }, { pin: [12, 88], foot: -172, bend: 1 }],
+        arms: [{ pin: [69, 87], bend: 1, far: true }, { pin: [69, 87], bend: 1 }],
+        legs: [{ pin: [14, 87], foot: 8, bend: 1, far: true }, { pin: [14, 87], foot: 6, bend: 1 }],
       },
     ],
   },
@@ -1570,20 +1567,21 @@ export const POSES = {
 
   // ── Mobilidade: respiração diafragmática ─────────────────────
   'diaphragm-breathing': {
-    viewBox: '10 50 96 42',
-    props: [{ type: 'floor', y: 86, x1: 12, x2: 104 }],
+    viewBox: '24 52 66 40',
+    far: [0, -3],
+    props: [{ type: 'floor', y: 86, x1: 26, x2: 88 }],
     frames: [
       {
         label: 'Uma mão no peito, outra na barriga',
         hip: [66, 78], torso: 180, head: 0,
-        arms: [{ a: [128, 40], far: true }, { a: [116, 26] }],
-        legs: [{ a: [-46, -134, -100], far: true }, { a: [-40, -140, -96] }],
+        arms: [{ a: [-6, -2], far: true }, { pin: [58, 74], bend: -1 }],
+        legs: [{ pin: [46, 84], foot: 168, bend: 1, far: true }, { pin: [44, 84], foot: 170, bend: 1 }],
       },
       {
         label: 'Inspira 4 segundos, só a barriga sobe',
         hip: [66, 78], torso: 180, head: 0,
-        arms: [{ a: [124, 34], far: true }, { a: [112, 20] }],
-        legs: [{ a: [-46, -134, -100], far: true }, { a: [-40, -140, -96] }],
+        arms: [{ a: [-6, -2], far: true }, { pin: [58, 71], bend: -1 }],
+        legs: [{ pin: [46, 84], foot: 168, bend: 1, far: true }, { pin: [44, 84], foot: 170, bend: 1 }],
       },
     ],
   },

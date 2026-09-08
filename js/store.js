@@ -41,6 +41,7 @@ export function defaultState() {
     },
     chainLevels: {},          // chain -> nível atual (default 1)
     chainStreak: {},          // chain -> sessões consecutivas com sucesso
+    chainLastDate: {},        // chain -> último dia contado (evita contar o mesmo treino duas vezes)
     loads: {},                // exerciseId -> último peso usado (kg)
     logs: [],                 // sessões registadas
     swaps: {},                // "YYYY-MM-DD" -> { exerciseId: replacementId }

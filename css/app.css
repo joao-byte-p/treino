@@ -7,7 +7,7 @@
   --line: rgba(255, 255, 255, 0.07);
   --text: #f2f4f7;
   --text-2: #a4acb8;
-  --text-3: #6b7380;
+  --text-3: #868e9c;   /* 5,3:1 sobre os cartões: texto pequeno tem de passar AA */
   --mint: #3ee6a8;
   --mint-2: rgba(62, 230, 168, 0.16);
   --amber: #ffb454;
@@ -27,6 +27,7 @@
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; border-radius: 6px; }
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
 body { min-height: 100dvh; overscroll-behavior-y: none; }
 button, input { font: inherit; color: inherit; }
@@ -63,7 +64,7 @@ body::before {
 .eyebrow { font-size: 13px; color: var(--text-3); font-weight: 600; margin-bottom: 2px; }
 .eyebrow::first-letter { text-transform: uppercase; }
 .lead { color: var(--text-2); margin-bottom: 14px; }
-.iconbtn { width: 40px; height: 40px; border-radius: 50%; background: var(--card); display: grid; place-items: center; font-size: 22px; line-height: 1; color: var(--text); flex: none; }
+.iconbtn { width: 44px; height: 44px; border-radius: 50%; background: var(--card); display: grid; place-items: center; font-size: 22px; line-height: 1; color: var(--text); flex: none; }
 .iconbtn:active { transform: scale(0.94); }
 
 .ringwrap { position: relative; width: 60px; height: 60px; flex: none; }
