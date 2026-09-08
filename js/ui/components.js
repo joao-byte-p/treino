@@ -35,7 +35,7 @@ export function exerciseRow(item, { showLoad = true, swappable = false, linked =
       : '');
   const chev = linked ? '<span class="exrow-chev" aria-hidden="true">›</span>' : '';
   return `
-  <li class="exrow" data-ex="${ex.id}"${linked ? ` data-nav="exercise"` : ''}>
+  <li class="exrow" data-ex="${ex.id}"${linked ? ` data-nav="exercise" role="button" tabindex="0" aria-label="Ver ${esc(ex.name)}"` : ''}>
     <div class="exrow-thumb" aria-hidden="true">${illustration(ex, 44)}</div>
     <div class="exrow-body">
       <div class="exrow-name">${esc(ex.name)}</div>

@@ -10,9 +10,12 @@ export const RPE = [
 ];
 
 // results: { [exerciseId]: { done: bool, top: bool, rpe: number|null, kg: number|null } }
+// Idempotente por dia: guardar o mesmo treino outra vez (botão "repetir ou rever")
+// corrige as cargas mas NÃO conta como sessão nova, senão saltavam-se níveis.
 export function applyProgression(state, session, results) {
   const events = [];
   const strengthItems = session.blocks.flatMap(b => b.kind === 'strength' ? b.items : []);
+  if (!state.chainLastDate) state.chainLastDate = {};
 
   for (const item of strengthItems) {
     const ex = item.ex;
@@ -20,9 +23,12 @@ export function applyProgression(state, session, results) {
     if (!r) continue;
     if (r.kg != null && ex.load) state.loads[ex.id] = r.kg;
 
+    const chain = ex.chain;
+    if (state.chainLastDate[chain] === session.date) continue; // este dia já foi contado
+    state.chainLastDate[chain] = session.date;
+
     const success = r.done && r.top !== false && (r.rpe == null || r.rpe <= 9);
     const hardFail = !r.done || r.rpe === 10;
-    const chain = ex.chain;
 
     if (success) {
       state.chainStreak[chain] = (state.chainStreak[chain] || 0) + 1;

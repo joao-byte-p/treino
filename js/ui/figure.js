@@ -91,6 +91,9 @@ function joints(f, farOff = FAR, wide = false) {
   return { hip, neck, shoulder, headC, arms, legs, dir, torsoAngle: t, wide };
 }
 
+// Exposto para a auditoria de geometria (tools/audit3.mjs).
+export function debugJoints(frame, farOff, wide) { return joints(frame, farOff || FAR, wide); }
+
 function resolve(name, j) {
   if (!name) return null;
   const m = /^(wrist|elbow|ankle|knee)(\d+)?$/.exec(name);
