@@ -5,7 +5,7 @@ import { POSES } from '../data/poses.js';
 
 export const SEG = {
   torso: 26, shoulder: 23, neck: 9.5, head: 5.8,
-  upper: 16, fore: 15, thigh: 18, shin: 18, foot: 6,
+  upper: 14.5, fore: 13.5, thigh: 18, shin: 18, foot: 6,
   chestW: 6.3, waistW: 4.7, shoulderFront: 2.9,
 };
 const FAR = [-5.2, 0]; // desvio dos membros do lado afastado; poses deitadas passam { far: [0, -5.2] }
@@ -38,7 +38,7 @@ function ik(root, target, l1, l2, bend = 1) {
 export function hasPose(id) { return !!POSES[id]; }
 export function poseOf(id) { return POSES[id] || null; }
 
-function joints(f, farOff = FAR) {
+function joints(f, farOff = FAR, wide = false) {
   const hip = f.hip;
   const t = f.torso;
   const dir = [Math.cos(rad(t)), -Math.sin(rad(t))];
@@ -48,34 +48,47 @@ function joints(f, farOff = FAR) {
   const off = (pt, far) => (far ? [pt[0] + farOff[0], pt[1] + farOff[1]] : pt);
   // ombro assenta na frente do tronco, para o braço não se fundir com o corpo
   const perp = [-dir[1], dir[0]];
-  const shoulderFront = [shoulder[0] + perp[0] * SEG.shoulderFront, shoulder[1] + perp[1] * SEG.shoulderFront];
+  const sfOff = wide ? SEG.shoulderFront * 2.6 : SEG.shoulderFront;
+  const shoulderFront = [shoulder[0] + perp[0] * sfOff, shoulder[1] + perp[1] * sfOff];
+  // vista de frente: o membro do outro lado é o reflexo do próximo em torno da anca
+  const mir = p => [2 * hip[0] - p[0], p[1]];
   const arms = (f.arms || []).map(spec => {
-    if (Array.isArray(spec)) {
-      const [u, fo, far] = spec;
-      const s = off(shoulderFront, far);
-      const e = step(s, SEG.upper, u);
-      const w = step(e, SEG.fore, fo);
-      return { pts: [s, e, w], wrist: w, far: !!far };
+    const far = !!(Array.isArray(spec) ? spec[2] : spec.far);
+    const mirror = !Array.isArray(spec) && !!spec.mirror;
+    const s = off(shoulderFront, far && !mirror);
+    let pts;
+    if (Array.isArray(spec) || spec.a) {
+      const ang = Array.isArray(spec) ? spec : spec.a;
+      const e = step(s, SEG.upper, ang[0]);
+      pts = [s, e, step(e, SEG.fore, ang[1])];
+    } else {
+      const r = ik(s, off(spec.pin, far && !mirror), SEG.upper, SEG.fore, spec.bend ?? 1);
+      pts = [s, r.mid, r.end];
     }
-    const far = !!spec.far;
-    const s = off(shoulderFront, far);
-    const r = ik(s, off(spec.pin, far), SEG.upper, SEG.fore, spec.bend ?? 1);
-    return { pts: [s, r.mid, r.end], wrist: r.end, far };
+    if (mirror) pts = pts.map(mir);
+    return { pts, wrist: pts[2], far };
   });
   const legs = (f.legs || []).map(spec => {
-    if (Array.isArray(spec)) {
-      const [th, sh, ft, far] = spec;
-      const h = off(hip, far);
-      const k = step(h, SEG.thigh, th);
-      const a = step(k, SEG.shin, sh);
-      return { pts: [h, k, a], ankle: a, toe: ft == null ? null : step(a, SEG.foot, ft), far: !!far };
+    const far = !!(Array.isArray(spec) ? spec[3] : spec.far);
+    const mirror = !Array.isArray(spec) && !!spec.mirror;
+    const h = off(hip, far && !mirror);
+    let pts; let toe = null;
+    if (Array.isArray(spec) || spec.a) {
+      const ang = Array.isArray(spec) ? spec : spec.a;
+      const k = step(h, SEG.thigh, ang[0]);
+      const a = step(k, SEG.shin, ang[1]);
+      pts = [h, k, a];
+      const ft = Array.isArray(spec) ? spec[2] : spec.foot;
+      if (ft != null) toe = step(a, SEG.foot, ft);
+    } else {
+      const r = ik(h, off(spec.pin, far && !mirror), SEG.thigh, SEG.shin, spec.bend ?? 1);
+      pts = [h, r.mid, r.end];
+      if (spec.foot != null) toe = step(r.end, SEG.foot, spec.foot);
     }
-    const far = !!spec.far;
-    const h = off(hip, far);
-    const r = ik(h, off(spec.pin, far), SEG.thigh, SEG.shin, spec.bend ?? 1);
-    return { pts: [h, r.mid, r.end], ankle: r.end, toe: spec.foot == null ? null : step(r.end, SEG.foot, spec.foot), far };
+    if (mirror) { pts = pts.map(mir); if (toe) toe = mir(toe); }
+    return { pts, ankle: pts[2], toe, far };
   });
-  return { hip, neck, shoulder, headC, arms, legs, dir, torsoAngle: t };
+  return { hip, neck, shoulder, headC, arms, legs, dir, torsoAngle: t, wide };
 }
 
 function resolve(name, j) {
@@ -114,11 +127,13 @@ function lerpFrame(a, b, u) {
     arms: (a.arms || []).map((ar, i) => {
       const br = b.arms[i];
       if (Array.isArray(ar)) return ar.map((v, k) => (k < 2 ? A(v, br[k]) : v));
+      if (ar.a) return { ...ar, a: [A(ar.a[0], br.a[0]), A(ar.a[1], br.a[1])] };
       return { ...ar, pin: [L(ar.pin[0], br.pin[0]), L(ar.pin[1], br.pin[1])] };
     }),
     legs: (a.legs || []).map((lg, i) => {
       const br = b.legs[i];
       if (Array.isArray(lg)) return lg.map((v, k) => (k < 3 && v != null && br?.[k] != null ? A(v, br[k]) : v));
+      if (lg.a) return { ...lg, a: [A(lg.a[0], br.a[0]), A(lg.a[1], br.a[1])], foot: lg.foot == null ? null : A(lg.foot, br.foot) };
       return { ...lg, pin: [L(lg.pin[0], br.pin[0]), L(lg.pin[1], br.pin[1])], foot: lg.foot == null ? null : A(lg.foot, br.foot) };
     }),
     items: a.items, marks: a.marks,
@@ -129,11 +144,13 @@ const easeInOut = u => (u < 0.5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u));
 
 // t em [0,1) percorre pose 1 → 2 → … → 1, com pausa nos extremos
 export function frameAt(frames, t) {
+  if (!frames || !frames.length) return null;
   if (frames.length === 1) return frames[0];
   const loop = [...frames, frames[0]];
   const segs = loop.length - 1;
-  const raw = t * segs;
-  const i = Math.min(segs - 1, Math.floor(raw));
+  const tt = (((t % 1) + 1) % 1); // normaliza para [0,1): o relógio pode chegar negativo
+  const raw = tt * segs;
+  const i = Math.min(segs - 1, Math.max(0, Math.floor(raw)));
   let u = raw - i;
   const hold = 0.18;
   u = u < hold ? 0 : u > 1 - hold ? 1 : (u - hold) / (1 - 2 * hold);
@@ -147,6 +164,15 @@ function propsSVG(props = []) {
     if (p.type === 'box') return `<rect class="fig-prop" x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="${p.rx ?? 1.5}"/>`;
     if (p.type === 'bar') return `<line class="fig-prop-line" x1="${p.x1}" y1="${p.y1}" x2="${p.x2}" y2="${p.y2}"/>`;
     if (p.type === 'wall') return `<line class="fig-prop-line" x1="${p.x}" y1="${p.y1 ?? 6}" x2="${p.x}" y2="${p.y2 ?? 92}"/>`;
+    if (p.type === 'rope') {
+      const mx = (p.x1 + p.x2) / 2;
+      return `<path class="fig-rope" d="M ${p.x1} ${p.y1} Q ${mx} ${p.y1 + (p.bow ?? 60)} ${p.x2} ${p.y2}"/>`;
+    }
+    if (p.type === 'water') {
+      const y = p.y;
+      return `<line class="fig-water" x1="${p.x1 ?? 2}" y1="${y}" x2="${p.x2 ?? 98}" y2="${y}"/>`
+        + `<line class="fig-water dim" x1="${p.x1 ?? 2}" y1="${y + 5}" x2="${p.x2 ?? 98}" y2="${y + 5}"/>`;
+    }
     return '';
   }).join('');
 }
@@ -164,6 +190,7 @@ function itemsSVG(items = [], j) {
   return (items || []).map(it => {
     const at = Array.isArray(it.at) ? it.at : resolve(it.at, j);
     if (it.type === 'db') return dumbbell(at, it.rot || 0, it.scale || 1);
+    if (it.type === 'ball' && at) return `<circle class="fig-ball" cx="${n(at[0])}" cy="${n(at[1])}" r="${it.r ?? 5}"/>`;
     return '';
   }).join('');
 }
@@ -218,7 +245,8 @@ function torsoPath(j) {
   const perp = [-d[1], d[0]];
   const T = [j.hip[0] + d[0] * (SEG.torso - 4.5), j.hip[1] + d[1] * (SEG.torso - 4.5)];
   const B = [j.hip[0] - d[0] * 1.6, j.hip[1] - d[1] * 1.6];
-  const o = (p, w, s) => [p[0] + perp[0] * w * s, p[1] + perp[1] * w * s];
+  const k = j.wide ? 1.5 : 1;
+  const o = (p, w, s) => [p[0] + perp[0] * w * k * s, p[1] + perp[1] * w * k * s];
   return `M ${xy(o(T, SEG.chestW, 1))} L ${xy(o(T, SEG.chestW, -1))} L ${xy(o(B, SEG.waistW, -1))} L ${xy(o(B, SEG.waistW, 1))} Z`;
 }
 
@@ -230,8 +258,8 @@ function torsoSVG(j) {
     + `<path class="fig-torso" d="${d}"/>${neck('fig-neck')}`;
 }
 
-function bodySVG(f, farOff) {
-  const j = joints(f, farOff);
+function bodySVG(f, farOff, wide) {
+  const j = joints(f, farOff, wide);
   const far = [];
   const near = [];
   j.legs.forEach(l => (l.far ? far : near).push(legSVG(l)));
@@ -246,7 +274,7 @@ export function figureSVG(id, { frame = 0, size = 120, showProps = true, arrow =
   const P = POSES[id];
   if (!P) return '';
   const f = P.frames[Math.min(frame, P.frames.length - 1)];
-  const b = bodySVG(f, P.far);
+  const b = bodySVG(f, P.far, P.wide);
   const vb = P.viewBox || '0 0 100 100';
   const [, , vw, vh] = vb.split(' ').map(Number);
   return `<svg class="fig ${className}" viewBox="${vb}" width="${size}" height="${Math.round((size * vh) / vw)}" aria-hidden="true">
@@ -264,7 +292,7 @@ export function mountFigure(host, id, { size = 200, period = 3200, animate = tru
   const vb = P.viewBox || '0 0 100 100';
   const [, , vw, vh] = vb.split(' ').map(Number);
   const f0 = P.frames[0];
-  const b0 = bodySVG(f0, P.far);
+  const b0 = bodySVG(f0, P.far, P.wide);
   host.innerHTML = `<svg class="fig fig-anim" viewBox="${vb}" width="${size}" height="${Math.round((size * vh) / vw)}" aria-hidden="true">
     ${propsSVG(P.props)}
     <g data-far>${b0.far}</g>
@@ -291,8 +319,8 @@ export function mountFigure(host, id, { size = 200, period = 3200, animate = tru
 
   function tick(now) {
     if (visible) {
-      const f = frameAt(P.frames, ((now - t0) % period) / period);
-      const b = bodySVG(f, P.far);
+      const f = frameAt(P.frames, (Math.max(0, now - t0) % period) / period);
+      const b = bodySVG(f, P.far, P.wide);
       g.far.innerHTML = b.far;
       g.torso.innerHTML = b.torso;
       g.near.innerHTML = b.near;

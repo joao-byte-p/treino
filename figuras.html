@@ -7,44 +7,84 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="css/app.css">
   <style>
-    body { padding: 24px; }
-    .lab { max-width: 1100px; margin: 0 auto; }
+    body { padding: 20px; }
+    .lab { max-width: 1400px; margin: 0 auto; }
     .lab h1 { margin-bottom: 4px; }
-    .lab > p { color: var(--text-2); margin-bottom: 24px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-    .cell { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 16px; }
-    .cell h3 { margin-bottom: 2px; }
-    .cell .sub { color: var(--text-3); font-size: 13px; margin-bottom: 10px; }
-    .anim { display: grid; place-items: center; background: #1b1f26; border-radius: 16px; padding: 8px; margin-bottom: 10px; }
-    .thumbs { display: flex; gap: 8px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
-    .thumbs span { font-size: 12px; color: var(--text-3); }
+    .lab > p { color: var(--text-2); margin-bottom: 18px; }
+    .bar { display: flex; gap: 8px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+    .bar button { background: rgba(255,255,255,0.07); padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 13px; color: var(--text-2); }
+    .bar button.on { background: var(--text); color: var(--bg); }
+    .count { color: var(--text-3); font-size: 13px; margin-left: auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+    .cell { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px; }
+    .cell h3 { font-size: 15px; margin-bottom: 2px; }
+    .cell .sub { color: var(--text-3); font-size: 12px; margin-bottom: 10px; }
+    .anim { display: grid; place-items: center; background: #1b1f26; border-radius: 14px; padding: 6px; margin-bottom: 8px; min-height: 150px; }
+    .anim .fig { width: 100%; max-width: 240px; height: auto; }
+    .figstrip-l { font-size: 11px; }
+    .missing { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
+    .missing span { font-size: 12px; background: rgba(255,180,84,0.14); color: var(--amber); padding: 5px 10px; border-radius: 999px; }
+    .err { color: var(--coral); font-size: 12px; }
   </style>
 </head>
 <body>
   <div class="lab">
     <h1>Figuras — banco de provas</h1>
-    <p>Lote 1. Cada figura é o mesmo corpo em ângulos diferentes, animada entre poses.</p>
+    <p>O mesmo corpo em ângulos diferentes, animado entre poses. Recarrega para ver alterações.</p>
+    <div class="bar" id="bar"></div>
     <div class="grid" id="grid"></div>
+    <h3 style="margin-top:28px">Ainda sem figura</h3>
+    <div class="missing" id="missing"></div>
   </div>
   <script type="module">
-    import { POSES } from './js/data/poses.js';
-    import { BY_ID } from './js/data/exercises.js';
-    import { mountFigure, stepsStrip, figureSVG } from './js/ui/figure.js';
+    // importação dinâmica com marca temporal: o laboratório nunca serve módulos em cache
+    const v = '?v=' + Date.now();
+    const { POSES } = await import('./js/data/poses.js' + v);
+    const { EXERCISES, BY_ID, PATTERN_LABEL } = await import('./js/data/exercises.js' + v);
+    const { mountFigure, stepsStrip } = await import('./js/ui/figure.js' + v);
 
     const grid = document.getElementById('grid');
-    for (const id of Object.keys(POSES)) {
-      const ex = BY_ID[id];
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.innerHTML = `
-        <h3>${ex ? ex.name : id}</h3>
-        <div class="sub">${ex ? ex.nameEn : ''}</div>
-        <div class="anim" data-anim></div>
-        ${stepsStrip(id, { size: 118 })}
-        <div class="thumbs"><span>Miniatura</span>${figureSVG(id, { size: 44, showProps: false })}${figureSVG(id, { size: 64, showProps: false })}</div>`;
-      grid.appendChild(cell);
-      mountFigure(cell.querySelector('[data-anim]'), id, { size: 230, period: 3200 });
+    const bar = document.getElementById('bar');
+    const disposers = [];
+    const order = ['todos', 'push', 'pull', 'squat', 'knee', 'hinge', 'glute', 'core', 'hiit', 'cardio', 'mobility', 'warmup'];
+    let filter = new URLSearchParams(location.search).get('p') || 'todos';
+
+    function patternOf(id) { return BY_ID[id]?.pattern || '?'; }
+
+    function render() {
+      disposers.forEach(d => d());
+      disposers.length = 0;
+      grid.innerHTML = '';
+      const ids = Object.keys(POSES).filter(id => filter === 'todos' || patternOf(id) === filter);
+      for (const id of ids) {
+        const ex = BY_ID[id];
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        let strip = '';
+        try { strip = stepsStrip(id, { size: 110 }); } catch (e) { strip = `<p class="err">${e.message}</p>`; }
+        cell.innerHTML = `<h3>${ex ? ex.name : id}</h3><div class="sub">${id} · ${PATTERN_LABEL[patternOf(id)] || ''}</div>
+          <div class="anim" data-anim></div>${strip}`;
+        grid.appendChild(cell);
+        try { disposers.push(mountFigure(cell.querySelector('[data-anim]'), id, { size: 230, period: 3200 })); }
+        catch (e) { cell.querySelector('[data-anim]').innerHTML = `<p class="err">${e.message}</p>`; }
+      }
+      document.getElementById('bar').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.p === filter));
+      const done = Object.keys(POSES).length;
+      bar.querySelector('.count').textContent = `${done} de ${EXERCISES.length} exercícios com figura`;
     }
+
+    bar.innerHTML = order.map(p => `<button data-p="${p}">${p === 'todos' ? 'Todos' : (PATTERN_LABEL[p] || p)}</button>`).join('') + '<span class="count"></span>';
+    bar.addEventListener('click', e => {
+      const b = e.target.closest('button[data-p]');
+      if (!b) return;
+      filter = b.dataset.p;
+      history.replaceState(null, '', '?p=' + filter);
+      render();
+    });
+
+    const missing = EXERCISES.filter(e => !POSES[e.id]);
+    document.getElementById('missing').innerHTML = missing.map(e => `<span>${e.name}</span>`).join('') || '<span>nenhum</span>';
+    render();
   </script>
 </body>
 </html>

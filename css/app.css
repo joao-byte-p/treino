@@ -342,6 +342,10 @@ body::before {
 .fig-prop { fill: rgba(255, 255, 255, 0.09); stroke: var(--fig); stroke-width: 1; stroke-opacity: 0.28; }
 .fig-prop-line { stroke: var(--fig); stroke-width: 2.4; opacity: 0.28; stroke-linecap: round; }
 .fig-db { fill: var(--amber); }
+.fig-rope { fill: none; stroke: var(--amber); stroke-width: 1.6; opacity: 0.75; stroke-linecap: round; }
+.fig-water { stroke: var(--sky); stroke-width: 1.4; opacity: 0.4; stroke-linecap: round; }
+.fig-water.dim { opacity: 0.2; }
+.fig-ball { fill: none; stroke: var(--amber); stroke-width: 2.2; }
 .fig-arrow { fill: none; stroke: var(--accent, var(--mint)); stroke-width: 2; stroke-linecap: round; opacity: 0.9; }
 .fig-arrow-head { fill: var(--accent, var(--mint)); stroke: none; }
 
