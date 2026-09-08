@@ -1,5 +1,5 @@
 // Service worker: cache-first para a app, network-first para fontes externas. Sobe a versão a cada deploy.
-const VERSION = 'treino-v0.2.0';
+const VERSION = 'treino-v0.2.1';
 const CORE = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
   './js/app.js', './js/config.js', './js/store.js', './js/timer.js',

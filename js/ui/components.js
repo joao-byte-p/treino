@@ -25,18 +25,19 @@ export function prescription(item) {
   return '';
 }
 
-export function exerciseRow(item, { showLoad = true, swappable = false } = {}) {
+export function exerciseRow(item, { showLoad = true, swappable = false, linked = false } = {}) {
   const ex = item.ex;
   const load = showLoad && item.load ? (item.load.kg ? `<span class="pill pill-load">${item.load.kg} kg</span>` : '') : '';
   const alt = swappable && item.homeAlt ? `<button class="swap" data-swap="${ex.id}" data-alt="${item.homeAlt.id}" aria-label="Trocar por ${esc(item.homeAlt.name)}">⇄ casa</button>` : '';
+  const chev = linked ? '<span class="exrow-chev" aria-hidden="true">›</span>' : '';
   return `
-  <li class="exrow" data-ex="${ex.id}">
+  <li class="exrow" data-ex="${ex.id}"${linked ? ` data-nav="exercise"` : ''}>
     <div class="exrow-thumb" aria-hidden="true">${illustration(ex, 44)}</div>
     <div class="exrow-body">
       <div class="exrow-name">${esc(ex.name)}</div>
       <div class="exrow-meta">${esc(prescription(item))}${item.rest && item.kind === 'strength' ? ` · ${item.rest}s pausa` : ''}</div>
     </div>
-    <div class="exrow-right">${load}${alt}</div>
+    <div class="exrow-right">${load}${alt}${chev}</div>
   </li>`;
 }
 
