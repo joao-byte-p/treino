@@ -2,7 +2,7 @@ import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, r
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { esc, ring, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
-import { hasPose, stepsStrip } from './figure.js';
+import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { CONFIG } from '../config.js';
 
 // ─────────────────────────── HOJE ───────────────────────────
@@ -50,7 +50,7 @@ export function renderHome(nav) {
         <div class="card-sub">${esc(s.subtitle)}</div>
         <div class="stats">
           <div class="stat"><span class="stat-n">${s.estMinutes}</span><span class="stat-l">min</span></div>
-          <div class="stat"><span class="stat-n">${mainBlock ? mainBlock.items.length : 0}</span><span class="stat-l">exercícios</span></div>
+          <div class="stat"><span class="stat-n">${mainBlock ? mainBlock.items.length : 0}</span><span class="stat-l">${mainBlock && mainBlock.items.length === 1 ? 'exercício' : 'exercícios'}</span></div>
           <div class="stat"><span class="stat-n">S${wk.week}</span><span class="stat-l">${esc(wk.focus.label)}</span></div>
         </div>
         <ul class="preview">${preview}</ul>
@@ -100,7 +100,7 @@ export function renderPlan(nav, offsetWeeks = 0) {
     const l = findLog(s.date);
     const status = s.type === 'rest' ? '' : l?.completed ? 'done' : (s.date < todayISO ? 'missed' : (s.date === todayISO ? 'today' : ''));
     const mainBlock = s.blocks.find(b => ['strength', 'hiit', 'circuit', 'cardio', 'mobility'].includes(b.kind));
-    const n = mainBlock && s.type !== 'rest' && s.type !== 'cardio' ? `${mainBlock.items.length} exercícios · ` : '';
+    const n = mainBlock && s.type !== 'rest' && s.type !== 'cardio' ? `${mainBlock.items.length} ${mainBlock.items.length === 1 ? 'exercício' : 'exercícios'} · ` : '';
     // o círculo diz apenas estado: um número aqui lia-se como aviso
     const mark = status === 'done' ? '<span class="dayrow-status done">✓</span>'
       : status === 'missed' ? '<span class="dayrow-status missed">—</span>'
@@ -204,6 +204,20 @@ export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = fals
     </section>`).join('') : '<p class="foot muted">Nada encontrado. Limpa a procura ou muda o filtro.</p>'}`;
 }
 
+// Legenda da figura. Nas isometrias não há movimento para parar, por isso em vez do
+// botão explica-se que a posição é fixa. O rótulo do botão vem sempre do estado, para
+// não ficar a dizer "Parar" quando o movimento já está parado.
+function figCaption(ex, state) {
+  if (frameCount(ex.id) < 2) {
+    return `<span class="hero-still">Posição fixa${ex.time ? `, mantida ${ex.time} segundos` : ''}. A figura não se move porque o exercício também não.</span>`;
+  }
+  if (prefersStill()) {
+    return '<span class="hero-still">Figura parada: o sistema tem o movimento reduzido ligado.</span>';
+  }
+  const parada = state.profile.animate === false;
+  return `<button class="link hero-toggle" data-anim-toggle aria-pressed="${parada}">${parada ? 'Retomar o movimento' : 'Parar o movimento'}</button>`;
+}
+
 export function renderExercise(nav, id) {
   const state = getState();
   const ex = BY_ID[id];
@@ -220,7 +234,7 @@ export function renderExercise(nav, id) {
   <p class="lead">${esc(ex.nameEn)} · ${esc(ex.muscles.join(' · '))}</p>
   ${ex.knee === 'care' ? `<div class="notice notice-warn"><strong>Atenção ao joelho.</strong> ${esc(ex.mistakes.find(m => /joelho/i.test(m)) || 'Joelho alinhado com o pé em todas as repetições. Se doer, para.')}</div>` : ''}
   ${hasPose(ex.id) ? `<figure class="hero"><div class="hero-fig" data-fig="${ex.id}"></div>
-      <figcaption class="hero-cap"><button class="link hero-toggle" data-anim-toggle>Parar o movimento</button></figcaption></figure>`
+      <figcaption class="hero-cap">${figCaption(ex, state)}</figcaption></figure>`
     : `<figure class="hero"><div class="hero-ph">${illustration(ex, 150)}<span>Ilustração a caminho. Por agora, o vídeo e os passos abaixo.</span></div></figure>`}
   <div class="chips">${rx ? chip(rx) : ''}${ex.rest ? chip(`${ex.rest}s pausa`) : ''}${ex.tempo ? chip(ex.tempo) : ''}${load ? chip(`${load} kg`, 'chip-load') : ''}${ex.optionalLoad ? chip('Peso opcional') : ''}</div>
   ${hasPose(ex.id) ? `<section class="block"><h3 class="block-title">Passo a passo</h3>${stepsStrip(ex.id, { size: 150 })}</section>` : ''}
@@ -234,7 +248,7 @@ export function renderExercise(nav, id) {
       <button class="btn btn-ghost btn-sm" data-level="${ex.chain}" data-dir="1" ${cur >= levels.length ? 'disabled' : ''}>Subir nível</button>
     </div></section>` : ''}
   <a class="btn btn-yt" href="${ytUrl(ex)}" target="_blank" rel="noopener">▶ Ver vídeo no YouTube</a>
-  <p class="foot muted">Se a ilustração não bastar, o vídeo mostra o movimento com uma pessoa.</p>`;
+  <p class="foot muted">${ex.ytTitle ? esc(ex.ytTitle) : 'Se a ilustração não bastar, o vídeo mostra o movimento com uma pessoa.'}</p>`;
 }
 
 // ─────────────────────────── PROGRESSO ───────────────────────────
@@ -281,7 +295,7 @@ export function renderProgress(nav) {
     <div class="card stat-card"><span class="stat-n">${logs.length}</span><span class="stat-l">sessões feitas</span></div>
     <div class="card stat-card"><span class="stat-n">${Math.round(totalMin / 60 * 10) / 10}</span><span class="stat-l">horas de treino</span></div>
     <div class="card stat-card"><span class="stat-n">${streak}</span><span class="stat-l">semanas seguidas com 4 ou mais treinos</span></div>
-    <div class="card stat-card"><span class="stat-n">${levels.length}</span><span class="stat-l">exercícios em que subiste de nível</span></div>
+    <div class="card stat-card"><span class="stat-n">${levels.length}</span><span class="stat-l">${levels.length === 1 ? 'exercício em que subiste de nível' : 'exercícios em que subiste de nível'}</span></div>
   </section>
   <section class="card">
     <h3>Sessões por semana</h3>

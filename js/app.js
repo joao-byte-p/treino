@@ -73,10 +73,9 @@ function render(scrollTop = true) {
     view.querySelector('[data-lib-mine]')?.addEventListener('change', e => { libMine = e.target.checked; render(false); });
   }
   if (route.name === 'exercise') {
-    view.querySelector('[data-anim-toggle]')?.addEventListener('click', e => {
+    view.querySelector('[data-anim-toggle]')?.addEventListener('click', () => {
       update(s => { s.profile.animate = s.profile.animate === false; });
-      e.target.textContent = getState().profile.animate === false ? 'Voltar a animar' : 'Parar o movimento';
-      render(false);
+      render(false); // o rótulo do botão é derivado do estado em figCaption
     });
   }
   if (route.name === 'exercise') {

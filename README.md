@@ -42,7 +42,13 @@ node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node t
 | `audit5.mjs` | temporizador com relógio controlado, incluindo ecrã bloqueado |
 | `check.mjs` | poses renderizam e os frames têm formas de membro compatíveis |
 | `fitframes.mjs` | mede a caixa real de cada figura e propõe o viewBox |
+| `figcheck.mjs` | inventário das figuras: poses em falta, isometrias, animações paradas |
+| `ytcheck.mjs` | confirma que cada vídeo referido ainda existe (pede ao YouTube) |
 | `diag.mjs` | `node tools/diag.mjs <id>` imprime as articulações de uma pose |
+
+Os vídeos vêm de `tools/ytfind.mjs` (recolhe candidatos reais na pesquisa do YouTube) e
+`tools/ytpick.mjs --write` (escolhe um por exercício, confirma que existe e escreve o `ytId`).
+Não se escrevem IDs à mão: um ID inventado dá erro só quando o João carrega no botão.
 
 Regras que evitam os erros mais comuns:
 - Ângulos interpolam pelo **arco mais curto**, senão os membros dão a volta por cima do ombro.
