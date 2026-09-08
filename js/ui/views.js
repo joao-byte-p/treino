@@ -115,7 +115,7 @@ export function renderPlan(nav, offsetWeeks = 0) {
   const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
   return `
   <header class="top">
-    <div><div class="eyebrow">Plano</div><h1>Semana ${wk.week} <small class="muted">de 4</small></h1></div>
+    <div><div class="eyebrow">Plano · ciclo ${wk.cycle}</div><h1 class="tight">Semana ${wk.week} <small class="muted">de 4</small></h1></div>
     <div class="weeknav">
       <button class="iconbtn" data-plan-offset="${offsetWeeks - 1}" aria-label="Semana anterior">‹</button>
       <span class="weeknav-label">${monday.getDate()}–${sunday.getDate()} ${esc(sunday.toLocaleDateString('pt-PT', { month: 'short' }))}</span>
@@ -123,7 +123,7 @@ export function renderPlan(nav, offsetWeeks = 0) {
     </div>
   </header>
   <section class="card focus">
-    <div class="row-between"><h3>${esc(wk.focus.label)}</h3><span class="chip">Ciclo ${wk.cycle}</span></div>
+    <div class="row-between"><h3>${esc(wk.focus.label)}</h3></div>
     <p class="muted">${esc(wk.focus.desc)}</p>
   </section>
   <ol class="days">${rows}</ol>

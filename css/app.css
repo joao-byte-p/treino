@@ -96,8 +96,9 @@ body::before {
 .stat { display: flex; flex-direction: column; }
 .stat-n { font-size: 34px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
 .stat-l { font-size: 12px; color: var(--text-3); font-weight: 600; margin-top: 4px; }
-.stat-card { padding: 16px; }
+.stat-card { padding: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .stat-card .stat-n { font-size: 32px; }
+.stat-card .stat-l { margin-top: 0; line-height: 1.25; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
 .grid2 .card { margin: 0; }
 
@@ -141,8 +142,9 @@ body::before {
 .weekstrip li.missed .ws-i { background: transparent; border: 1.5px dashed var(--text-3); color: var(--text-3); }
 
 /* ---- plan ---- */
-.weeknav { display: flex; align-items: center; gap: 6px; }
-.weeknav-label { font-size: 13px; color: var(--text-2); font-weight: 600; min-width: 72px; text-align: center; }
+.weeknav { display: flex; align-items: center; gap: 2px; flex: none; }
+.top h1.tight { font-size: 26px; white-space: nowrap; }
+.weeknav-label { font-size: 13px; color: var(--text-2); font-weight: 600; min-width: 56px; text-align: center; }
 .focus h3 { font-size: 20px; }
 .days { display: flex; flex-direction: column; gap: 10px; }
 .dayrow { display: flex; align-items: center; gap: 14px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; cursor: pointer; }
