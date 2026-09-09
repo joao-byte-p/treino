@@ -40,7 +40,7 @@ export function exerciseRow(item, { showLoad = true, swappable = false, linked =
     <div class="exrow-thumb" aria-hidden="true">${illustration(ex, 44)}</div>
     <div class="exrow-body">
       <div class="exrow-name">${esc(ex.name)}</div>
-      <div class="exrow-meta">${esc(prescription(item))}${item.repBonus ? ` <span class="meta-bonus">+${item.repBonus}</span>` : ''}${item.rest && item.kind === 'strength' ? ` · ${item.rest}s pausa` : ''}</div>
+      <div class="exrow-meta">${esc(prescription(item))}${item.repBonus || item.timeBonus ? ` <span class="meta-bonus">+${item.repBonus || item.timeBonus}${item.timeBonus ? 's' : ''}</span>` : ''}${item.rest && item.kind === 'strength' ? ` · ${item.rest}s pausa` : ''}</div>
     </div>
     <div class="exrow-right">${load}${alt}${chev}</div>
   </li>`;

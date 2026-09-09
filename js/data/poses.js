@@ -1666,4 +1666,148 @@ export const POSES = {
       },
     ],
   },
+
+  // ── Níveis novos no topo das cadeias ─────────────────────────
+
+  // Curl concentrado: sentado, cotovelo apoiado na coxa, só o antebraço se move.
+  'db-curl-concentration': {
+    viewBox: '22 24 62 62',
+    accent: 'arms',
+    props: [{ type: 'floor', y: 82, x1: 24, x2: 82 }, { type: 'box', x: 30, y: 62, w: 22, h: 20 }],
+    frames: [
+      {
+        label: 'Cotovelo na face interna da coxa',
+        hip: [44, 62], torso: 45, head: -10,
+        arms: [{ a: [-100, -95], far: true }, { a: [-90, -85] }],
+        legs: [[4, -86, 0, true], [0, -90, 0]],
+        items: [{ type: 'db', at: 'wrist1' }],
+      },
+      {
+        label: 'Sobe sem mexer o ombro',
+        hip: [44, 62], torso: 45, head: -10,
+        arms: [{ a: [-100, -95], far: true }, { a: [-90, 80] }],
+        legs: [[4, -86, 0, true], [0, -90, 0]],
+        items: [{ type: 'db', at: 'wrist1' }],
+      },
+    ],
+  },
+
+  // Dips com pernas à frente: o mesmo dip, com as pernas a fazer de contrapeso.
+  'bar-dips-lsit': {
+    viewBox: '24 -4 78 104',
+    props: [{ type: 'bar', x1: 40, y1: 48, x2: 66, y2: 48 }, { type: 'bar', x1: 36, y1: 52, x2: 62, y2: 52 }],
+    frames: [
+      {
+        label: 'Pernas esticadas à frente, à altura da anca',
+        hip: [49.1, 43], torso: 92, head: -6,
+        arms: [{ pin: [52, 48], bend: 1, far: true }, { pin: [52, 48], bend: 1 }],
+        legs: [[10, 6, 34, true], [6, 2, 30]],
+      },
+      {
+        label: 'Ombro ao nível do cotovelo, pernas na linha',
+        hip: [49.1, 57], torso: 92, head: -6,
+        arms: [{ pin: [52, 48], bend: 1, far: true }, { pin: [52, 48], bend: 1 }],
+        legs: [[10, 6, 34, true], [6, 2, 30]],
+      },
+    ],
+  },
+
+  // Wall sit numa perna: a perna livre estica à frente e duplica a carga na de apoio.
+  'wall-sit-single': {
+    viewBox: '28 14 68 82',
+    props: [{ type: 'floor', y: 90, x1: 30, x2: 94 }, { type: 'wall', x: 40, y1: 20, y2: 90 }],
+    frames: [
+      {
+        label: 'Costas na parede, uma perna estica à frente',
+        hip: [46, 64], torso: 90, head: 0,
+        arms: [{ a: [-88, -86], far: true }, { a: [-86, -88] }],
+        legs: [{ a: [-8, -4], foot: 34, far: true }, { pin: [64, 88], foot: 0, bend: -1 }],
+        marks: [{ at: 'knee1' }],
+      },
+    ],
+  },
+
+  // Prancha lateral com subida da anca: a anca desce e sobe, o resto fica.
+  'side-plank-dips': {
+    viewBox: '-3 40 101 52',
+    accent: 'core',
+    props: [{ type: 'floor', y: 88, x1: -1, x2: 96 }],
+    frames: [
+      {
+        label: 'Anca alta, corpo em linha',
+        hip: [45.1, 73.3], torso: 16.6, head: 0,
+        arms: [{ a: [78, 84], far: true }, { a: [-90, 0] }],
+        legs: [{ pin: [10.6, 82], foot: -150, bend: 1, far: true }, { pin: [10.6, 85], foot: -146, bend: 1 }],
+      },
+      {
+        label: 'Desce a anca a dois dedos do chão',
+        hip: [45.1, 80], torso: 22, head: 0,
+        arms: [{ a: [78, 84], far: true }, { a: [-90, 0] }],
+        legs: [{ pin: [10.6, 82], foot: -150, bend: 1, far: true }, { pin: [10.6, 85], foot: -146, bend: 1 }],
+      },
+    ],
+  },
+
+  // Flexão em pino: a mesma vertical do apoio, agora a dobrar os braços.
+  'handstand-pushup-wall': {
+    viewBox: '18 -2 68 100',
+    props: [{ type: 'floor', y: 94, x1: 20, x2: 84 }, { type: 'wall', x: 62, y1: 0, y2: 94 }],
+    frames: [
+      {
+        label: 'Braços esticados, corpo em linha',
+        hip: [48, 42], torso: -75, head: 10,
+        arms: [{ pin: [44, 92], bend: -1, far: true }, { pin: [44, 92], bend: -1 }],
+        legs: [{ a: [70, 78], foot: 24, far: true }, { a: [76, 84], foot: 28 }],
+      },
+      {
+        label: 'Cabeça a dois dedos do chão',
+        hip: [48, 52], torso: -75, head: 10,
+        arms: [{ pin: [44, 92], bend: -1, far: true }, { pin: [44, 92], bend: -1 }],
+        legs: [{ a: [70, 78], foot: 24, far: true }, { a: [76, 84], foot: 28 }],
+      },
+    ],
+  },
+
+  // Hip thrust unilateral com o pé de apoio num degrau: mais amplitude para o glúteo.
+  'hip-thrust-single-elevated': {
+    viewBox: '10 34 90 60',
+    accent: 'legs',
+    props: [{ type: 'floor', y: 90, x1: 12, x2: 98 }, { type: 'box', x: 68, y: 68, w: 26, h: 22 }, { type: 'box', x: 14, y: 78, w: 22, h: 12 }],
+    frames: [
+      {
+        label: 'Pé de apoio no degrau, joelho a 90°',
+        hip: [42, 80], torso: 20, head: -6,
+        arms: [{ a: [-174, -178], far: true }, { a: [-172, -176] }],
+        legs: [{ a: [112, 32], foot: 16, far: true }, { pin: [26, 76], foot: 0, bend: 1 }],
+      },
+      {
+        label: 'Anca sobe nivelada, sem rodar',
+        hip: [42, 66], torso: 6, head: -6,
+        arms: [{ a: [-174, -178], far: true }, { a: [-172, -176] }],
+        legs: [{ a: [112, 32], foot: 16, far: true }, { pin: [26, 76], foot: 0, bend: 1 }],
+      },
+    ],
+  },
+
+  // Pistol completo: o assistido sem parede, com os braços à frente a equilibrar.
+  'pistol-full': {
+    viewBox: '10 10 90 86',
+    accent: 'legs',
+    props: [{ type: 'floor', y: 90, x1: 12, x2: 98 }],
+    frames: [
+      {
+        label: 'Perna livre estendida à frente',
+        hip: [50, 54], torso: 86, head: 0,
+        arms: [{ a: [-16, -8], far: true }, { a: [-12, -4] }],
+        legs: [{ a: [-16, -8], foot: 60, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
+      },
+      {
+        label: 'Desce em 3 segundos, joelho alinhado',
+        hip: [50, 65], torso: 72, head: -8,
+        arms: [{ a: [-4, 4], far: true }, { a: [0, 8] }],
+        legs: [{ a: [-4, 2], foot: 60, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
+        marks: [{ at: 'knee1' }],
+      },
+    ],
+  },
 };

@@ -4,7 +4,13 @@
 // a quem tem halteres de 12 é dar um conselho que não se pode seguir.
 import { chainLevels } from '../data/exercises.js';
 
-export const BONUS_MAX = 6; // reps extra antes de a única saída ser comprar peso
+export const BONUS_MAX = 6;      // reps extra antes de a única saída ser comprar peso
+export const TEMPO_MAX = 20;     // segundos extra numa isometria no topo da cadeia
+
+// Subir de nível fica mais exigente à medida que se sobe: duas sessões boas chegam
+// para sair do nível 1, mas o quarto nível de uma cadeia exige cinco. Com o critério
+// fixo de duas, uma cadeia inteira esgotava-se em oito semanas.
+export function sessoesParaSubir(nivel) { return nivel + 1; }
 
 export const RPE = [
   { value: 6, label: 'Fácil', hint: 'Sobravam 4+ reps' },
@@ -40,15 +46,33 @@ export function applyProgression(state, session, results) {
       state.chainStreak[chain] = 0;
     }
 
-    if ((state.chainStreak[chain] || 0) >= 2 && session.week !== 4) {
+    const current = state.chainLevels[chain] || 1;
+    if ((state.chainStreak[chain] || 0) >= sessoesParaSubir(current) && session.week !== 4) {
       const levels = chainLevels(chain);
-      const current = state.chainLevels[chain] || 1;
       const next = levels.find(l => l.level === current + 1);
       if (next) {
         state.chainLevels[chain] = current + 1;
         state.chainStreak[chain] = 0;
         events.push({ type: 'level', chain, from: ex.name, to: next.name });
-      } else if (ex.load) {
+      } else if (!ex.load) {
+        // topo de uma cadeia sem carga: a alavanca que resta é o volume ou o tempo
+        if (!state.repBonus) state.repBonus = {};
+        if (!state.timeBonus) state.timeBonus = {};
+        state.chainStreak[chain] = 0;
+        if (ex.time) {
+          const b = state.timeBonus[ex.id] || 0;
+          if (b < TEMPO_MAX) {
+            state.timeBonus[ex.id] = b + 5;
+            events.push({ type: 'tempo', chain, ex: ex.name, bonus: b + 5 });
+          } else events.push({ type: 'limite', chain, ex: ex.name });
+        } else if (ex.reps) {
+          const b = state.repBonus[ex.id] || 0;
+          if (b < BONUS_MAX) {
+            state.repBonus[ex.id] = b + 2;
+            events.push({ type: 'reps', chain, ex: ex.name, bonus: b + 2 });
+          } else events.push({ type: 'limite', chain, ex: ex.name });
+        }
+      } else {
         const teto = state.profile?.dumbbellMaxKg || 12;
         const atual = state.loads[ex.id] || 0;
         if (!state.repBonus) state.repBonus = {};
