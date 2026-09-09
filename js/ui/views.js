@@ -425,7 +425,8 @@ export function renderSettings(nav, onboarding = false) {
         <button type="button" class="link" data-sync-out>Terminar sessão</button>
       ` : `
         <p class="muted small">Uma cópia no servidor europeu do Supabase, para o histórico sobreviver a este telefone. Entras com um código enviado por email, sem password para guardar.</p>
-        <label class="field"><span>O teu email</span><input type="email" inputmode="email" autocomplete="email" placeholder="joao@onya.pt" value="${esc(p.syncEmail || '')}" data-sync-email></label>
+        <div class="notice">O código é enviado pelo teu próprio projeto Supabase, e o serviço de email dele <strong>só entrega a endereços da equipa do projeto</strong>, no máximo 2 por hora. Usa o email da tua conta Supabase.</div>
+        <label class="field"><span>Email da conta Supabase</span><input type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.pt" value="${esc(p.syncEmail || '')}" data-sync-email></label>
         <div class="actions-row">
           <button type="button" class="btn btn-ghost" data-sync-code>Enviar código</button>
         </div>
