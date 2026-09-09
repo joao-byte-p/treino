@@ -72,6 +72,7 @@ export function renderHome(nav) {
     </div>
   </header>
   ${goalNotice}${kneeNotice}
+  <div class="wide2">
   ${main}
   <section class="card card-week">
     <div class="row-between">
@@ -87,7 +88,8 @@ export function renderHome(nav) {
         return `<li class="${cls}" data-nav="day" data-date="${x.date}" role="button" tabindex="0" aria-label="${esc(x.weekday)}: ${esc(x.title)}"><span class="ws-d">${esc(x.weekdayShort)}</span><span class="ws-i" aria-hidden="true">${esc(DAY_META[x.type].icon)}</span></li>`;
       }).join('')}
     </ol>
-  </section>`;
+  </section>
+  </div>`;
 }
 
 // ─────────────────────────── PLANO ───────────────────────────

@@ -291,10 +291,21 @@ function armSVG(a) {
     + `<circle class="fig-hand${c}" cx="${n(a.wrist[0])}" cy="${n(a.wrist[1])}" r="2.6"/>`;
 }
 
+// Calcanhar: um traço curto e mais grosso sobre o primeiro terço do pé, a partir do
+// tornozelo. Dá massa ao tornozelo e é isso que faz o pé ler-se como pé — inclusive
+// quando está em linha com a canela (ponta esticada), onde antes desaparecia.
+function heelEnd(l) {
+  const dx = l.toe[0] - l.ankle[0];
+  const dy = l.toe[1] - l.ankle[1];
+  return [l.ankle[0] + dx * 0.42, l.ankle[1] + dy * 0.42];
+}
+
 function legSVG(l) {
   const c = l.far ? ' far' : '';
+  const h = l.toe ? heelEnd(l) : null;
   const foot = l.toe ? `<line class="fig-halo-foot${c}" x1="${n(l.ankle[0])}" y1="${n(l.ankle[1])}" x2="${n(l.toe[0])}" y2="${n(l.toe[1])}"/>` : '';
-  const foot2 = l.toe ? `<line class="fig-foot${c}" x1="${n(l.ankle[0])}" y1="${n(l.ankle[1])}" x2="${n(l.toe[0])}" y2="${n(l.toe[1])}"/>` : '';
+  const foot2 = l.toe ? `<line class="fig-foot${c}" x1="${n(l.ankle[0])}" y1="${n(l.ankle[1])}" x2="${n(l.toe[0])}" y2="${n(l.toe[1])}"/>`
+    + `<line class="fig-heel${c}" x1="${n(l.ankle[0])}" y1="${n(l.ankle[1])}" x2="${n(h[0])}" y2="${n(h[1])}"/>` : '';
   return `<polyline class="fig-halo${c}" points="${pts(l.pts)}"/>${foot}`
     + `<polyline class="fig-limb${c}" points="${pts(l.pts)}"/>${foot2}`;
 }

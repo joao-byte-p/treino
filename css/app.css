@@ -363,10 +363,11 @@ body::before {
 
 /* ---- figuras dos exercícios ---- */
 .fig { display: block; overflow: visible; --fig: #eef1f5; --fig-bg: #1b1f26; }
-.fig-limb, .fig-halo, .fig-foot, .fig-halo-foot, .fig-neck, .fig-halo-neck { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.fig-limb, .fig-halo, .fig-foot, .fig-heel, .fig-halo-foot, .fig-neck, .fig-halo-neck { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .fig-limb { stroke: var(--fig); stroke-width: 4.4; }
 .fig-halo { stroke: var(--fig-bg); stroke-width: 8.4; }
 .fig-foot { stroke: var(--fig); stroke-width: 5.2; }
+.fig-heel { stroke: var(--fig); stroke-width: 7.8; fill: none; stroke-linecap: round; }
 .fig-halo-foot { stroke: var(--fig-bg); stroke-width: 9.2; }
 .fig-neck { stroke: var(--fig); stroke-width: 4.6; }
 .fig-halo-neck { stroke: var(--fig-bg); stroke-width: 8.6; }
@@ -376,7 +377,7 @@ body::before {
 .fig-torso-halo { fill: var(--fig-bg); stroke: var(--fig-bg); stroke-width: 8.6; stroke-linejoin: round; }
 .fig-head { fill: var(--fig); }
 .fig-head-halo { fill: var(--fig-bg); }
-.fig-limb.far, .fig-foot.far, .fig-hand.far { opacity: 0.45; }
+.fig-limb.far, .fig-foot.far, .fig-heel.far, .fig-hand.far { opacity: 0.45; }
 .fig-mark { fill: none; stroke: var(--accent, var(--mint)); stroke-width: 1.8; opacity: 0.9; }
 .fig-mark.warn { stroke: var(--coral); }
 .fig-floor { stroke: var(--fig); stroke-width: 1.2; opacity: 0.2; stroke-linecap: round; }
@@ -405,3 +406,24 @@ body::before {
 .srun-illu .srun-info { position: absolute; right: -8px; top: -8px; margin: 0; }
 .srun-illu .fig { max-width: 100%; }
 
+
+/* ---- iPad: a partir daqui há largura a mais para uma coluna só ----
+   A sessão guiada continua estreita e ao centro de propósito: ler um número
+   grande e uma figura não melhora por estarem a 900px de distância. */
+@media (min-width: 840px) {
+  .view { max-width: 980px; padding-left: 26px; padding-right: 26px; }
+  .wide2 { display: grid; grid-template-columns: 1.12fr 0.88fr; gap: 16px; align-items: start; }
+  .wide2 > .card { margin-bottom: 0; }
+  .days { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .exlist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grid2 { grid-template-columns: repeat(4, 1fr); }
+  .figstrip { max-width: 620px; }
+  .hero-fig { padding: 18px; }
+  h1 { font-size: 34px; }
+  .card-title { font-size: 34px; }
+  #app.in-session .view { max-width: 480px; margin: 0 auto; }
+}
+@media (min-width: 1180px) {
+  .view { max-width: 1120px; }
+  .exlist { grid-template-columns: repeat(3, 1fr); }
+}

@@ -38,9 +38,9 @@ for (const [id, P] of Object.entries(POSES)) {
 console.log(`pés medidos: ${medidos} · dobrados: ${fora.length} · exceções aceites: ${Object.keys(ACEITES).length}`);
 for (const f of fora.sort((a, b) => a.j - b.j)) console.log(`  DOBRADO ${f.id.padEnd(24)} f${f.fi} perna${f.li}: articulação ${String(f.j).padStart(3)}°  (canela ${f.canela}°, pé ${f.pe}°)`);
 // Colineares não são defeito: é a ponta esticada ou o pé assente a continuar a canela
-// (ajoelhado, deitado, a nadar). Só custam legibilidade, porque o pé some na perna.
+// (ajoelhado, deitado, a nadar). Desde que o pé leva calcanhar, lê-se mesmo em linha.
 if (colineares.length) console.log(`
-pé colinear com a canela, ${colineares.length} (ponta esticada — legível a custo):
+pé em linha com a canela, ${colineares.length} (ponta esticada; o calcanhar dá-lhes forma):
   ` + colineares.join(', '));
 if (fora.length) process.exitCode = 1;
 
