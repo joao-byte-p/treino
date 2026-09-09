@@ -1,8 +1,8 @@
 // Service worker: cache-first para a app, network-first para fontes externas. Sobe a versão a cada deploy.
-const VERSION = 'treino-v0.8.0';
+const VERSION = 'treino-v0.9.0';
 const CORE = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
-  './js/app.js', './js/config.js', './js/store.js', './js/timer.js', './js/calendar.js',
+  './js/app.js', './js/config.js', './js/store.js', './js/timer.js', './js/calendar.js', './js/sync.js',
   './js/data/exercises.js', './js/engine/planner.js', './js/engine/progression.js',
   './js/ui/components.js', './js/ui/views.js', './js/ui/session.js', './js/ui/figure.js', './js/data/poses.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',

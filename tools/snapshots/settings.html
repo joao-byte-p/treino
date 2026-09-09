@@ -121,14 +121,44 @@
 </label>
 </section>
 <section class="card">
-<h3>Dados</h3>
-<p class="muted small">Tudo fica neste aparelho. Exporta regularmente até a sincronização chegar na fase 3.</p>
+<h3>Cópia de segurança</h3>
+<div class="notice notice-warn">3 treinos registados e nunca copiados para fora deste aparelho.</div>
+<p class="muted small">O histórico vive no armazenamento do Safari deste aparelho. Se o limpares ou perderes o telefone, vai com ele.</p>
 <div class="actions-row">
 <button type="button" class="btn btn-ghost" data-export>Exportar cópia</button>
 <label class="btn btn-ghost">Importar<input type="file" accept="application/json" data-import hidden>
 </label>
 </div>
 <button type="button" class="link danger" data-reset>Apagar tudo e recomeçar</button>
+</section>
+<section class="card">
+<h3>Sincronizar</h3>
+<p class="muted small">Uma cópia no servidor europeu do Supabase, para o histórico sobreviver a este telefone. Entras com um código enviado por email, sem password para guardar.</p>
+<label class="field">
+<span>O teu email</span>
+<input type="email" inputmode="email" autocomplete="email" placeholder="joao@onya.pt" value="" data-sync-email>
+</label>
+<div class="actions-row">
+<button type="button" class="btn btn-ghost" data-sync-code>Enviar código</button>
+</div>
+<label class="field">
+<span>Código do email</span>
+<input type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" data-sync-otp>
+</label>
+<button type="button" class="btn btn-primary" data-sync-in>Entrar</button>
+<details class="det">
+<summary>Primeira vez: criar a tabela no Supabase</summary>
+<p class="muted small">Cola isto no editor de SQL do teu projeto. Cria a tabela e as regras que impedem qualquer outra pessoa de ler a tua linha.</p>
+<pre class="sql">create table if not exists public.estado (
+  user_id uuid primary key default auth.uid() references auth.users(id) on delete cascade,
+  dados jsonb not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.estado enable row level security;
+create policy &quot;ve o seu&quot; on public.estado for select using (auth.uid() = user_id);
+create policy &quot;cria o seu&quot; on public.estado for insert with check (auth.uid() = user_id);
+create policy &quot;altera o seu&quot; on public.estado for update using (auth.uid() = user_id) with check (auth.uid() = user_id);</pre>
+</details>
 </section>
 <section class="card">
 <h3>Lembretes</h3>
@@ -153,5 +183,5 @@
 <p class="muted small">Início do ciclo atual: 7/09. Reiniciar começa uma semana 1 na próxima segunda.</p>
 <button type="button" class="btn btn-ghost" data-restart-cycle>Reiniciar ciclo na próxima segunda</button>
 </section>
-<p class="foot muted">Treino v0.8.0 · PWA · sincronização Supabase na fase 3</p>
+<p class="foot muted">Treino v0.9.0 · PWA · Supabase na UE</p>
 </form>

@@ -32,7 +32,7 @@ As ilustrações não são imagens: são SVG desenhado a partir de um modelo de 
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
 ```bash
-node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/audit6.mjs && node tools/check.mjs && node tools/anklecheck.mjs && node tools/snapshot.mjs
+node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/audit6.mjs && node tools/audit7.mjs && node tools/check.mjs && node tools/anklecheck.mjs && node tools/snapshot.mjs
 ```
 | Ficheiro | O que verifica |
 |---|---|
@@ -47,6 +47,7 @@ node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node t
 | `anklecheck.mjs` | ângulo do tornozelo em cada pé: apanha pés dobrados contra a canela |
 | `audit6.mjs` | um ano de treinos simulado: teto dos halteres, quando as cadeias esgotam |
 | `snapshot.mjs` | fotografia do HTML dos 13 ecrãs; `--update` aceita mudanças de propósito |
+| `audit7.mjs` | sincronização: quem ganha o conflito, sessão a expirar, tabela em falta |
 | `ytcheck.mjs` | confirma que cada vídeo referido ainda existe (pede ao YouTube) |
 | `diag.mjs` | `node tools/diag.mjs <id>` imprime as articulações de uma pose |
 
@@ -71,4 +72,15 @@ Regras que evitam os erros mais comuns:
 ## Fases
 1. ✅ App offline: motor, biblioteca, temporizador, registo local.
 2. ✅ Figuras animadas e vídeo confirmado nos 90 exercícios (`ytId` + `ytTitle`).
-3. Login e sincronização Supabase (UE) com RLS por utilizador.
+3. ✅ Login por código no email e sincronização Supabase (UE) com RLS por utilizador.
+
+## Ligar a sincronização
+Uma vez, no editor de SQL do projeto Supabase, colar o SQL que a app mostra em
+Definições → Sincronizar → "Primeira vez". Cria `public.estado` (uma linha por
+utilizador) e as três políticas de RLS que impedem qualquer outra pessoa de ler
+essa linha. Depois é entrar na app com o email: o código chega por email e não há
+password para guardar em lado nenhum.
+
+O documento é o estado inteiro e ganha o lado com `updatedAt` mais recente. Para
+uma pessoa em dois aparelhos isto basta; juntar campo a campo seria complexidade a
+mais para um problema que não existe.

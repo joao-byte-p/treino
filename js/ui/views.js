@@ -5,6 +5,7 @@ import { esc, ring, exerciseRow, illustration, chip, patternLabel, equipmentLabe
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { CONFIG } from '../config.js';
 import { buildICS, downloadICS } from '../calendar.js';
+import * as sync from '../sync.js';
 
 // ─────────────────────────── HOJE ───────────────────────────
 export function renderHome(nav) {
@@ -345,6 +346,21 @@ function computeStreak(state) {
 }
 
 // ─────────────────────────── DEFINIÇÕES ───────────────────────────
+// Quantos dias desde a última cópia para fora do aparelho. Só avisa quem já tem
+// histórico para perder: dizer "faz uma cópia" a quem ainda não treinou é ruído.
+function copiaAviso(state) {
+  const n = state.logs.filter(l => l.completed).length;
+  if (!n) return '';
+  const ultima = state.profile.lastBackup || state.profile.lastSync;
+  const dias = ultima ? Math.floor((Date.now() - ultima) / 864e5) : null;
+  if (dias != null && dias < 21) return `<p class="muted small">Última cópia há ${dias === 0 ? 'menos de um dia' : `${dias} dias`}.</p>`;
+  return `<div class="notice notice-warn">${ultima ? `A última cópia foi há ${dias} dias.` : `${n} ${n === 1 ? 'treino' : 'treinos'} registados e nunca copiados para fora deste aparelho.`}</div>`;
+}
+
+function fmtDataHora(ms) {
+  return new Date(ms).toLocaleString('pt-PT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
 // Hora do treino guardada como "HH:MM" para o campo <input type="time">.
 export function icsOpts(p) {
   const [h, m] = String(p.trainTime || '18:00').split(':').map(Number);
@@ -391,13 +407,35 @@ export function renderSettings(nav, onboarding = false) {
     </section>
     ${onboarding ? `<button type="button" class="btn btn-primary btn-big" data-finish-onboarding>Gerar o meu plano</button>` : `
     <section class="card">
-      <h3>Dados</h3>
-      <p class="muted small">Tudo fica neste aparelho. Exporta regularmente até a sincronização chegar na fase 3.</p>
+      <h3>Cópia de segurança</h3>
+      ${copiaAviso(state)}
+      <p class="muted small">O histórico vive no armazenamento do Safari deste aparelho. Se o limpares ou perderes o telefone, vai com ele.</p>
       <div class="actions-row">
         <button type="button" class="btn btn-ghost" data-export>Exportar cópia</button>
         <label class="btn btn-ghost">Importar<input type="file" accept="application/json" data-import hidden></label>
       </div>
       <button type="button" class="link danger" data-reset>Apagar tudo e recomeçar</button>
+    </section>
+    <section class="card">
+      <h3>Sincronizar</h3>
+      ${sync.ligado() ? `
+        <p class="muted small">Ligado como <strong>${esc(sync.email())}</strong>. ${p.lastSync ? `Última sincronização: ${esc(fmtDataHora(p.lastSync))}.` : 'Ainda não sincronizou.'}</p>
+        <p class="muted small">Guarda-se no servidor europeu do Supabase, com uma linha só tua protegida por Row Level Security. Ganha sempre o aparelho onde mexeste por último.</p>
+        <button type="button" class="btn btn-ghost" data-sync-now>Sincronizar agora</button>
+        <button type="button" class="link" data-sync-out>Terminar sessão</button>
+      ` : `
+        <p class="muted small">Uma cópia no servidor europeu do Supabase, para o histórico sobreviver a este telefone. Entras com um código enviado por email, sem password para guardar.</p>
+        <label class="field"><span>O teu email</span><input type="email" inputmode="email" autocomplete="email" placeholder="joao@onya.pt" value="${esc(p.syncEmail || '')}" data-sync-email></label>
+        <div class="actions-row">
+          <button type="button" class="btn btn-ghost" data-sync-code>Enviar código</button>
+        </div>
+        <label class="field"><span>Código do email</span><input type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" data-sync-otp></label>
+        <button type="button" class="btn btn-primary" data-sync-in>Entrar</button>
+        <details class="det"><summary>Primeira vez: criar a tabela no Supabase</summary>
+          <p class="muted small">Cola isto no editor de SQL do teu projeto. Cria a tabela e as regras que impedem qualquer outra pessoa de ler a tua linha.</p>
+          <pre class="sql">${esc(sync.SQL_TABELA)}</pre>
+        </details>
+      `}
     </section>
     <section class="card">
       <h3>Lembretes</h3>
@@ -412,7 +450,7 @@ export function renderSettings(nav, onboarding = false) {
       <p class="muted small">Início do ciclo atual: ${esc(fmtDate(p.cycleStart))}. Reiniciar começa uma semana 1 na próxima segunda.</p>
       <button type="button" class="btn btn-ghost" data-restart-cycle>Reiniciar ciclo na próxima segunda</button>
     </section>
-    <p class="foot muted">${esc(CONFIG.appName)} v${esc(CONFIG.version)} · PWA · sincronização Supabase na fase 3</p>`}
+    <p class="foot muted">${esc(CONFIG.appName)} v${esc(CONFIG.version)} · PWA · Supabase na UE</p>`}
   </form>`;
 }
 
@@ -456,6 +494,7 @@ export function bindSettings(root, nav, onboarding) {
     try {
       if (navigator.share && navigator.canShare?.({ files: [new File([text], name, { type: 'application/json' })] })) {
         await navigator.share({ files: [new File([text], name, { type: 'application/json' })], title: 'Cópia do Treino' });
+        setProfile({ lastBackup: Date.now() });
         return;
       }
     } catch { /* cancelado */ }
@@ -463,6 +502,37 @@ export function bindSettings(root, nav, onboarding) {
     a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
     a.download = name; a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    setProfile({ lastBackup: Date.now() });
+  });
+  const campoEmail = () => root.querySelector('[data-sync-email]')?.value.trim() || getState().profile.syncEmail || '';
+  root.querySelector('[data-sync-code]')?.addEventListener('click', async b => {
+    const mail = campoEmail();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) return toast('Escreve um email válido');
+    setProfile({ syncEmail: mail });
+    try { await sync.pedirCodigo(mail); toast('Código enviado. Vê o email.'); }
+    catch (e) { toast(e.message); }
+  });
+  root.querySelector('[data-sync-in]')?.addEventListener('click', async () => {
+    const codigo = root.querySelector('[data-sync-otp]')?.value.trim();
+    if (!codigo) return toast('Falta o código do email');
+    try {
+      await sync.confirmarCodigo(campoEmail(), codigo);
+      const r = await sync.sincronizar(getState(), dados => importJSON(JSON.stringify(dados)));
+      setProfile({ lastSync: Date.now() });
+      toast(r.texto);
+      nav.rerender();
+    } catch (e) { toast(e.message); }
+  });
+  root.querySelector('[data-sync-now]')?.addEventListener('click', async () => {
+    try {
+      const r = await sync.sincronizar(getState(), dados => importJSON(JSON.stringify(dados)));
+      setProfile({ lastSync: Date.now() });
+      toast(r.texto);
+      nav.rerender();
+    } catch (e) { toast(e.message); }
+  });
+  root.querySelector('[data-sync-out]')?.addEventListener('click', () => {
+    sync.sair(); toast('Sessão terminada neste aparelho'); nav.rerender();
   });
   root.querySelector('[data-import]')?.addEventListener('change', async e => {
     const f = e.target.files?.[0]; if (!f) return;
