@@ -63,5 +63,5 @@ Regras que evitam os erros mais comuns:
 
 ## Fases
 1. ✅ App offline: motor, biblioteca, temporizador, registo local.
-2. ✅ Figuras animadas nos 83 exercícios. Falta fixar IDs de vídeo YouTube verificados (`ytId`).
+2. ✅ Figuras animadas e vídeo confirmado nos 83 exercícios (`ytId` + `ytTitle`).
 3. Login e sincronização Supabase (UE) com RLS por utilizador.
