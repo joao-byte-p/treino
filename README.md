@@ -32,7 +32,7 @@ As ilustrações não são imagens: são SVG desenhado a partir de um modelo de 
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
 ```bash
-node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/check.mjs && node tools/anklecheck.mjs
+node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/audit6.mjs && node tools/check.mjs && node tools/anklecheck.mjs
 ```
 | Ficheiro | O que verifica |
 |---|---|
@@ -45,6 +45,7 @@ node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node t
 | `fitframes.mjs` | mede a caixa real de cada figura e propõe o viewBox |
 | `figcheck.mjs` | inventário das figuras: poses em falta, isometrias, animações paradas |
 | `anklecheck.mjs` | ângulo do tornozelo em cada pé: apanha pés dobrados contra a canela |
+| `audit6.mjs` | um ano de treinos simulado: teto dos halteres, quando as cadeias esgotam |
 | `ytcheck.mjs` | confirma que cada vídeo referido ainda existe (pede ao YouTube) |
 | `diag.mjs` | `node tools/diag.mjs <id>` imprime as articulações de uma pose |
 
@@ -63,5 +64,5 @@ Regras que evitam os erros mais comuns:
 
 ## Fases
 1. ✅ App offline: motor, biblioteca, temporizador, registo local.
-2. ✅ Figuras animadas e vídeo confirmado nos 83 exercícios (`ytId` + `ytTitle`).
+2. ✅ Figuras animadas e vídeo confirmado nos 90 exercícios (`ytId` + `ytTitle`).
 3. Login e sincronização Supabase (UE) com RLS por utilizador.

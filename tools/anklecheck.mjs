@@ -14,6 +14,7 @@ const norm = d => ((((d + 180) % 360) + 360) % 360) - 180;
 // flexão do tornozelo no limite do humano; não é o mesmo que um pé dobrado por erro.
 const ACEITES = {
   'pistol-assisted[1].leg1': 'pistol em profundidade: tornozelo no limite, é o exercício',
+  'pistol-full[1].leg1': 'pistol em profundidade: tornozelo no limite, é o exercício',
 };
 
 const fora = [];

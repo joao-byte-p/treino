@@ -55,6 +55,14 @@
     "views": 1465,
     "live": false
   },
+  "handstand-pushup-wall": {
+    "id": "gdhmNaZ7nAk",
+    "title": "Wall Handstand Push Ups | For WILD Shoulder Strength",
+    "channel": "Andrew Alinda",
+    "dur": 202,
+    "views": 24828,
+    "live": false
+  },
   "db-press-seated": {
     "id": "rO_iEImwHyo",
     "title": "How to do the SEATED DUMBBELL SHOULDER PRESS! | 2 Minute Tutorial",
@@ -101,6 +109,14 @@
     "channel": "One Minute Tutorial",
     "dur": 81,
     "views": 7447,
+    "live": false
+  },
+  "bar-dips-lsit": {
+    "id": "r-LQKNxGJB0",
+    "title": "L-Sit Tutorial On Floor, Bar And Parallel Bars (6 Step-by-Step Guide)",
+    "channel": "Gymless Fitness",
+    "dur": 562,
+    "views": 8545,
     "live": false
   },
   "db-lateral-raise": {
@@ -167,6 +183,14 @@
     "views": 1278718,
     "live": false
   },
+  "db-curl-concentration": {
+    "id": "Jvj2wV0vOYU",
+    "title": "How To: Dumbbell Concentration Curl",
+    "channel": "ScottHermanFitness",
+    "dur": 101,
+    "views": 2464808,
+    "live": false
+  },
   "db-rear-delt-fly": {
     "id": "buuYPLVXsJg",
     "title": "How to PROPERLY Dumbbell Rear Delt Fly | Reverse Dumbbell Fly Tutorial",
@@ -215,6 +239,14 @@
     "views": 2558491,
     "live": false
   },
+  "pistol-full": {
+    "id": "hHxm3VbuS-w",
+    "title": "How To PISTOL SQUAT [Full Progressions] // School of Calisthenics",
+    "channel": "School of Calisthenics",
+    "dur": 375,
+    "views": 114666,
+    "live": false
+  },
   "reverse-lunge": {
     "id": "sjlsISvHyZs",
     "title": "How To: Dumbbell Reverse Lunge",
@@ -253,6 +285,14 @@
     "channel": "3CB Performance",
     "dur": 158,
     "views": 8174,
+    "live": false
+  },
+  "wall-sit-single": {
+    "id": "01uSdj_zz08",
+    "title": "Single Leg Wall Sit Isometric",
+    "channel": "The Strength Guys",
+    "dur": 58,
+    "views": 1241,
     "live": false
   },
   "slow-step-down": {
@@ -327,6 +367,14 @@
     "views": 741347,
     "live": false
   },
+  "hip-thrust-single-elevated": {
+    "id": "YIpw8ogCVKs",
+    "title": "Shoulder and Feet Elevated Hip Thrusts and Single Leg Hip Thrusts",
+    "channel": "Bret Contreras Glute Guy",
+    "dur": 240,
+    "views": 192795,
+    "live": false
+  },
   "db-swing": {
     "id": "v1LoYk4qdLc",
     "title": "Kettlebell Swings with a Dumbbell, How To",
@@ -397,6 +445,14 @@
     "channel": "The Physiobot",
     "dur": 138,
     "views": 83,
+    "live": false
+  },
+  "side-plank-dips": {
+    "id": "hAAJ7EsluLY",
+    "title": "How to do Side Plank Dips the correct way (Perfect Technique) | Tutorial",
+    "channel": "Lean Physique Lab",
+    "dur": 42,
+    "views": 443,
     "live": false
   },
   "bird-dog": {

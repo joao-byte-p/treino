@@ -92,9 +92,9 @@ function repsForWeek(ex, week, bonus = 0) {
   return { 1: [lo, mid], 2: [mid, hi], 3: [hi, hi], 4: [lo, lo] }[week];
 }
 
-function timeForWeek(ex, week) {
+function timeForWeek(ex, week, bonus = 0) {
   if (!ex.time) return null;
-  const t = ex.time;
+  const t = ex.time + bonus;
   return Math.round({ 1: t, 2: t * 1.15, 3: t * 1.3, 4: t * 0.7 }[week] / 5) * 5;
 }
 
@@ -111,9 +111,10 @@ function loadHint(ex, state, week) {
 function strengthItem(ex, state, week, baseSets) {
   const sets = setsForWeek(week, baseSets ?? ex.sets ?? 3);
   const bonus = (state.repBonus || {})[ex.id] || 0;
+  const bonusT = (state.timeBonus || {})[ex.id] || 0;
   return {
-    kind: 'strength', ex, sets, repBonus: bonus,
-    reps: repsForWeek(ex, week, bonus), time: timeForWeek(ex, week),
+    kind: 'strength', ex, sets, repBonus: bonus, timeBonus: bonusT,
+    reps: repsForWeek(ex, week, bonus), time: timeForWeek(ex, week, bonusT),
     rest: week === 4 ? Math.round(ex.rest * 0.8) : ex.rest,
     load: loadHint(ex, state, week),
     perSide: !!ex.perSide,

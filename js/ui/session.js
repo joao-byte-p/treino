@@ -49,7 +49,9 @@ export function buildSteps(session) {
 function frase(e) {
   if (e.type === 'level') return `Subiste de nível: ${e.to}`;
   if (e.type === 'load') return `Mais carga: ${e.ex} a ${e.kg} kg`;
-  if (e.type === 'reps') return `${e.ex} no teto dos ${e.teto} kg: passa a +${e.bonus} reps`;
+  if (e.type === 'reps') return e.teto ? `${e.ex} no teto dos ${e.teto} kg: passa a +${e.bonus} reps` : `${e.ex} no topo da cadeia: passa a +${e.bonus} reps`;
+  if (e.type === 'tempo') return `${e.ex} no topo da cadeia: passa a +${e.bonus} segundos`;
+  if (e.type === 'limite') return `${e.ex} é o fim desta cadeia. Não tenho nada mais difícil para te dar aqui.`;
   if (e.type === 'comprar') return `${e.ex} chegou ao fim do que ${e.teto} kg dão. É aqui que compensa comprar mais peso.`;
   return 'Progresso registado';
 }

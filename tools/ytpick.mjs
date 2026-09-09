@@ -24,6 +24,12 @@ const ESCOLHA_MANUAL = {
   'side-plank': 'XeN4pEZZJNI',          // prancha lateral explicada de ponta a ponta
   'pullup': 'eGo4IYlbE5g',              // elevação perfeita, em vez de uma dica de 47s
   'run-tempo': 'k5vqiyry2z8',           // o que é um tempo run, não como testar o limiar
+  'bar-dips-lsit': 'r-LQKNxGJB0',       // a posição de L nas paralelas, que é a parte difícil
+  'wall-sit-single': '01uSdj_zz08',     // o exercício exato, sem rodeios
+  'side-plank-dips': 'hAAJ7EsluLY',     // a subida da anca, não a prancha lateral parada
+  'handstand-pushup-wall': 'gdhmNaZ7nAk', // flexão em pino com a parede, não a arte do pino
+  'hip-thrust-single-elevated': 'YIpw8ogCVKs', // Bret Contreras, que é quem estudou isto
+  'pistol-full': 'hHxm3VbuS-w',         // progressão completa, diferente do vídeo do assistido
 };
 
 const BOM = ['how to', 'tutorial', 'proper form', 'correct form', 'technique', 'form', 'demonstration', 'demo', 'guide', 'exercise'];

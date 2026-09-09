@@ -14,6 +14,7 @@ const TETO = s.profile.dumbbellMaxKg;
 const topo = {};      // cadeia -> semana em que chegou ao nível máximo
 const tetoEm = {};    // exercício -> semana em que a carga parou de subir
 const comprar = [];   // avisos de "compra mais peso"
+const semNada = {};   // exercício -> semana em que a app ficou sem nada a oferecer
 let maxCargaVista = 0;
 
 const d0 = mondayOf(new Date(2026, 0, 5));
@@ -42,6 +43,7 @@ for (let semana = 1; semana <= 52; semana++) {
     const ev = applyProgression(s, sess, results);
     for (const e of ev) {
       if (e.type === 'comprar') comprar.push(`semana ${semana}: ${e.ex}`);
+      if (e.type === 'limite' && !semNada[e.ex]) semNada[e.ex] = semana;
     }
   }
 
@@ -69,6 +71,14 @@ if (tetos.length) {
   for (const [id, w] of tetos) console.log(`  semana ${String(w).padStart(2)}  ${id}`);
 }
 if (comprar.length) console.log(`\navisos de "compra mais peso": ${comprar.length}\n  ` + comprar.slice(0, 8).join('\n  '));
+
+// A pergunta que importa: quando é que a app deixa de ter resposta? Nível, reps e
+// tempo esgotados significa que só material novo ou exercícios novos desbloqueiam.
+const esgotados = Object.entries(semNada).sort((a, b) => a[1] - b[1]);
+console.log('');
+console.log('── Onde a app fica sem nada a oferecer (nem nível, nem reps, nem tempo) ──');
+if (!esgotados.length) console.log('  em nenhum exercício, num ano inteiro de adesão perfeita');
+else for (const [ex, w] of esgotados) console.log(`  semana ${String(w).padStart(2)}  ${ex}`);
 
 console.log('');
 if (problems.length) { console.log(`${problems.length} problemas:\n  ` + problems.slice(0, 15).join('\n  ')); process.exitCode = 1; }
