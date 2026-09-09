@@ -39,7 +39,16 @@
   </div>
   <script type="module">
     // importação dinâmica com marca temporal: o laboratório nunca serve módulos em cache
-    const v = '?v=' + Date.now();
+    // Páginas de trabalho: existem para eu revisar figuras, não fazem parte da app.
+  // No endereço público não abrem, para quem lá chegar não pensar que é a app.
+  if (!['localhost', '127.0.0.1', ''].includes(location.hostname)) {
+    document.body.innerHTML = '<p style="font:16px/1.5 system-ui;color:#a4acb8;padding:24px;max-width:38ch">'
+      + 'Esta é uma página de trabalho para revisão das figuras, e só abre em desenvolvimento. '
+      + 'A app está em <a href="./" style="color:#6fb9ff">/</a>.</p>';
+    throw new Error('pagina de trabalho fora de desenvolvimento');
+  }
+
+  const v = '?v=' + Date.now();
     const { POSES } = await import('./js/data/poses.js' + v);
     const { EXERCISES, BY_ID, PATTERN_LABEL } = await import('./js/data/exercises.js' + v);
     const { mountFigure, stepsStrip } = await import('./js/ui/figure.js' + v);
