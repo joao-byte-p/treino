@@ -27,7 +27,8 @@ export function prescription(item) {
 
 export function exerciseRow(item, { showLoad = true, swappable = false, linked = false } = {}) {
   const ex = item.ex;
-  const load = showLoad && item.load ? (item.load.kg ? `<span class="pill pill-load">${item.load.kg} kg</span>` : '') : '';
+  // no teto dos halteres a pastilha do peso muda de cor: o número parou de subir de propósito
+  const load = showLoad && item.load ? (item.load.kg ? `<span class="pill pill-load${item.load.teto ? ' pill-teto' : ''}"${item.load.teto ? ' title="No teto dos teus halteres"' : ''}>${item.load.kg} kg</span>` : '') : '';
   const alt = swappable && item.homeAlt
     ? `<button class="swap" data-swap="${ex.id}" data-alt="${item.homeAlt.id}" aria-label="Trocar por ${esc(item.homeAlt.name)}">⇄ casa</button>`
     : (swappable && item.swappedFrom
@@ -39,7 +40,7 @@ export function exerciseRow(item, { showLoad = true, swappable = false, linked =
     <div class="exrow-thumb" aria-hidden="true">${illustration(ex, 44)}</div>
     <div class="exrow-body">
       <div class="exrow-name">${esc(ex.name)}</div>
-      <div class="exrow-meta">${esc(prescription(item))}${item.rest && item.kind === 'strength' ? ` · ${item.rest}s pausa` : ''}</div>
+      <div class="exrow-meta">${esc(prescription(item))}${item.repBonus ? ` <span class="meta-bonus">+${item.repBonus}</span>` : ''}${item.rest && item.kind === 'strength' ? ` · ${item.rest}s pausa` : ''}</div>
     </div>
     <div class="exrow-right">${load}${alt}${chev}</div>
   </li>`;

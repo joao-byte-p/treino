@@ -177,6 +177,8 @@ body::before {
 .exrow-right { display: flex; align-items: center; gap: 6px; flex: none; }
 .pill { font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.07); color: var(--text-2); white-space: nowrap; }
 .pill-load { background: var(--amber-2); color: var(--amber); }
+.pill-teto { background: var(--amber-2); color: var(--amber); }
+.meta-bonus { color: var(--amber); font-weight: 700; }
 .pill-now { background: var(--mint-2); color: var(--mint); }
 .swap { font-size: 12px; font-weight: 700; color: var(--sky); background: var(--sky-2); padding: 6px 9px; border-radius: 999px; }
 .exrow-chev { color: var(--text-3); font-size: 20px; line-height: 1; margin-left: 2px; }
