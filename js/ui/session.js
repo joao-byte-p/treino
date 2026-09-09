@@ -44,6 +44,16 @@ export function buildSteps(session) {
   return steps;
 }
 
+// Cada evento de progressão dito por palavras. Os dois do teto explicam a saída,
+// porque "mais carga" deixou de ser uma opção honesta acima dos halteres que ele tem.
+function frase(e) {
+  if (e.type === 'level') return `Subiste de nível: ${e.to}`;
+  if (e.type === 'load') return `Mais carga: ${e.ex} a ${e.kg} kg`;
+  if (e.type === 'reps') return `${e.ex} no teto dos ${e.teto} kg: passa a +${e.bonus} reps`;
+  if (e.type === 'comprar') return `${e.ex} chegou ao fim do que ${e.teto} kg dão. É aqui que compensa comprar mais peso.`;
+  return 'Progresso registado';
+}
+
 export function mountSession(root, nav, dateISO, altIndex) {
   const state = getState();
   // sessionFor já aplica as trocas por versão em casa guardadas para o dia
@@ -321,7 +331,7 @@ export function mountSession(root, nav, dateISO, altIndex) {
       }
       update(s => {
         const ev = applyProgression(s, session, results);
-        events = events.concat(ev.map(e => e.type === 'level' ? `Subiste de nível: ${e.to}` : `Mais carga: ${e.ex} a ${e.kg} kg`));
+        events = events.concat(ev.map(frase));
       });
       const doneN = strength.filter(it => results[it.ex.id]?.done).length;
       log.summary = strength.length ? `${doneN} de ${strength.length} exercícios · ${minutes} min` : `${minutes} min`;

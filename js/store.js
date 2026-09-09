@@ -43,6 +43,8 @@ export function defaultState() {
     chainStreak: {},          // chain -> sessões consecutivas com sucesso
     chainLastDate: {},        // chain -> último dia contado (evita contar o mesmo treino duas vezes)
     loads: {},                // exerciseId -> último peso usado (kg)
+    repBonus: {},             // exerciseId -> reps extra, quando a carga chegou ao teto dos halteres
+    tetoAvisado: {},          // exerciseId -> data do último aviso de comprar mais peso
     logs: [],                 // sessões registadas
     swaps: {},                // "YYYY-MM-DD" -> { exerciseId: replacementId }
     kneeFlag: false,          // joelho a queixar-se esta semana

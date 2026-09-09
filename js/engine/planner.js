@@ -85,9 +85,9 @@ function setsForWeek(week, base = 3) {
   return { 1: base, 2: base, 3: base + 1, 4: Math.max(2, base - 1) }[week];
 }
 
-function repsForWeek(ex, week) {
+function repsForWeek(ex, week, bonus = 0) {
   if (!ex.reps) return null;
-  const [lo, hi] = ex.reps;
+  const [lo, hi] = [ex.reps[0] + bonus, ex.reps[1] + bonus];
   const mid = Math.round((lo + hi) / 2);
   return { 1: [lo, mid], 2: [mid, hi], 3: [hi, hi], 4: [lo, lo] }[week];
 }
@@ -103,14 +103,17 @@ function loadHint(ex, state, week) {
   const last = state.loads[ex.id];
   if (!last) return { kg: null, note: 'Escolhe um peso que permita o topo das reps com boa forma' };
   if (week === 4) return { kg: Math.max(2, Math.round(last * 0.8)), note: 'Deload: 80% do habitual' };
+  const teto = state.profile?.dumbbellMaxKg || 12;
+  if (last >= teto) return { kg: last, teto: true, note: `No teto dos teus halteres: sobem as reps, não o peso` };
   return { kg: last, note: 'Último peso usado' };
 }
 
 function strengthItem(ex, state, week, baseSets) {
   const sets = setsForWeek(week, baseSets ?? ex.sets ?? 3);
+  const bonus = (state.repBonus || {})[ex.id] || 0;
   return {
-    kind: 'strength', ex, sets,
-    reps: repsForWeek(ex, week), time: timeForWeek(ex, week),
+    kind: 'strength', ex, sets, repBonus: bonus,
+    reps: repsForWeek(ex, week, bonus), time: timeForWeek(ex, week),
     rest: week === 4 ? Math.round(ex.rest * 0.8) : ex.rest,
     load: loadHint(ex, state, week),
     perSide: !!ex.perSide,
