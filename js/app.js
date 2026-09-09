@@ -1,4 +1,5 @@
-import { getState, update, subscribe } from './store.js';
+import { getState, update, subscribe, importJSON } from './store.js';
+import * as sync from './sync.js';
 import { applyPendingGoal } from './engine/planner.js';
 import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, bindSettings } from './ui/views.js';
 import { mountSession } from './ui/session.js';
@@ -148,5 +149,31 @@ if ('serviceWorker' in navigator) {
   }).catch(() => { /* offline ou file:// */ });
 }
 
-subscribe(() => { /* reservado para sincronização (fase 3) */ });
+// Envio automático: só com sessão iniciada por ele, e com folga de 4 segundos para
+// não fazer um pedido por cada tecla das definições. Falhar em silêncio é de propósito
+// — a app tem de continuar a funcionar sem rede, e o ecrã das Definições diz o estado.
+let porEnviar = null;
+subscribe(() => {
+  if (!sync.ligado()) return;
+  clearTimeout(porEnviar);
+  porEnviar = setTimeout(() => {
+    sync.empurrar(getState())
+      .then(() => setProfileSilencioso({ lastSync: Date.now() }))
+      .catch(() => {});
+  }, 4000);
+});
+
+// Marca a data sem disparar outro envio, senão isto nunca parava.
+function setProfileSilencioso(campos) {
+  const st = getState();
+  Object.assign(st.profile, campos);
+  try { localStorage.setItem('treino.v1', JSON.stringify(st)); } catch { /* sem espaço */ }
+}
+
+// Ao abrir, se houver sessão, vê se o outro aparelho tem novidades.
+if (sync.ligado()) {
+  sync.sincronizar(getState(), dados => { importJSON(JSON.stringify(dados)); render(false); })
+    .then(r => { if (r.acao === 'recebido') toast(r.texto); })
+    .catch(() => {});
+}
 render();
