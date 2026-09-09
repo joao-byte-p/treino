@@ -86,6 +86,10 @@ async function mensagemErro(r, prefixo) {
     const j = await r.json();
     detalhe = j.msg || j.message || j.error_description || j.error || j.hint || '';
     if (/relation .*estado.* does not exist/i.test(detalhe) || r.status === 404) detalhe = 'a tabela `estado` ainda não existe no Supabase';
+    // O serviço de email do próprio Supabase só entrega a endereços da equipa do
+    // projeto, e manda 2 por hora. Sem isto, a mensagem em inglês não explica nada.
+    else if (/not authorized/i.test(detalhe)) detalhe = 'este endereço não pertence à equipa do projeto Supabase. Usa o email da tua conta Supabase, ou configura SMTP próprio no projeto';
+    else if (r.status === 429 || /rate limit|too many/i.test(detalhe)) detalhe = 'o Supabase só manda 2 emails por hora sem SMTP próprio. Espera um pouco e tenta outra vez';
   } catch { /* corpo vazio ou não-JSON */ }
   return `${prefixo}${detalhe ? `: ${detalhe}` : ` (HTTP ${r.status})`}`;
 }

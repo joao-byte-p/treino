@@ -81,6 +81,13 @@ utilizador) e as três políticas de RLS que impedem qualquer outra pessoa de le
 essa linha. Depois é entrar na app com o email: o código chega por email e não há
 password para guardar em lado nenhum.
 
+O código do email é enviado pelo serviço de email do próprio projeto Supabase. Esse
+serviço **só entrega a endereços que pertencem à equipa do projeto** e manda 2 por
+hora — por isso o login tem de usar o email da conta Supabase. Para outros endereços
+seria preciso configurar SMTP próprio no projeto, o que para um utilizador não
+compensa. O endereço também fica guardado em `profile.syncEmail`, e portanto viaja
+dentro do documento sincronizado, na linha dele.
+
 O documento é o estado inteiro e ganha o lado com `updatedAt` mais recente. Para
 uma pessoa em dois aparelhos isto basta; juntar campo a campo seria complexidade a
 mais para um problema que não existe.
