@@ -32,7 +32,7 @@ As ilustrações não são imagens: são SVG desenhado a partir de um modelo de 
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
 ```bash
-node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/audit6.mjs && node tools/check.mjs && node tools/anklecheck.mjs
+node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/audit6.mjs && node tools/check.mjs && node tools/anklecheck.mjs && node tools/snapshot.mjs
 ```
 | Ficheiro | O que verifica |
 |---|---|
@@ -46,6 +46,7 @@ node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node t
 | `figcheck.mjs` | inventário das figuras: poses em falta, isometrias, animações paradas |
 | `anklecheck.mjs` | ângulo do tornozelo em cada pé: apanha pés dobrados contra a canela |
 | `audit6.mjs` | um ano de treinos simulado: teto dos halteres, quando as cadeias esgotam |
+| `snapshot.mjs` | fotografia do HTML dos 13 ecrãs; `--update` aceita mudanças de propósito |
 | `ytcheck.mjs` | confirma que cada vídeo referido ainda existe (pede ao YouTube) |
 | `diag.mjs` | `node tools/diag.mjs <id>` imprime as articulações de uma pose |
 
@@ -61,6 +62,11 @@ Regras que evitam os erros mais comuns:
 - **Plano de vista tem de coincidir com o plano do movimento.** Uma elevação de joelhos de frente não mostra flexão da anca.
 - O `foot:` também interpola pelo arco mais curto: se o caminho passar por baixo, a ponta atravessa o chão a meio da animação (foi o caso do cão-cobra).
 - `mirror: true` + `wide: true` dão vista de frente (elevações laterais, elevações, pull-aparts).
+
+## Automático
+`.github/workflows/auditorias.yml` corre tudo isto a cada push para `main`. Às segundas
+às 6h corre também `ytcheck.mjs`, porque os vídeos do YouTube desaparecem sem avisar e
+é melhor saber por email do que ao carregar no botão no ginásio.
 
 ## Fases
 1. ✅ App offline: motor, biblioteca, temporizador, registo local.

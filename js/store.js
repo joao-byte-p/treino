@@ -34,6 +34,8 @@ export function defaultState() {
       minutes: 30,
       runsPerWeek: 2,
       dumbbellMaxKg: 12,
+      trainTime: '18:00',
+      remindMin: 30,
       kneeSensitive: true,
       equipment: { dumbbells: true, board: true, rope: true, bars: true, pool: true, court: true, chair: true, wall: true, run: true, body: true },
       barsOptional: true,

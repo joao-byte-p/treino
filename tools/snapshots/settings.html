@@ -1,0 +1,157 @@
+<header class="top">
+<div>
+<div class="eyebrow">Definições</div>
+<h1>Perfil</h1>
+</div>
+</header>
+<form class="form" data-settings>
+<section class="card">
+<h3>Objetivo</h3>
+<div class="opts">
+<label class="opt on">
+<input type="radio" name="goal" value="saude" checked>
+<span>
+<strong>Saúde geral</strong>
+<small>Força, cardio em zona 2, mobilidade e um HIIT. O plano mais equilibrado.</small>
+</span>
+</label>
+<label class="opt ">
+<input type="radio" name="goal" value="musculo" >
+<span>
+<strong>Criar músculo</strong>
+<small>Mais dias de força e mais séries. Menos HIIT, duas corridas.</small>
+</span>
+</label>
+<label class="opt ">
+<input type="radio" name="goal" value="gordura" >
+<span>
+<strong>Queimar gordura</strong>
+<small>Circuitos densos e mais zona 2. Força mantida. A alimentação manda.</small>
+</span>
+</label>
+</div>
+<p class="muted small">Mudar de objetivo entra em vigor no início do próximo ciclo (5/10). Trocar a meio destrói a progressão.</p>
+</section>
+<section class="card">
+<h3>Semana</h3>
+<label class="field">
+<span>Dias por semana</span>
+<div class="seg">
+<button type="button" class="on" data-seg="daysPerWeek" data-val="5">5</button>
+<button type="button" class="" data-seg="daysPerWeek" data-val="6">6</button>
+<button type="button" class="" data-seg="daysPerWeek" data-val="7">7</button>
+</div>
+</label>
+<label class="field">
+<span>Minutos por sessão</span>
+<div class="seg">
+<button type="button" class="" data-seg="minutes" data-val="25">25</button>
+<button type="button" class="on" data-seg="minutes" data-val="30">30</button>
+<button type="button" class="" data-seg="minutes" data-val="40">40</button>
+<button type="button" class="" data-seg="minutes" data-val="45">45</button>
+</div>
+</label>
+<label class="field">
+<span>Corridas por semana</span>
+<div class="seg">
+<button type="button" class="" data-seg="runsPerWeek" data-val="1">1</button>
+<button type="button" class="on" data-seg="runsPerWeek" data-val="2">2</button>
+<button type="button" class="" data-seg="runsPerWeek" data-val="3">3</button>
+</div>
+</label>
+</section>
+<section class="card">
+<h3>Equipamento</h3>
+<div class="toggles">
+<label class="toggle">
+<input type="checkbox" data-eq="dumbbells" checked>
+<span>Halteres</span>
+</label>
+<label class="toggle">
+<input type="checkbox" data-eq="board" checked>
+<span>Push-up board</span>
+</label>
+<label class="toggle">
+<input type="checkbox" data-eq="rope" checked>
+<span>Corda</span>
+</label>
+<label class="toggle">
+<input type="checkbox" data-eq="bars" checked>
+<span>Barras street workout</span>
+</label>
+<label class="toggle">
+<input type="checkbox" data-eq="pool" checked>
+<span>Piscina</span>
+</label>
+<label class="toggle">
+<input type="checkbox" data-eq="court" checked>
+<span>Ringue de basket</span>
+</label>
+<label class="toggle">
+<input type="checkbox" data-eq="chair" checked>
+<span>Cadeira / banco / degrau</span>
+</label>
+</div>
+<label class="field">
+<span>Peso máximo por halter (kg)</span>
+<input type="number" inputmode="numeric" min="2" max="60" step="1" value="12" data-num="dumbbellMaxKg">
+</label>
+</section>
+<section class="card">
+<h3>Corpo</h3>
+<label class="toggle">
+<input type="checkbox" data-bool="kneeSensitive" checked>
+<span>Joelhos sensíveis (evita impacto e saltos)</span>
+</label>
+<label class="toggle">
+<input type="checkbox" data-knee-flag >
+<span>Joelho a queixar-se esta semana (troca corrida por piscina, pernas por isometrias)</span>
+</label>
+<label class="field">
+<span>Nome</span>
+<input type="text" value="João" data-text="name" autocomplete="off">
+</label>
+</section>
+<section class="card">
+<h3>Figuras</h3>
+<label class="toggle">
+<input type="checkbox" data-bool-inv="animate" checked>
+<span>Animar o movimento<small>Desliga se preferires as figuras paradas</small>
+</span>
+</label>
+</section>
+<section class="card">
+<h3>Dados</h3>
+<p class="muted small">Tudo fica neste aparelho. Exporta regularmente até a sincronização chegar na fase 3.</p>
+<div class="actions-row">
+<button type="button" class="btn btn-ghost" data-export>Exportar cópia</button>
+<label class="btn btn-ghost">Importar<input type="file" accept="application/json" data-import hidden>
+</label>
+</div>
+<button type="button" class="link danger" data-reset>Apagar tudo e recomeçar</button>
+</section>
+<section class="card">
+<h3>Lembretes</h3>
+<p class="muted small">O iOS só entrega notificações de uma app web através de um servidor de push, que isto não tem. O calendário do telefone avisa com a app fechada, e por isso é ele que faz o lembrete.</p>
+<label class="field">
+<span>Hora habitual do treino</span>
+<input type="time" value="18:00" data-text="trainTime" step="900">
+</label>
+<label class="field">
+<span>Avisar quantos minutos antes</span>
+<div class="seg">
+<button type="button" class="" data-seg="remindMin" data-val="15">15</button>
+<button type="button" class="on" data-seg="remindMin" data-val="30">30</button>
+<button type="button" class="" data-seg="remindMin" data-val="60">60</button>
+</div>
+</label>
+<button type="button" class="btn btn-ghost" data-ics>Adicionar 8 semanas ao calendário</button>
+<p class="foot muted">38 treinos, com aviso 30 minutos antes. Repete quando mudares o plano.</p>
+</section>
+<section class="card">
+<h3>Ciclo</h3>
+<p class="muted small">Início do ciclo atual: 7/09. Reiniciar começa uma semana 1 na próxima segunda.</p>
+<button type="button" class="btn btn-ghost" data-restart-cycle>Reiniciar ciclo na próxima segunda</button>
+</section>
+<p class="foot muted">Treino v0.8.0 · PWA · sincronização Supabase na fase 3</p>
+</form>
