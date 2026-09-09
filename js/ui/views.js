@@ -4,6 +4,7 @@ import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../
 import { esc, ring, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { CONFIG } from '../config.js';
+import { buildICS, downloadICS } from '../calendar.js';
 
 // ─────────────────────────── HOJE ───────────────────────────
 export function renderHome(nav) {
@@ -22,6 +23,14 @@ export function renderHome(nav) {
     </div>` : '';
 
   const kneeNotice = state.kneeFlag ? `<div class="notice notice-warn">Joelho em modo cuidado: sem corrida nem exercícios de impacto esta semana. Desliga nas Definições quando estiver bem.</div>` : '';
+
+  // Se ele já treinou antes e há dias que não aparece, a app diz-lhe quantos.
+  // Sem drama e sem contar dias a quem está a começar: um zero não é uma falha.
+  const ultimo = state.logs.filter(l => l.completed).map(l => l.date).sort().pop();
+  const diasParado = ultimo ? Math.floor((new Date(iso(today)) - new Date(ultimo)) / 864e5) : 0;
+  const pausaNotice = diasParado >= 3
+    ? `<div class="notice">Último treino há ${diasParado} dias. ${diasParado >= 7 ? 'A semana recomeça quando quiseres: o ciclo não te espera nem te castiga.' : 'Hoje é um bom dia para voltar.'}</div>`
+    : '';
 
   let main;
   if (s.type === 'rest') {
@@ -71,7 +80,7 @@ export function renderHome(nav) {
       <div class="ringnum">${doneThisWeek}<small>/${planned}</small></div>
     </div>
   </header>
-  ${goalNotice}${kneeNotice}
+  ${goalNotice}${kneeNotice}${pausaNotice}
   <div class="wide2">
   ${main}
   <section class="card card-week">
@@ -336,6 +345,12 @@ function computeStreak(state) {
 }
 
 // ─────────────────────────── DEFINIÇÕES ───────────────────────────
+// Hora do treino guardada como "HH:MM" para o campo <input type="time">.
+export function icsOpts(p) {
+  const [h, m] = String(p.trainTime || '18:00').split(':').map(Number);
+  return { semanas: 8, hora: Number.isFinite(h) ? h : 18, minuto: Number.isFinite(m) ? m : 0, aviso: p.remindMin ?? 30 };
+}
+
 export function renderSettings(nav, onboarding = false) {
   const state = getState();
   const p = state.profile;
@@ -385,6 +400,14 @@ export function renderSettings(nav, onboarding = false) {
       <button type="button" class="link danger" data-reset>Apagar tudo e recomeçar</button>
     </section>
     <section class="card">
+      <h3>Lembretes</h3>
+      <p class="muted small">O iOS só entrega notificações de uma app web através de um servidor de push, que isto não tem. O calendário do telefone avisa com a app fechada, e por isso é ele que faz o lembrete.</p>
+      <label class="field"><span>Hora habitual do treino</span><input type="time" value="${esc(p.trainTime || '18:00')}" data-text="trainTime" step="900"></label>
+      <label class="field"><span>Avisar quantos minutos antes</span><div class="seg">${[15, 30, 60].map(n => `<button type="button" class="${(p.remindMin ?? 30) === n ? 'on' : ''}" data-seg="remindMin" data-val="${n}">${n}</button>`).join('')}</div></label>
+      <button type="button" class="btn btn-ghost" data-ics>Adicionar 8 semanas ao calendário</button>
+      <p class="foot muted">${(() => { try { return buildICS(state, icsOpts(p)).eventos; } catch { return 0; } })()} treinos, com aviso ${p.remindMin ?? 30} minutos antes. Repete quando mudares o plano.</p>
+    </section>
+    <section class="card">
       <h3>Ciclo</h3>
       <p class="muted small">Início do ciclo atual: ${esc(fmtDate(p.cycleStart))}. Reiniciar começa uma semana 1 na próxima segunda.</p>
       <button type="button" class="btn btn-ghost" data-restart-cycle>Reiniciar ciclo na próxima segunda</button>
@@ -413,7 +436,19 @@ export function bindSettings(root, nav, onboarding) {
   root.querySelectorAll('[data-bool-inv]').forEach(c => c.addEventListener('change', () => setProfile({ [c.dataset.boolInv]: c.checked })));
   root.querySelector('[data-knee-flag]')?.addEventListener('change', e => update(s => { s.kneeFlag = e.target.checked; }));
   root.querySelectorAll('[data-num]').forEach(i => i.addEventListener('change', () => setProfile({ [i.dataset.num]: Number(i.value) || 0 })));
-  root.querySelectorAll('[data-text]').forEach(i => i.addEventListener('change', () => setProfile({ [i.dataset.text]: i.value.trim() || 'João' })));
+  // o recuo para 'João' só vale para o nome; a hora do treino tem o seu próprio recuo
+  root.querySelectorAll('[data-text]').forEach(i => i.addEventListener('change', () => {
+    const campo = i.dataset.text;
+    const v = i.value.trim();
+    const recuo = campo === 'name' ? 'João' : campo === 'trainTime' ? '18:00' : '';
+    setProfile({ [campo]: v || recuo });
+    if (campo === 'trainTime') nav.rerender();
+  }));
+  root.querySelector('[data-ics]')?.addEventListener('click', () => {
+    const st = getState();
+    const n = downloadICS(st, icsOpts(st.profile));
+    toast(n ? `${n} treinos prontos para o calendário` : 'Nada para agendar nas próximas 8 semanas');
+  });
   root.querySelector('[data-finish-onboarding]')?.addEventListener('click', () => { update(s => { s.onboarded = true; }); nav.go('home'); });
   root.querySelector('[data-export]')?.addEventListener('click', async () => {
     const text = exportJSON();

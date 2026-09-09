@@ -4,6 +4,7 @@ import { EXERCISES } from '../js/data/exercises.js';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const mortos = [];
+const semRede = [];
 const semId = [];
 let ok = 0;
 
@@ -14,12 +15,13 @@ for (const ex of EXERCISES) {
   for (let t = 0; t < 3 && !r; t++) {
     try { r = await fetch(u); } catch { await sleep(1200); }
   }
-  if (!r) { mortos.push(`${ex.id} (${ex.ytId}): rede`); continue; }
+  if (!r) { semRede.push(ex.id); continue; } // rede em baixo não é vídeo morto
   if (r.status === 200 || r.status === 401 || r.status === 403) ok++;
   else mortos.push(`${ex.id} (${ex.ytId}): HTTP ${r.status}`);
   await sleep(220);
 }
 
-console.log(`vídeos verificados: ${ok} vivos · ${mortos.length} em falta · ${semId.length} sem ID`);
+console.log(`vídeos verificados: ${ok} vivos · ${mortos.length} em falta · ${semId.length} sem ID${semRede.length ? ` · ${semRede.length} sem resposta da rede` : ''}`);
+if (semRede.length) console.log('sem resposta (não conta como morto): ' + semRede.join(', '));
 if (semId.length) console.log('sem ID (caem na pesquisa do YouTube): ' + semId.join(', '));
 if (mortos.length) { console.log('EM FALTA:\n  ' + mortos.join('\n  ')); process.exitCode = 1; }

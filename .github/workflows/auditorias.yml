@@ -1,0 +1,44 @@
+name: Auditorias
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # segunda-feira às 6h UTC: os vídeos do YouTube morrem sem avisar,
+    # e é melhor saber por email do que ao carregar no botão no ginásio.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  offline:
+    name: Motor, figuras e ecrãs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tools/audit.mjs
+      - run: node tools/audit2.mjs
+      - run: node tools/audit3.mjs
+      - run: node tools/audit4.mjs
+      - run: node tools/audit5.mjs
+      - run: node tools/audit6.mjs
+      - run: node tools/check.mjs
+      - run: node tools/anklecheck.mjs
+      - run: node tools/figcheck.mjs
+      - name: Marcação dos ecrãs igual à gravada
+        run: node tools/snapshot.mjs
+
+  videos:
+    name: Vídeos ainda existem
+    # Só no agendamento e a pedido: não vale a pena bater no YouTube a cada commit.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tools/ytcheck.mjs
