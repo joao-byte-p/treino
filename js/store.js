@@ -76,7 +76,9 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultState();
     const parsed = JSON.parse(raw);
-    return { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...(parsed.profile || {}) } };
+    const st = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...(parsed.profile || {}) } };
+    if (st.profile.minutes < 30) st.profile.minutes = 30; // 30 min passou a ser o mínimo
+    return st;
   } catch {
     return defaultState();
   }

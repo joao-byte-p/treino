@@ -46,9 +46,13 @@ export function applyProgression(state, session, results) {
       state.chainStreak[chain] = 0;
     }
 
-    const current = state.chainLevels[chain] || 1;
+    const levels = chainLevels(chain);
+    // O nível tem de ser limitado ao tamanho da cadeia antes de decidir quantas
+    // sessões são precisas: com um valor guardado acima do topo (import antigo, ou
+    // um ajuste manual) o requisito disparava para um número inalcançável e a
+    // progressão de carga ficava presa em silêncio.
+    const current = Math.min(state.chainLevels[chain] || 1, levels.length);
     if ((state.chainStreak[chain] || 0) >= sessoesParaSubir(current) && session.week !== 4) {
-      const levels = chainLevels(chain);
       const next = levels.find(l => l.level === current + 1);
       if (next) {
         state.chainLevels[chain] = current + 1;

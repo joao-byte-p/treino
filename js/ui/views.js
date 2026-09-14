@@ -534,7 +534,8 @@ export function renderSettings(nav, onboarding = false) {
     <section class="card">
       <h3>Semana</h3>
       <label class="field"><span>Dias por semana</span><div class="seg">${[5, 6, 7].map(n => `<button type="button" class="${p.daysPerWeek === n ? 'on' : ''}" data-seg="daysPerWeek" data-val="${n}">${n}</button>`).join('')}</div></label>
-      <label class="field"><span>Minutos por sessão</span><div class="seg">${[25, 30, 40, 45].map(n => `<button type="button" class="${p.minutes === n ? 'on' : ''}" data-seg="minutes" data-val="${n}">${n}</button>`).join('')}</div></label>
+      <label class="field"><span>Minutos por sessão</span><div class="seg">${[30, 40, 45].map(n => `<button type="button" class="${p.minutes === n ? 'on' : ''}" data-seg="minutes" data-val="${n}">${n}</button>`).join('')}</div></label>
+      <p class="muted small">Trinta minutos é o mínimo. Na semana de deload a sessão mantém o tempo e baixa a carga — uma semana leve não é uma semana curta.</p>
       <label class="field"><span>Corridas por semana</span><div class="seg">${[1, 2, 3].map(n => `<button type="button" class="${p.runsPerWeek === n ? 'on' : ''}" data-seg="runsPerWeek" data-val="${n}">${n}</button>`).join('')}</div></label>
     </section>
     <section class="card">

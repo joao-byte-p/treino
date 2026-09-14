@@ -161,9 +161,47 @@ export function blockSeconds(b) {
 }
 
 // Semana de deload treina menos: encurta o orçamento em vez de só cortar séries.
+// O João quer sessões pensadas para 30 minutos, nunca abaixo disso.
+export const MIN_MINUTOS = 30;
+
 function budgetFor(profile, week, usedSec) {
-  const total = (profile.minutes || 30) * 60 * (week === 4 ? 0.65 : 1);
+  // O deload corta o TRABALHO, não o tempo: menos uma série, reps no fundo do
+  // intervalo, carga a 80% e pausas mais curtas já estão noutros sítios. O tempo que
+  // sobra volta em mobilidade, mais abaixo — uma semana leve não é uma semana curta.
+  const total = Math.max(MIN_MINUTOS, profile.minutes || 30) * 60 * (week === 4 ? 0.72 : 1);
   return Math.max(5 * 60, total - usedSec);
+}
+
+// Mobilidade de reserva para encher o que faltar aos 30 minutos, sobretudo na semana
+// de deload. Ordem pensada para o que ele precisa: anca, tornozelo e coluna torácica.
+const ENCHER = ['worlds-greatest', 'ninety-ninety', 'thoracic-rotation', 'ankle-mobility', 'deep-squat-hold', 'hamstring-stretch', 'figure-four', 'cat-cow', 'hip-flexor-stretch', 'downdog-cobra', 'diaphragm-breathing', 'hip-circles', 'arm-circles', 'march-in-place', 'bw-squat-warm', 'towel-pull-apart'];
+
+// Estica o arrefecimento até a sessão chegar ao mínimo. Nunca corta nada: só
+// acrescenta mobilidade, que é sempre seguro e nunca estraga um deload.
+function encherAteMinimo(s, state) {
+  if (s.type === 'rest') return;
+  const alvo = Math.max(MIN_MINUTOS, state.profile.minutes || 30) * 60;
+  const cool = s.blocks.find(b => b.kind === 'cooldown') || s.blocks.filter(b => b.kind === 'mobility').pop();
+  if (!cool) return;
+  const jaLa = new Set(s.blocks.flatMap(b => b.items.map(i => i.ex.id)));
+  // 1.ª passagem: exercícios novos, que é sempre melhor do que repetir.
+  for (const id of ENCHER) {
+    if (estimateMinutes(s) * 60 >= alvo) return;
+    if (jaLa.has(id)) continue;
+    const ex = pickId(id, state);
+    if (!ex) continue;
+    cool.items.push({ kind: 'mobility', ex, sets: 1, reps: ex.reps || null, time: ex.time || null, rest: 0, perSide: !!ex.perSide });
+    jaLa.add(id);
+  }
+  // 2.ª passagem (dias de mobilidade, onde o poço já foi todo usado): segunda série
+  // do que lá está, do primeiro para o último, sem passar de duas.
+  for (let volta = 0; volta < 2; volta++) {
+    for (const it of cool.items) {
+      if (estimateMinutes(s) * 60 >= alvo) return;
+      if ((it.sets || 1) < 2) it.sets = 2;
+    }
+    if (!cool.items.some(it => (it.sets || 1) < 2)) break;
+  }
 }
 
 // Corta séries a partir do fim até caber no tempo disponível.
@@ -422,6 +460,7 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
     s.notes.push('Se as barras estiverem ocupadas, os exercícios de barra têm o botão “casa” para trocar pela versão sem barra.');
   }
 
+  encherAteMinimo(s, state);
   s.estMinutes = estimateMinutes(s);
   return s;
 }

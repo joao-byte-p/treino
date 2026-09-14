@@ -18,7 +18,7 @@ function stateFor(over = {}) {
 // ── 1. Todas as combinações objetivo × dias × semana do ciclo ──────────────
 const goals = Object.keys(GOALS);
 const dayCounts = [5, 6, 7];
-const minuteOpts = [25, 30, 40, 45];
+const minuteOpts = [30, 40, 45];
 let sessionsChecked = 0;
 
 for (const goal of goals) {
@@ -45,9 +45,10 @@ for (const goal of goals) {
             if (main.kind === 'strength' && main.items.length < 3) warn('poucos exercicios', `${tag} ${sess.type}: ${main.items.length}`);
             // duração dentro do orçamento (+/- tolerância)
             const est = estimateMinutes(sess);
-            const target = minutes * (wk.week === 4 ? 0.65 : 1); // semana 4 é deload
-            if (est > target * 1.4 + 6) warn('tempo excede', `${tag} ${sess.type}: ${est} min para alvo ${Math.round(target)}`);
-            if (est < target * 0.6) warn('tempo curto', `${tag} ${sess.type}: ${est} min para alvo ${Math.round(target)}`);
+            // 30 minutos é o mínimo pedido, inclusive na semana de deload: aí o que
+            // baixa é a carga, não o tempo.
+            if (est < 30) warn('abaixo do minimo', `${tag} ${sess.type}: ${est} min`);
+            if (est > minutes * 1.25 + 4) warn('tempo excede', `${tag} ${sess.type}: ${est} min para ${minutes} pedidos`);
             // exercícios existem e respeitam o joelho
             for (const b of sess.blocks) {
               for (const it of b.items) {
@@ -139,9 +140,13 @@ for (const off of [...eqKeys.map(k => [k]), ['bars', 'chair'], ['dumbbells', 'ba
   for (const it of strength) results[it.ex.id] = { done: true, top: true, rpe: 8, kg: 10 };
   const d2 = new Date(mondayOf()); d2.setDate(d2.getDate() + 7);
   applyProgression(s, sess, results);
-  const ev = applyProgression(s, sessionFor(s, d2), results);
+  // a 2.ª sessão pode ter outros exercícios: os resultados têm de ser os dela
+  const sess2 = sessionFor(s, d2);
+  const results2 = {};
+  for (const it of sess2.blocks.flatMap(b => (b.kind === 'strength' ? b.items : []))) results2[it.ex.id] = { done: true, top: true, rpe: 8, kg: 10 };
+  const ev = applyProgression(s, sess2, results2);
   const loads = ev.filter(e => e.type === 'load');
-  if (!loads.length && strength.some(i => i.ex.load)) warn('nivel maximo', 'no topo da cadeia não passou a somar carga');
+  if (!loads.length && Object.keys(results2).some(id => BY_ID[id]?.load)) warn('nivel maximo', 'no topo da cadeia não passou a somar carga');
 }
 
 // ── 5. Mudança de objetivo agendada ───────────────────────────────────────
