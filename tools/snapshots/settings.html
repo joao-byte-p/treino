@@ -134,9 +134,8 @@
 <section class="card">
 <h3>Sincronizar</h3>
 <p class="muted small">Uma cópia no servidor europeu do Supabase, para o histórico sobreviver a este telefone. Entras com um código enviado por email, sem password para guardar.</p>
-<div class="notice">O código é enviado pelo teu próprio projeto Supabase, e o serviço de email dele <strong>só entrega a endereços da equipa do projeto</strong>, no máximo 2 por hora. Usa o email da tua conta Supabase.</div>
 <label class="field">
-<span>Email da conta Supabase</span>
+<span>O teu email</span>
 <input type="email" inputmode="email" autocomplete="email" placeholder="email@exemplo.pt" value="" data-sync-email>
 </label>
 <div class="actions-row">
@@ -148,8 +147,18 @@
 </label>
 <button type="button" class="btn btn-primary" data-sync-in>Entrar</button>
 <details class="det">
-<summary>Primeira vez: criar a tabela no Supabase</summary>
-<p class="muted small">Cola isto no editor de SQL do teu projeto. Cria a tabela e as regras que impedem qualquer outra pessoa de ler a tua linha.</p>
+<summary>Primeira vez: preparar o projeto Supabase</summary>
+<p class="muted small">Quatro passos, uma vez só. Feitos a 14 de setembro de 2026; ficam aqui para o dia em que o projeto for outro.</p>
+<ol class="steps steps-sm">
+<li>
+<strong>Tabela.</strong> SQL Editor → colar e correr o SQL abaixo. Cria a tabela e as regras que impedem qualquer outra pessoa de ler a tua linha.</li>
+<li>
+<strong>SMTP próprio.</strong> Sem ele o Supabase não deixa editar os emails, e o email traz um link em vez do código. Brevo (UE, grátis): Project Settings → Authentication → SMTP. Host <code>smtp-relay.brevo.com</code>, porta 587. O <em>Username</em> é o «Login» que o Brevo mostra em SMTP &amp; API (do tipo <code>xxxx001@smtp-brevo.com</code>), não o teu email. E em Brevo → Segurança → IPs autorizados, «Desativar para chaves SMTP», senão recusa o Supabase com <code>525</code>.</li>
+<li>
+<strong>Código no email.</strong> Authentication → Emails → «Confirm signup» e «Magic Link» → Source → acrescentar <code>{{ .Token }}</code>.</li>
+<li>
+<strong>Site URL.</strong> Authentication → URL Configuration → o endereço da app, para o link do email não apontar para <code>localhost</code>.</li>
+</ol>
 <pre class="sql">create table if not exists public.estado (
   user_id uuid primary key default auth.uid() references auth.users(id) on delete cascade,
   dados jsonb not null,

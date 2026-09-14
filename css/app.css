@@ -430,5 +430,7 @@ body::before {
 
 /* ---- SQL para colar no Supabase: monoespaçado e a rolar, não a esmagar a página ---- */
 .det { margin-top: 12px; }
+.steps-sm li { font-size: 13px; line-height: 1.45; }
+.steps-sm code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: var(--bg-2); padding: 1px 5px; border-radius: 5px; }
 .det summary { font-size: 13px; color: var(--sky); font-weight: 600; cursor: pointer; padding: 13px 0; min-height: 44px; }
 .sql { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.45; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; color: var(--text-2); white-space: pre; margin: 8px 0 0; }
