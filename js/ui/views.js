@@ -3,6 +3,7 @@ import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META,
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
+import { lineChart, barChart, chartHead } from './charts.js';
 import { CONFIG } from '../config.js';
 import { buildICS, downloadICS } from '../calendar.js';
 import * as sync from '../sync.js';
@@ -373,10 +374,16 @@ export function renderProgress(nav) {
     <div class="card stat-card"><span class="stat-n">${streak}</span><span class="stat-l">semanas seguidas com 4 ou mais treinos</span></div>
     <div class="card stat-card"><span class="stat-n">${levels.length}</span><span class="stat-l">${levels.length === 1 ? 'exercício em que subiste de nível' : 'exercícios em que subiste de nível'}</span></div>
   </section>
-  <section class="card">
+  ${weeks.length ? `<section class="card">
     <h3>Sessões por semana</h3>
-    <div class="bars">${weeks.map(w => `<div class="bar"><div class="bar-fill" style="height:${w.planned ? Math.round(w.n / w.planned * 100) : 0}%"></div><span class="bar-n">${w.n}</span><span class="bar-l">${w.label}</span></div>`).join('')}</div>
-  </section>
+    ${chartHead({ kicker: 'Esta semana', valor: `${weeks[weeks.length - 1].n}`, unidade: `de ${weeks[weeks.length - 1].planned}` })}
+    ${barChart(weeks.map(w => ({ label: w.label, valor: w.n })), {
+      tone: 'mint',
+      // destaca a última semana com treinos: a corrente, a meio, mostraria um zero
+      destaque: Math.max(0, weeks.map(w => w.n).lastIndexOf(Math.max(...weeks.map(w => w.n), 1)) >= 0 && weeks[weeks.length - 1].n === 0 ? weeks.length - 2 : weeks.length - 1),
+      alt: `Sessões feitas em cada uma das últimas ${weeks.length} semanas: ${weeks.map(w => `${w.label} ${w.n}`).join(', ')}.`,
+    })}
+  </section>` : ''}
   ${levels.length ? `<section class="card"><h3>Onde estás em cada progressão</h3><ul class="kv">${levels.map(l => `<li><span>${esc(l.name)}</span><strong>nível ${l.lvl}<small> de ${l.max}</small></strong></li>`).join('')}</ul></section>` : ''}
   ${loads.length ? `<section class="card"><h3>Cargas</h3><ul class="kv">${loads.map(l => `<li><span>${esc(l.ex.name)}</span><strong>${l.kg} kg${l.delta ? `<small class="delta ${l.delta > 0 ? 'up' : 'down'}"> ${l.delta > 0 ? '+' : ''}${l.delta} desde ${esc(fmtDate(l.since))}</small>` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${corridaCard(logs)}
@@ -418,30 +425,41 @@ function escalao(sec) {
 }
 
 function corridaCard(logs) {
-  const cs = logs.filter(l => l.cardio && segPorKm(l.cardio)).map(l => ({ date: l.date, s: segPorKm(l.cardio), km: l.cardio.dist ?? l.cardio.km }));
+  const cs = logs.filter(l => l.cardio && segPorKm(l.cardio))
+    .map(l => ({ date: l.date, s: segPorKm(l.cardio), km: l.cardio.dist ?? l.cardio.km }))
+    .slice(-12);
   if (!cs.length) return '';
   const ultimo = cs[cs.length - 1];
   const [nome, frase] = escalao(ultimo.s);
-  // tendência: média das três últimas contra as três anteriores, se houver seis
-  let tend = '';
+
+  // variação: as três últimas contra as três anteriores. Num ritmo, descer é melhorar.
+  let delta = null, deltaTexto = '', melhorou = null;
   if (cs.length >= 6) {
     const med = a => a.reduce((x, y) => x + y.s, 0) / a.length;
-    const nova = med(cs.slice(-3)), velha = med(cs.slice(-6, -3));
-    const d = Math.round(velha - nova);
-    tend = Math.abs(d) < 5
-      ? '<span class="muted">Estável nas últimas seis corridas.</span>'
-      : `<span class="delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '−' : '+'}${mmss(Math.abs(d))}/km</span> <span class="muted">nas três últimas contra as três anteriores.</span>`;
-  } else {
-    tend = `<span class="muted">Com ${6 - cs.length} ${6 - cs.length === 1 ? 'corrida' : 'corridas'} a mais mostro-te a tendência.</span>`;
+    const d = Math.round(med(cs.slice(-6, -3)) - med(cs.slice(-3)));
+    delta = d;
+    melhorou = Math.abs(d) < 5 ? null : d > 0;
+    deltaTexto = Math.abs(d) < 5 ? 'estável' : `${d > 0 ? '−' : '+'}${mmss(Math.abs(d))}/km`;
   }
+
+  const pontos = cs.map(c => ({ label: fmtDataCurta(c.date), valor: c.s }));
+  const grafico = cs.length >= 2
+    ? lineChart(pontos, {
+      fmt: mmss, invertido: true, tone: 'sky', eixo: '↑ mais rápido',
+      alt: `Ritmo das últimas ${cs.length} corridas, da mais antiga (${mmss(cs[0].s)}) à mais recente (${mmss(ultimo.s)}) por quilómetro.`,
+    })
+    : `<p class="muted small">Com mais uma corrida registada aparece aqui o gráfico.</p>`;
+
   return `<section class="card">
     <h3>Ritmo de corrida</h3>
-    <div class="stats"><div class="stat"><span class="stat-n">${mmss(ultimo.s)}</span><span class="stat-l">min/km na última</span></div>
-      <div class="stat"><span class="stat-n">${nome}</span><span class="stat-l">para ${ultimo.km} km em piso plano</span></div></div>
-    <p class="small">${frase} ${tend}</p>
-    <p class="foot muted" style="text-align:left;margin-top:6px">Metade do teu percurso é a subir, e nenhuma referência conta com isso — em plano o mesmo esforço daria um ritmo mais rápido.</p>
+    ${chartHead({ kicker: 'Última corrida', valor: mmss(ultimo.s), unidade: '/km', delta, deltaTexto, melhorou })}
+    ${grafico}
+    <p class="small" style="margin-top:12px"><strong>${esc(nome)}</strong> para ${ultimo.km} km em piso plano. ${esc(frase)}${cs.length < 6 ? ` <span class="muted">Com ${6 - cs.length} ${6 - cs.length === 1 ? 'corrida' : 'corridas'} a mais comparo com as anteriores.</span>` : ''}</p>
+    <p class="foot muted" style="text-align:left;margin-top:2px">Metade do teu percurso é a subir, e nenhuma referência conta com isso — em plano o mesmo esforço daria um ritmo mais rápido.</p>
   </section>`;
 }
+
+const fmtDataCurta = d => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
 
 function computeStreak(state) {
   let streak = 0;

@@ -48,6 +48,15 @@ voltam a discutir:
 - **Semibold, não black.** Títulos e números a 700. O 800 fazia a app mais pesada do
   que a referência.
 - Cartões sem contorno; a separação é a cor do cartão sobre o fundo, mais sombra.
+- **Gráficos em `js/ui/charts.js`**, ao estilo dos Trends da Bevel: número grande com a
+  variação ao lado (`chartHead`), gráfico por baixo, último ponto destacado. Nunca
+  desenham eixos completos — só os extremos que dão escala. Todas as barras têm cor e
+  só a destacada é saturada: barras cinzentas com uma colorida liam-se como "só esta
+  conta". Cada gráfico leva sempre um `alt` com os números por extenso, senão é um
+  buraco para quem usa leitor de ecrã.
+- **Num gráfico invertido diz-se o sentido.** No ritmo de corrida menos é melhor, por
+  isso o menor valor fica em cima e há um rótulo `↑ mais rápido` — sem ele, a subida
+  lê-se como piorar.
 - **Miniaturas usam recorte quadrado centrado no corpo** (`figureSVG(..., { square: true })`),
   não o viewBox da pose. O viewBox enquadra a cena inteira e vai de 1,8:1 deitado a
   0,4:1 suspenso; numa caixa quadrada isso punha metade das figuras fora. `figcheck.mjs`
