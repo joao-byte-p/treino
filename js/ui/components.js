@@ -76,8 +76,14 @@ export function exerciseRow(item, { showLoad = true, swappable = false, linked =
 
 // Figura articulada quando o exercício já tem pose; senão, glifo genérico.
 export function illustration(ex, size = 120) {
-  if (hasPose(ex.id)) return figureSVG(ex.id, { size, showProps: size >= 90 });
-  return glyph(ex, size);
+  // Miniatura: recorte quadrado centrado no corpo, para todas terem o mesmo peso
+  // dentro da caixa. Com o viewBox da cena, metade delas saía fora — o dips em
+  // paralelas desenhava-se a 132px numa caixa de 56.
+  // Acima disso mostra-se a cena inteira (chão, parede, barra), limitada em altura.
+  if (!hasPose(ex.id)) return glyph(ex, size);
+  return size < 90
+    ? figureSVG(ex.id, { size, square: true, showProps: false })
+    : figureSVG(ex.id, { size, maxH: size, showProps: true });
 }
 
 function glyph(ex, size = 120) {

@@ -349,14 +349,41 @@ function fit(vw, vh, size, maxH) {
   return [Math.round(w), Math.round(h)];
 }
 
-export function figureSVG(id, { frame = 0, size = 120, maxH = 0, showProps = true, arrow = false, className = '' } = {}) {
+// Caixa real do corpo numa pose, em unidades do viewBox. Serve para recortar
+// miniaturas: o viewBox declarado enquadra a cena toda (chão, parede, barra) e por
+// isso varia muito de pose para pose — de 1,8:1 deitado a 0,4:1 suspenso.
+export function bodyBox(id, frame = 0) {
+  const P = POSES[id];
+  if (!P) return null;
+  const f = P.frames[Math.min(frame, P.frames.length - 1)];
+  const j = joints(f, P.far || FAR, P.wide);
+  const pts = [j.hip, j.neck];
+  for (const a of j.arms) pts.push(...a.pts);
+  for (const l of j.legs) { pts.push(...l.pts); if (l.toe) pts.push(l.toe); }
+  pts.push([j.headC[0] - SEG.head, j.headC[1] - SEG.head], [j.headC[0] + SEG.head, j.headC[1] + SEG.head]);
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  return { x0: Math.min(...xs), y0: Math.min(...ys), x1: Math.max(...xs), y1: Math.max(...ys) };
+}
+
+// viewBox quadrado centrado no corpo. Assim uma prancha e um dips ocupam a mesma
+// caixa com o mesmo peso, em vez de uma fita de 16px e um risco de 132px.
+function squareBox(id, frame) {
+  const b = bodyBox(id, frame);
+  if (!b) return null;
+  const w = b.x1 - b.x0, h = b.y1 - b.y0;
+  const lado = Math.max(w, h) * 1.14;                 // margem para os traços grossos
+  const cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2;
+  return [cx - lado / 2, cy - lado / 2, lado, lado].map(v => Math.round(v * 10) / 10).join(' ');
+}
+
+export function figureSVG(id, { frame = 0, size = 120, maxH = 0, showProps = true, arrow = false, square = false, className = '' } = {}) {
   const P = POSES[id];
   if (!P) return '';
   const f = P.frames[Math.min(frame, P.frames.length - 1)];
   const b = bodySVG(f, P.far, P.wide);
-  const vb = P.viewBox || '0 0 100 100';
+  const vb = (square && squareBox(id, frame)) || P.viewBox || '0 0 100 100';
   const [, , vw, vh] = vb.split(' ').map(Number);
-  const [w, h] = fit(vw, vh, size, maxH);
+  const [w, h] = fit(vw, vh, size, maxH || (square ? size : 0));
   return `<svg class="fig ${className}" viewBox="${vb}" width="${w}" height="${h}" aria-hidden="true">
     ${showProps ? propsSVG(P.props) : ''}
     ${b.far}${b.torso}${b.head}${b.near}${b.marks}

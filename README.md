@@ -48,6 +48,10 @@ voltam a discutir:
 - **Semibold, não black.** Títulos e números a 700. O 800 fazia a app mais pesada do
   que a referência.
 - Cartões sem contorno; a separação é a cor do cartão sobre o fundo, mais sombra.
+- **Miniaturas usam recorte quadrado centrado no corpo** (`figureSVG(..., { square: true })`),
+  não o viewBox da pose. O viewBox enquadra a cena inteira e vai de 1,8:1 deitado a
+  0,4:1 suspenso; numa caixa quadrada isso punha metade das figuras fora. `figcheck.mjs`
+  verifica que todas cabem e enchem a caixa.
 
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
@@ -63,7 +67,7 @@ node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node t
 | `audit5.mjs` | temporizador com relógio controlado, incluindo ecrã bloqueado |
 | `check.mjs` | poses renderizam e os frames têm formas de membro compatíveis |
 | `fitframes.mjs` | mede a caixa real de cada figura e propõe o viewBox |
-| `figcheck.mjs` | inventário das figuras: poses em falta, isometrias, animações paradas |
+| `figcheck.mjs` | inventário das figuras: poses em falta, isometrias, animações paradas, miniaturas dentro da caixa |
 | `anklecheck.mjs` | ângulo do tornozelo em cada pé: apanha pés dobrados contra a canela |
 | `audit6.mjs` | um ano de treinos simulado: teto dos halteres, quando as cadeias esgotam |
 | `snapshot.mjs` | fotografia do HTML dos 13 ecrãs; `--update` aceita mudanças de propósito |

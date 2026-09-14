@@ -224,7 +224,7 @@ body::before {
 .block-title .muted { font-weight: 600; margin-left: 4px; }
 .exlist { display: flex; flex-direction: column; gap: 6px; }
 .exrow { display: flex; align-items: center; gap: 12px; background: var(--card); box-shadow: var(--shadow-s); border-radius: 16px; padding: 10px 12px; cursor: pointer; }
-.exrow-thumb { width: 44px; height: 44px; flex: none; display: grid; place-items: center; }
+.exrow-thumb { width: 44px; height: 44px; flex: none; display: grid; place-items: center; overflow: hidden; }
 .exrow-thumb.lg { width: 56px; height: 56px; }
 .exrow-body { flex: 1; min-width: 0; }
 .exrow-name { font-weight: 700; font-size: 15px; }

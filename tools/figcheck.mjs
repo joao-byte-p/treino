@@ -57,3 +57,30 @@ console.log('\n── Todos ──');
 for (const r of rows.sort((a, b) => a.pattern.localeCompare(b.pattern) || a.id.localeCompare(b.id))) {
   console.log(`  ${r.pattern.padEnd(10)} ${r.id.padEnd(24)} ${r.frames}f mov ${String(r.move).padStart(5)}  ${r.labels.join(' → ')}`);
 }
+
+// ── Miniaturas cabem na caixa ────────────────────────────────────────────────
+// O viewBox de cada pose enquadra a cena toda e varia de 1,8:1 deitado a 0,4:1
+// suspenso. Numa caixa quadrada de 56px isso fazia metade das figuras sair fora,
+// e o dips em paralelas desenhava-se a 132px. As miniaturas usam recorte quadrado
+// centrado no corpo; isto confirma que continuam a caber e a encher a caixa.
+import { figureSVG } from '../js/ui/figure.js';
+
+const fora = [];
+const pequenas = [];
+for (const ex of EXERCISES) {
+  if (!POSES[ex.id]) continue;
+  for (const lado of [44, 56]) {
+    const svg = figureSVG(ex.id, { size: lado, square: true, showProps: false });
+    const m = /width="(\d+(?:\.\d+)?)" height="(\d+(?:\.\d+)?)"/.exec(svg);
+    if (!m) { fora.push(`${ex.id}: sem dimensões a ${lado}px`); continue; }
+    const [w, h] = [Number(m[1]), Number(m[2])];
+    if (w > lado || h > lado) fora.push(`${ex.id}: ${w}x${h} numa caixa de ${lado}`);
+    if (Math.max(w, h) < lado) pequenas.push(`${ex.id}: ${w}x${h} não enche ${lado}`);
+  }
+}
+console.log(`
+── Miniaturas ──`);
+console.log(`  ${fora.length ? fora.length + ' fora da caixa' : 'todas dentro da caixa'} · ${pequenas.length ? pequenas.length + ' a não encher' : 'todas a encher'}`);
+for (const f of fora.slice(0, 10)) console.log('  FORA  ' + f);
+for (const f of pequenas.slice(0, 10)) console.log('  FOLGA ' + f);
+if (fora.length) process.exitCode = 1;
