@@ -28,7 +28,13 @@ class DataParada extends DataReal {
 globalThis.Date = DataParada;
 
 const { defaultState, iso, mondayOf } = await import('../js/store.js');
+const { CONFIG } = await import('../js/config.js');
 const views = await import('../js/ui/views.js');
+
+// O número da versão aparece no rodapé das Definições. Deixá-lo no ficheiro gravado
+// fazia com que subir a versão partisse o teste, o que é ruído: o teste existe para
+// apanhar mudanças de marcação, não para me lembrar de correr `--update`.
+const semVersao = html => html.split('v' + CONFIG.version).join('v{VERSAO}');
 
 // ── estado de referência: nem vazio nem aleatório ──
 function estado() {
@@ -79,7 +85,7 @@ for (const [nome, fn] of Object.entries(ECRAS)) {
   try { html = fn(); } catch (e) { erros.push(`${nome}: ${e.message}`); continue; }
   if (typeof html !== 'string' || !html.trim()) { erros.push(`${nome}: devolveu vazio`); continue; }
   // uma tag por linha, para o diff dizer onde mudou em vez de "a linha 1 mudou"
-  const bonito = html.replace(/>\s*</g, '>\n<').trim() + '\n';
+  const bonito = semVersao(html).replace(/>\s*</g, '>\n<').trim() + '\n';
   const ficheiro = path.join(DIR, `${nome}.html`);
   if (!fs.existsSync(ficheiro)) { fs.writeFileSync(ficheiro, bonito); novos.push(nome); continue; }
   const antes = fs.readFileSync(ficheiro, 'utf8');
