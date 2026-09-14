@@ -29,6 +29,26 @@ As ilustrações não são imagens: são SVG desenhado a partir de um modelo de 
 - `tools/solve.js` — resolve a geometria de apoios fixos (`node tools/solve.js`).
 - `tools/check.mjs` — valida todas as poses (`node tools/check.mjs`).
 
+## Visual
+Referência: **Bevel** (a versão escura como origem, a clara como opção em Perfil → Aspeto).
+Os dois temas vivem nos mesmos tokens em `css/app.css`: `:root` é o escuro, ardósia
+azulada e não preto; `[data-theme="light"]` inverte a tinta. Regras que não se
+voltam a discutir:
+- **Nunca cor fixa fora dos tokens.** Preenchimentos discretos usam `--fill/-2/-3`,
+  divisórias `--line/--line-strong`, o poço dos anéis e o painel das figuras `--well`.
+  Um `rgba(255,255,255,…)` solto desaparece no tema claro.
+- **Acentos são texto no tema claro**, por isso lá são escuros (`--mint: #0f7a4a`,
+  4,5:1 sobre branco). Os anéis usam os degradês `--g-*`, vivos nos dois temas,
+  porque nunca são texto.
+- **Anéis assentam num poço** (`dial()`), grossos e com degradê ao longo do arco.
+  Três lado a lado no topo de Hoje: Semana, Tempo, Ciclo. A frase de orientação vive
+  no mesmo cartão, por baixo, com o kicker ORIENTAÇÃO.
+- **Mosaicos de métrica** (`tile()`): ícone e rótulo em cima, número e unidade em
+  baixo. Dois por linha a 375px; três cortam o rótulo.
+- **Semibold, não black.** Títulos e números a 700. O 800 fazia a app mais pesada do
+  que a referência.
+- Cartões sem contorno; a separação é a cor do cartão sobre o fundo, mais sombra.
+
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
 ```bash

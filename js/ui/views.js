@@ -1,7 +1,7 @@
 import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso } from '../store.js';
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
-import { esc, ring, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
+import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { CONFIG } from '../config.js';
 import { buildICS, downloadICS } from '../calendar.js';
@@ -29,9 +29,17 @@ export function renderHome(nav) {
   // Sem drama e sem contar dias a quem está a começar: um zero não é uma falha.
   const ultimo = state.logs.filter(l => l.completed).map(l => l.date).sort().pop();
   const diasParado = ultimo ? Math.floor((new Date(iso(today)) - new Date(ultimo)) / 864e5) : 0;
-  const pausaNotice = diasParado >= 3
-    ? `<div class="notice">Último treino há ${diasParado} dias. ${diasParado >= 7 ? 'A semana recomeça quando quiseres: o ciclo não te espera nem te castiga.' : 'Hoje é um bom dia para voltar.'}</div>`
-    : '';
+  const ativos = wk.sessions.filter(x => x.type !== 'rest');
+  const minsPlan = ativos.reduce((a, x) => a + (x.estMinutes || 0), 0);
+  const minsDone = wk.sessions.reduce((a, x) => { const l = findLog(x.date); return a + (l?.completed ? (l.minutes || 0) : 0); }, 0);
+  const cicloPct = Math.min(1, ((wk.week - 1) + (planned ? doneThisWeek / planned : 0)) / 4);
+  // A frase de orientação: uma só, a que importa hoje. Um dia parado há muito ganha
+  // ao foco da semana; senão, contexto de hoje mais o foco.
+  const orientacao = diasParado >= 3
+    ? `Último treino há ${diasParado} dias. ${diasParado >= 7 ? 'A semana recomeça quando quiseres: o ciclo não te espera nem te castiga.' : 'Hoje é um bom dia para voltar.'}`
+    : s.type === 'rest' ? `Hoje é descanso. ${wk.focus.desc}`
+    : log?.completed ? `A sessão de hoje está feita. ${wk.focus.desc}`
+    : `Hoje: ${s.title}, ${s.estMinutes} min. ${wk.focus.desc}`;
 
   let main;
   if (s.type === 'rest') {
@@ -58,10 +66,9 @@ export function renderHome(nav) {
         <div class="card-kicker">Hoje · ${esc(s.weekday)}</div>
         <h2 class="card-title">${esc(s.title)}</h2>
         <div class="card-sub">${esc(s.subtitle)}</div>
-        <div class="stats">
-          <div class="stat"><span class="stat-n">${s.estMinutes}</span><span class="stat-l">min</span></div>
-          <div class="stat"><span class="stat-n">${mainBlock ? mainBlock.items.length : 0}</span><span class="stat-l">${mainBlock && mainBlock.items.length === 1 ? 'exercício' : 'exercícios'}</span></div>
-          <div class="stat"><span class="stat-n">S${wk.week}</span><span class="stat-l">${esc(wk.focus.label)}</span></div>
+        <div class="tiles">
+          ${tile({ icon: 'clock', label: 'Duração', num: `${s.estMinutes}`, unit: 'min' })}
+          ${tile({ icon: 'list', label: mainBlock && mainBlock.items.length === 1 ? 'Exercício' : 'Exercícios', num: `${mainBlock ? mainBlock.items.length : 0}` })}
         </div>
         <ul class="preview">${preview}</ul>
         ${s.notes.length ? `<p class="note">${esc(s.notes[0])}</p>` : ''}
@@ -76,12 +83,16 @@ export function renderHome(nav) {
       <div class="eyebrow">${esc(dateLabel(today))}</div>
       <h1>Olá, ${esc(p.name)}</h1>
     </div>
-    <div class="ringwrap">
-      ${ring(planned ? doneThisWeek / planned : 0, { size: 60, stroke: 6, label: 'Semana' })}
-      <div class="ringnum">${doneThisWeek}<small>/${planned}</small></div>
-    </div>
   </header>
-  ${goalNotice}${kneeNotice}${pausaNotice}
+  ${goalNotice}${kneeNotice}
+  <section class="card card-dials">
+    <div class="dials">
+      ${dial(planned ? doneThisWeek / planned : 0, { num: `${doneThisWeek}`, unit: `/${planned}`, label: 'Semana', sub: doneThisWeek >= planned && planned ? 'completa' : `${planned - doneThisWeek} por fazer`, tone: 'mint' })}
+      ${dial(minsPlan ? minsDone / minsPlan : 0, { num: `${minsDone}`, unit: 'min', label: 'Tempo', sub: `de ${minsPlan} planeados`, tone: 'amber' })}
+      ${dial(cicloPct, { num: `S${wk.week}`, unit: '/4', label: 'Ciclo', sub: wk.focus.label, tone: 'sky' })}
+    </div>
+    <div class="coaching"><div class="card-kicker">Orientação</div><p>${esc(orientacao)}</p></div>
+  </section>
   <div class="wide2">
   ${main}
   <section class="card card-week">
@@ -402,6 +413,11 @@ export function renderSettings(nav, onboarding = false) {
       <label class="field"><span>Nome</span><input type="text" value="${esc(p.name)}" data-text="name" autocomplete="off"></label>
     </section>
     <section class="card">
+      <h3>Aspeto</h3>
+      <label class="field"><span>Tema</span><div class="seg">${[['dark', 'Escuro'], ['light', 'Claro'], ['auto', 'Automático']].map(([v, l]) => `<button type="button" class="${(p.theme || 'dark') === v ? 'on' : ''}" data-seg="theme" data-val="${v}">${l}</button>`).join('')}</div></label>
+      <p class="muted small">Automático segue o telefone: claro de dia, escuro de noite.</p>
+    </section>
+    <section class="card">
       <h3>Figuras</h3>
       <label class="toggle"><input type="checkbox" data-bool-inv="animate" ${p.animate !== false ? 'checked' : ''}><span>Animar o movimento<small>Desliga se preferires as figuras paradas</small></span></label>
     </section>
@@ -462,7 +478,8 @@ export function renderSettings(nav, onboarding = false) {
 
 export function bindSettings(root, nav, onboarding) {
   root.querySelectorAll('[data-seg]').forEach(b => b.addEventListener('click', () => {
-    setProfile({ [b.dataset.seg]: Number(b.dataset.val) });
+    const v = b.dataset.val;
+    setProfile({ [b.dataset.seg]: Number.isNaN(Number(v)) ? v : Number(v) });
     nav.rerender();
   }));
   root.querySelectorAll('input[name="goal"]').forEach(r => r.addEventListener('change', () => {

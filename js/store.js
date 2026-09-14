@@ -40,6 +40,7 @@ export function defaultState() {
       minutes: 30,
       runsPerWeek: 2,
       dumbbellMaxKg: 12,
+      theme: 'dark',            // dark | light | auto
       trainTime: '18:00',
       syncEmail: '',
       lastSync: null,

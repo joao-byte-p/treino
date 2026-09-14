@@ -3,16 +3,44 @@ import { hasPose, figureSVG } from './figure.js';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+let ringSeq = 0;
+// Anel com degradê ao longo do arco, como os da Bevel. As cores vêm de variáveis CSS
+// para o tema claro as poder trocar sem tocar aqui. Cada anel leva o seu gradiente,
+// senão dois anéis no mesmo ecrã partilhavam o id e o segundo ficava sem cor.
 export function ring(pct, { size = 64, stroke = 6, tone = 'mint', label = '' } = {}) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const off = c * (1 - Math.min(1, Math.max(0, pct)));
+  const gid = `rg${++ringSeq}`;
   return `
   <svg class="ring ring-${tone}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(label)}">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" style="stop-color: var(--g-${tone}-a)"/><stop offset="1" style="stop-color: var(--g-${tone}-b)"/>
+    </linearGradient></defs>
     <circle class="ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"/>
-    <circle class="ring-fill" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"
+    <circle class="ring-fill" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" stroke="url(#${gid})"
       stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" transform="rotate(-90 ${size / 2} ${size / 2})"/>
   </svg>`;
+}
+
+// Anel assente num poço, com o número dentro e o rótulo por baixo.
+export function dial(pct, { num, unit = '', label, sub = '', tone = 'mint' }) {
+  return `<div>
+    <div class="dial"><div class="dial-well"></div>${ring(pct, { size: 94, stroke: 9, tone, label })}
+      <div class="dial-num">${esc(num)}${unit ? `<small>${esc(unit)}</small>` : ''}</div></div>
+    <div class="dial-l">${esc(label)}</div>${sub ? `<div class="dial-sub">${esc(sub)}</div>` : ''}
+  </div>`;
+}
+
+// Mosaico de métrica: ícone e rótulo em cima, número grande e unidade em baixo.
+const ICONS = {
+  clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  list: '<svg viewBox="0 0 24 24"><path d="M8 6h11M8 12h11M8 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
+  flag: '<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
+};
+export function tile({ icon = 'clock', label, num, unit = '' }) {
+  return `<div class="tile"><div class="tile-h">${ICONS[icon] || ''}<span>${esc(label)}</span></div>
+    <div class="tile-n">${esc(num)}${unit ? `<small>${esc(unit)}</small>` : ''}</div></div>`;
 }
 
 export function prescription(item) {
@@ -71,9 +99,13 @@ export function chip(text, cls = '') { return `<span class="chip ${cls}">${esc(t
 const RING_R = 54;
 export const RING_C = 2 * Math.PI * RING_R;
 export function timerRing(tone = 'mint') {
+  const gid = `tg${++ringSeq}`;
   return `<svg class="tring tring-${tone}" viewBox="0 0 120 120" aria-hidden="true">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" style="stop-color: var(--g-${tone}-a)"/><stop offset="1" style="stop-color: var(--g-${tone}-b)"/>
+    </linearGradient></defs>
     <circle class="tring-track" cx="60" cy="60" r="${RING_R}"/>
-    <circle class="tring-fill" cx="60" cy="60" r="${RING_R}"
+    <circle class="tring-fill" cx="60" cy="60" r="${RING_R}" stroke="url(#${gid})"
       stroke-dasharray="${RING_C.toFixed(1)}" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
   </svg>`;
 }

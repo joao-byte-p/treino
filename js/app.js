@@ -33,7 +33,21 @@ const nav = {
   rerender() { render(false); },
 };
 
+// Tema: "dark" e "light" fixam; "auto" segue o telefone. A cor da barra de estado
+// do iOS lê-se do próprio CSS depois de aplicado, para nunca ficar desencontrada.
+const mqLight = window.matchMedia?.('(prefers-color-scheme: light)');
+function applyTheme() {
+  const t = getState().profile.theme || 'dark';
+  const html = document.documentElement;
+  html.dataset.theme = t;
+  html.classList.toggle('light-ok', t === 'auto' && !!mqLight?.matches);
+  const bg = getComputedStyle(html).getPropertyValue('--bg').trim();
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bg || '#15181e');
+}
+mqLight?.addEventListener?.('change', applyTheme);
+
 function render(scrollTop = true) {
+  applyTheme();
   if (cleanup) { cleanup(); cleanup = null; }
   figOffs.forEach(fn => fn());
   figOffs = [];
