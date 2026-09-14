@@ -134,3 +134,67 @@ for (const i of [0, 1]) {
   const j = F('mountain-climber-slow', i);
   linha(`f${i}`, `anca ${r(j.hip[0])},${r(j.hip[1])} · joelho perto ${r(j.legs[1].pts[1][0])},${r(j.legs[1].pts[1][1])} · pé ${r(j.legs[1].ankle[0])},${r(j.legs[1].ankle[1])} · cabeça x ${r(j.headC[0])}`);
 }
+
+sec('MEMBROS OPOSTOS: dead-bug e bird-dog estendem o mesmo lado ou lados opostos?');
+for (const id of ['dead-bug', 'bird-dog']) {
+  const a = F(id, 0), b = F(id, 1);
+  const dB = a.arms.map((x, k) => r(dist(x.wrist, b.arms[k].wrist)));
+  const dP = a.legs.map((x, k) => r(dist(x.ankle, b.legs[k].ankle)));
+  linha(id, `mãos movem ${dB.join(' / ')} · pés movem ${dP.join(' / ')} → ${dB[0] > dB[1] ? 'braço afastado' : 'braço próximo'} + ${dP[0] > dP[1] ? 'perna afastada' : 'perna próxima'}`);
+}
+
+sec('BALANÇO (hollow rock): ombros e pés movem-se no mesmo sentido?');
+{
+  const a = F('hollow-rock', 0), b = F('hollow-rock', 1);
+  const dOmbro = r(b.shoulder[1] - a.shoulder[1]);
+  const dPe = r(b.legs[1].ankle[1] - a.legs[1].ankle[1]);
+  linha('hollow-rock', `ombro Δy ${dOmbro} · pé Δy ${dPe} → ${Math.sign(dOmbro) === Math.sign(dPe) ? 'MESMO sentido (abre e fecha, não balança)' : 'sentidos opostos (balança)'}`);
+}
+
+sec('PONTE DE GLÚTEOS e HIP THRUSTS: anca no chão em baixo, em linha em cima?');
+for (const [id, nome] of [['glute-bridge', 'ponte'], ['db-hip-thrust', 'hip thrust'], ['single-leg-hip-thrust', 'unilateral'], ['hip-thrust-single-elevated', 'unilateral elevado']]) {
+  POSES[id].frames.forEach((f, i) => {
+    const j = F(id, i);
+    const [ombro, anca, joelho] = [j.shoulder, j.hip, j.legs[1].pts[1]];
+    linha(`${id} f${i}`, `anca y=${r(anca[1])} (chão ${chao(id)}) · ombro-anca-joelho ${ang3(ombro, anca, joelho)}° · anca vs joelho Δy ${r(anca[1] - joelho[1])}`);
+  });
+}
+
+sec('PERNA LIVRE dos hip thrusts: o joelho dobra para o lado certo?');
+for (const id of ['single-leg-hip-thrust', 'hip-thrust-single-elevated']) {
+  const j = F(id, 1); const l = j.legs[0];
+  linha(id, `anca ${r(l.pts[0][0])},${r(l.pts[0][1])} · joelho ${r(l.pts[1][0])},${r(l.pts[1][1])} · pé ${r(l.pts[2][0])},${r(l.pts[2][1])} · cabeça x ${r(j.headC[0])}`);
+}
+
+sec('APOIOS QUE TÊM DE FICAR QUIETOS');
+for (const [id, lado] of [['side-plank-dips', 1], ['copenhagen-plank', 1]]) {
+  POSES[id].frames.forEach((f, i) => {
+    const j = F(id, i);
+    linha(`${id} f${i}`, `cotovelo ${r(j.arms[lado].pts[1][0])},${r(j.arms[lado].pts[1][1])} · mão ${r(j.arms[lado].wrist[0])},${r(j.arms[lado].wrist[1])} · chão ${chao(id)}`);
+  });
+}
+
+sec('COPENHAGEN: apoia o joelho (curta) ou o pé (longa)?');
+{
+  const j = F('copenhagen-plank', 0); const box = prop('copenhagen-plank', 'box')[0];
+  const l = j.legs[0];
+  linha('perna de cima', `joelho ${r(l.pts[1][0])},${r(l.pts[1][1])} · pé ${r(l.pts[2][0])},${r(l.pts[2][1])} · banco x ${box.x}-${box.x + box.w} y ${box.y}`);
+  linha('perna de baixo', `joelho ${r(j.legs[1].pts[1][0])},${r(j.legs[1].pts[1][1])} · pé ${r(j.legs[1].ankle[0])},${r(j.legs[1].ankle[1])}`);
+}
+
+sec('RDL: canela vertical? halteres junto às pernas?');
+for (const [id, i] of [['db-rdl', 1], ['db-single-leg-rdl', 1], ['db-staggered-rdl', 1]]) {
+  const j = F(id, i); const l = j.legs[1];
+  const canela = r(Math.abs(l.pts[1][0] - l.pts[2][0]));
+  linha(`${id} f${i}`, `joelho ${ang3(l.pts[0], l.pts[1], l.pts[2])}° · canela fora da vertical ${canela} · mão ${r(j.arms[1].wrist[0])},${r(j.arms[1].wrist[1])} · joelho x ${r(l.pts[1][0])}`);
+}
+{
+  const j = F('db-staggered-rdl', 1); const t = j.legs[0];
+  linha('perna de trás', `anca ${r(t.pts[0][0])} · joelho ${r(t.pts[1][0])},${r(t.pts[1][1])} · pé ${r(t.pts[2][0])} · joelho ${ang3(t.pts[0], t.pts[1], t.pts[2])}°`);
+}
+
+sec('ELEVAÇÃO DE JOELHOS SUSPENSO: a coxa passa da horizontal?');
+for (const i of [0, 1]) {
+  const j = F('hanging-knee-raise', i);
+  linha(`f${i}`, `anca ${r(j.hip[0])},${r(j.hip[1])} · joelho ${r(j.legs[1].pts[1][0])},${r(j.legs[1].pts[1][1])} · coxa acima da horizontal? ${j.legs[1].pts[1][1] < j.hip[1] ? 'sim' : 'não'}`);
+}
