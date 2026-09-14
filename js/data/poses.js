@@ -453,13 +453,13 @@ export const POSES = {
     frames: [
       {
         label: 'Braços esticados, ombros ativos',
-        hip: [50, 52], torso: 90, head: 0,
+        hip: [50, 54.5], torso: 90, head: 0,
         arms: [{ pin: [60, 4], bend: 1, mirror: true, far: true }, { pin: [60, 4], bend: 1 }],
         legs: [{ a: [-86, -88], foot: 6, mirror: true, far: true }, { a: [-86, -88], foot: -6 }],
       },
       {
         label: 'Queixo passa a barra',
-        hip: [50, 40], torso: 90, head: 0,
+        hip: [50, 33], torso: 90, head: 0,
         arms: [{ pin: [60, 4], bend: 1, mirror: true, far: true }, { pin: [60, 4], bend: 1 }],
         legs: [{ a: [-86, -88], foot: 6, mirror: true, far: true }, { a: [-86, -88], foot: -6 }],
       },
@@ -474,13 +474,13 @@ export const POSES = {
     frames: [
       {
         label: 'Começa com o queixo acima da barra',
-        hip: [50, 40], torso: 90, head: 0,
+        hip: [50, 33], torso: 90, head: 0,
         arms: [{ pin: [60, 4], bend: 1, mirror: true, far: true }, { pin: [60, 4], bend: 1 }],
         legs: [{ a: [-86, -88], foot: 6, mirror: true, far: true }, { a: [-86, -88], foot: -6 }],
       },
       {
         label: 'Desce em 5 segundos controlados',
-        hip: [50, 52], torso: 90, head: 0,
+        hip: [50, 54.5], torso: 90, head: 0,
         arms: [{ pin: [60, 4], bend: 1, mirror: true, far: true }, { pin: [60, 4], bend: 1 }],
         legs: [{ a: [-86, -88], foot: 6, mirror: true, far: true }, { a: [-86, -88], foot: -6 }],
       },
@@ -629,7 +629,7 @@ export const POSES = {
       },
       {
         label: 'Desce vertical, joelho alinhado',
-        hip: [50, 70], torso: 86, head: 0,
+        hip: [50, 66], torso: 86, head: 0,
         arms: ARMS_HANG,
         legs: [{ pin: [35, 76], foot: -160, bend: -1, far: true }, { pin: [64, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
@@ -673,7 +673,7 @@ export const POSES = {
       },
       {
         label: 'Passo largo para trás, joelho a 90°',
-        hip: [48, 60], torso: 88, head: 0,
+        hip: [41, 63], torso: 88, head: 0,
         arms: ARMS_HANG,
         legs: [{ pin: [25, 84], foot: -117, bend: -1, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
@@ -697,7 +697,7 @@ export const POSES = {
       },
       {
         label: 'Sobe só com a perna de cima',
-        hip: [60, 42], torso: 90, head: 0,
+        hip: [62, 36], torso: 90, head: 0,
         arms: ARMS_HANG,
         legs: [{ pin: [46, 76], foot: -20, bend: -1, far: true }, { pin: [64, 70], foot: 0, bend: -1 }],
         items: [{ type: 'db', at: 'wrist0' }, { type: 'db', at: 'wrist1' }],
@@ -735,7 +735,7 @@ export const POSES = {
     frames: [
       {
         label: 'Costas na parede, joelhos a 90°',
-        hip: [46, 64], torso: 90, head: 0,
+        hip: [46, 70], torso: 90, head: 0,
         arms: [{ a: [-88, -86], far: true }, { a: [-86, -88] }],
         legs: [{ pin: [64, 88], foot: 4, bend: -1, far: true }, { pin: [64, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
@@ -788,13 +788,13 @@ export const POSES = {
         label: 'Costas na parede, pés à frente',
         hip: [48, 56], torso: 90, head: 0,
         arms: [{ a: [-88, -86], far: true }, { a: [-86, -88] }],
-        legs: [{ pin: [58, 88], foot: 4, bend: -1, far: true }, { pin: [58, 88], foot: 0, bend: -1 }],
+        legs: [{ pin: [66, 88], foot: 4, bend: -1, far: true }, { pin: [66, 88], foot: 0, bend: -1 }],
       },
       {
         label: 'Levanta as pontas dos pés',
         hip: [48, 56], torso: 90, head: 0,
         arms: [{ a: [-88, -86], far: true }, { a: [-86, -88] }],
-        legs: [{ pin: [58, 88], foot: 25, bend: -1, far: true }, { pin: [58, 88], foot: 22, bend: -1 }],
+        legs: [{ pin: [66, 88], foot: 38, bend: -1, far: true }, { pin: [66, 88], foot: 35, bend: -1 }],
       },
     ],
   },
@@ -1108,7 +1108,7 @@ export const POSES = {
     frames: [
       {
         label: 'Agachamento com halteres aos ombros',
-        hip: [44, 66], torso: 70, head: -10,
+        hip: [40, 68], torso: 70, head: -10,
         arms: [{ a: [-118, 46], far: true }, { a: [-115, 50] }],
         legs: [{ pin: [50, 88], foot: 4, bend: -1, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
@@ -1719,7 +1719,7 @@ export const POSES = {
     frames: [
       {
         label: 'Costas na parede, uma perna estica à frente',
-        hip: [46, 64], torso: 90, head: 0,
+        hip: [46, 70], torso: 90, head: 0,
         arms: [{ a: [-88, -86], far: true }, { a: [-86, -88] }],
         legs: [{ a: [-8, -4], foot: 34, far: true }, { pin: [64, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
@@ -1803,7 +1803,7 @@ export const POSES = {
       },
       {
         label: 'Desce em 3 segundos, joelho alinhado',
-        hip: [50, 65], torso: 72, head: -8,
+        hip: [48, 74], torso: 68, head: -8,
         arms: [{ a: [-4, 4], far: true }, { a: [0, 8] }],
         legs: [{ a: [-4, 2], foot: 60, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
