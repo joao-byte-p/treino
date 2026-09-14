@@ -416,21 +416,12 @@ function segPorKm(c) {
 }
 const mmss = sec => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
 
-function escalao(sec) {
-  if (sec <= 240) return ['Competitivo', 'Ritmo de quem treina para competir.'];
-  if (sec <= 285) return ['Rápido', 'Acima da maioria dos corredores recreativos.'];
-  if (sec <= 330) return ['Bom', 'Ritmo sólido de corredor habitual.'];
-  if (sec <= 390) return ['Regular', 'Confortável e sustentável.'];
-  return ['A construir', 'A base aeróbica constrói-se assim mesmo.'];
-}
-
 function corridaCard(logs) {
   const cs = logs.filter(l => l.cardio && segPorKm(l.cardio))
     .map(l => ({ date: l.date, s: segPorKm(l.cardio), km: l.cardio.dist ?? l.cardio.km }))
     .slice(-12);
   if (!cs.length) return '';
   const ultimo = cs[cs.length - 1];
-  const [nome, frase] = escalao(ultimo.s);
 
   // variação: as três últimas contra as três anteriores. Num ritmo, descer é melhorar.
   let delta = null, deltaTexto = '', melhorou = null;
@@ -452,10 +443,8 @@ function corridaCard(logs) {
 
   return `<section class="card">
     <h3>Ritmo de corrida</h3>
-    ${chartHead({ kicker: 'Última corrida', valor: mmss(ultimo.s), unidade: '/km', delta, deltaTexto, melhorou })}
+    ${chartHead({ kicker: `Última corrida · ${ultimo.km} km`, valor: mmss(ultimo.s), unidade: '/km', delta, deltaTexto, melhorou })}
     ${grafico}
-    <p class="small" style="margin-top:12px"><strong>${esc(nome)}</strong> para ${ultimo.km} km em piso plano. ${esc(frase)}${cs.length < 6 ? ` <span class="muted">Com ${6 - cs.length} ${6 - cs.length === 1 ? 'corrida' : 'corridas'} a mais comparo com as anteriores.</span>` : ''}</p>
-    <p class="foot muted" style="text-align:left;margin-top:2px">Metade do teu percurso é a subir, e nenhuma referência conta com isso — em plano o mesmo esforço daria um ritmo mais rápido.</p>
   </section>`;
 }
 

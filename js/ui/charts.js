@@ -31,16 +31,23 @@ export function lineChart(pontos, { fmt = v => String(v), invertido = false, ton
   // a etiqueta do último ponto encosta-se à borda se estiver perto dela
   const lx = Math.min(W - 34, Math.max(22, x(ult)));
 
+  // O SVG estica-se para encher a largura, e por isso nada com forma própria pode
+  // viver lá dentro: um círculo esticado sai elipse. A linha e a área esticam bem
+  // (o traço é `non-scaling-stroke`); os pontos são elementos por cima, posicionados
+  // em percentagem, e ficam redondos em qualquer largura.
+  const pct = (v, total) => n((v / total) * 100);
   return `<figure class="chart" role="img" aria-label="${esc(alt || 'Gráfico de evolução')}">
-    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="chart-svg chart-${tone}">
-      <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" class="chart-g0"/><stop offset="1" class="chart-g1"/>
-      </linearGradient></defs>
-      <polygon class="chart-area" points="${area}" fill="url(#${gid})"/>
-      <polyline class="chart-line" points="${linha}"/>
-      <line class="chart-guide" x1="${n(x(ult))}" y1="${PT}" x2="${n(x(ult))}" y2="${H - PB}"/>
-      ${pontos.map((p, i) => `<circle class="chart-dot${i === ult ? ' on' : ''}" cx="${n(x(i))}" cy="${n(y(p.valor))}" r="${i === ult ? 3.4 : 2}"/>`).join('')}
-    </svg>
+    <div class="chart-box">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="chart-svg chart-${tone}">
+        <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" class="chart-g0"/><stop offset="1" class="chart-g1"/>
+        </linearGradient></defs>
+        <polygon class="chart-area" points="${area}" fill="url(#${gid})"/>
+        <polyline class="chart-line" points="${linha}"/>
+        <line class="chart-guide" x1="${n(x(ult))}" y1="${PT}" x2="${n(x(ult))}" y2="${H - PB}"/>
+      </svg>
+      ${pontos.map((p, i) => `<i class="chart-dot${i === ult ? ' on' : ''} chart-${tone}" style="left:${pct(x(i), W)}%;top:${pct(y(p.valor), H)}%"></i>`).join('')}
+    </div>
     <span class="chart-tip" style="left:${n((lx / W) * 100)}%">${esc(fmt(pontos[ult].valor))}</span>
     ${eixo ? `<span class="chart-eixo">${esc(eixo)}</span>` : ''}
     <figcaption class="chart-axis"><span>${esc(pontos[0].label)}</span><span>${esc(pontos[ult].label)}</span></figcaption>
