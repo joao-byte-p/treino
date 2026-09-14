@@ -1,4 +1,4 @@
-import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada } from '../store.js';
+import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, moverTreino } from '../store.js';
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
@@ -133,7 +133,7 @@ export function renderPlan(nav, offsetWeeks = 0) {
       <div class="dayrow-date"><span>${esc(s.weekdayShort)}</span><strong>${new Date(s.date).getDate()}</strong></div>
       <div class="dayrow-body">
         <div class="dayrow-title">${esc(s.title)}</div>
-        <div class="dayrow-sub">${s.type === 'rest' ? esc(s.subtitle) : `${s.estMinutes} min · ${n}${esc(s.subtitle)}`}</div>
+        <div class="dayrow-sub">${s.movido ? '<span class="tag-movido">trocado</span> ' : ''}${s.type === 'rest' ? esc(s.subtitle) : `${s.estMinutes} min · ${n}${esc(s.subtitle)}`}</div>
       </div>
       ${mark}
     </li>`;
@@ -180,7 +180,26 @@ export function renderDay(nav, dateISO, altIndex = null) {
   ${s.type !== 'rest' ? `<div class="actions">
     <button class="btn btn-primary btn-big" data-nav="session" data-date="${dateISO}" ${altIndex != null ? `data-alt="${altIndex}"` : ''}>Começar</button>
     ${s.alternatives.map((a, i) => `<button class="btn btn-ghost" data-nav="day" data-date="${dateISO}" data-alt="${i}">${esc(a.label)}</button>`).join('')}
-  </div>` : ''}`;
+  </div>` : ''}
+  ${log?.completed ? '' : moverCard(state, dateISO, s)}`;
+}
+
+// Trocar o treino de dia. É uma troca com outro dia da mesma semana, e não um
+// cancelamento: a semana fica com os mesmos dias de treino que o perfil pede.
+function moverCard(state, dateISO, s) {
+  const wk = buildWeek(state, new Date(dateISO));
+  const outros = wk.sessions.filter(x => x.date !== dateISO && !findLog(x.date)?.completed);
+  if (!outros.length) return '';
+  return `<details class="det mover">
+    <summary>${s.type === 'rest' ? 'Trazer um treino para este dia' : 'Não posso treinar neste dia'}</summary>
+    <p class="muted small">Troca com outro dia desta semana. ${s.type === 'rest' ? 'Este dia passa a ter esse treino, e esse dia passa a descanso.' : 'O treino passa para o dia que escolheres, e esse dia vem para aqui.'}</p>
+    <ul class="movelist">${outros.map(x => `<li>
+      <button type="button" data-mover="${dateISO}" data-para="${x.date}">
+        <span class="movelist-d">${esc(x.weekdayShort)} ${new Date(x.date).getDate()}</span>
+        <span class="movelist-t">${esc(x.title)}</span>
+        <span class="movelist-a" aria-hidden="true">⇄</span>
+      </button></li>`).join('')}</ul>
+  </details>`;
 }
 
 export function applyAlt(session, altIndex) {

@@ -533,3 +533,12 @@ body::before {
 .marcadas li { background: var(--fill); border-radius: 12px; padding: 10px 12px; }
 .marcadas input { width: 100%; margin-top: 8px; background: var(--card); border: 1px solid var(--line-strong); border-radius: 10px; padding: 9px 11px; outline: none; font-size: 14px; }
 .srun-flag { display: block; width: 100%; text-align: center; margin-top: 6px; color: var(--text-3); font-size: 13px; }
+
+/* ---- trocar o treino de dia ---- */
+.mover summary { color: var(--sky); }
+.movelist { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.movelist button { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--fill); border-radius: 12px; padding: 12px 14px; min-height: 44px; }
+.movelist-d { font-weight: 700; font-size: 13px; width: 52px; flex: none; color: var(--text); }
+.movelist-t { flex: 1; min-width: 0; font-size: 14px; color: var(--text-2); }
+.movelist-a { color: var(--sky); font-weight: 700; flex: none; }
+.tag-movido { font-size: 11px; font-weight: 700; color: var(--amber); background: var(--amber-2); padding: 1px 6px; border-radius: 999px; }

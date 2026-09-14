@@ -1,4 +1,4 @@
-import { getState, update, subscribe, importJSON, marcarFigura } from './store.js';
+import { getState, update, subscribe, importJSON, marcarFigura, moverTreino } from './store.js';
 import * as sync from './sync.js';
 import { applyPendingGoal } from './engine/planner.js';
 import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, bindSettings } from './ui/views.js';
@@ -105,6 +105,12 @@ function render(scrollTop = true) {
       toast('Nível ajustado'); render(false);
     }));
   }
+  view.querySelectorAll('[data-mover]').forEach(b => b.addEventListener('click', () => {
+    const { mover, para } = b.dataset;
+    moverTreino(mover, para);
+    toast('Treino trocado de dia');
+    render(false);
+  }));
   view.querySelectorAll('[data-swap]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
     const date = route.params.date; if (!date) return;

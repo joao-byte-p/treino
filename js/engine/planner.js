@@ -425,11 +425,29 @@ export function applySwaps(session, state) {
 }
 
 // ---------- semana ----------
+// Índice 0-6 de uma data dentro desta semana, ou -1 se for de outra.
+function diaDaSemana(monday, dateISO) {
+  const [y, m, d] = String(dateISO).split('-').map(Number);
+  if (!y || !m || !d) return -1;
+  const i = Math.round((new Date(y, m - 1, d) - monday) / 864e5);
+  return i >= 0 && i <= 6 ? i : -1;
+}
+
 export function buildWeek(state, date = new Date()) {
   const p = state.profile;
   const { week, cycle, monday } = cycleInfo(p, date);
   const days = Math.min(7, Math.max(5, p.daysPerWeek || 5));
-  const template = TEMPLATES[p.goal]?.[days] || TEMPLATES.saude[5];
+  const template = [...(TEMPLATES[p.goal]?.[days] || TEMPLATES.saude[5])];
+  // Trocas de dia: quando ele não pode treinar num dia (escritório) e passa o treino
+  // para outro. É uma TROCA, não uma remoção — a semana mantém os dias de treino que
+  // o perfil pede, e o dia de origem fica com o que estava no destino.
+  const trocado = new Array(7).fill(false);
+  for (const [de, para] of Object.entries(state.movidos || {})) {
+    const i = diaDaSemana(monday, de), j = diaDaSemana(monday, para);
+    if (i < 0 || j < 0 || i === j) continue;
+    [template[i], template[j]] = [template[j], template[i]];
+    trocado[i] = trocado[j] = true;
+  }
   let cardioIndex = 0;
   const sessions = template.map((type, i) => {
     const d = new Date(monday); d.setDate(monday.getDate() + i);
@@ -440,6 +458,7 @@ export function buildWeek(state, date = new Date()) {
     sess.weekday = WEEKDAYS[i];
     sess.weekdayShort = WEEKDAYS_SHORT[i];
     sess.dayIndex = i;
+    sess.movido = trocado[i];
     return sess;
   });
   return { week, cycle, monday, focus: WEEK_FOCUS[week], sessions };

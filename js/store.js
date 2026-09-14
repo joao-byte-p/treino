@@ -61,6 +61,7 @@ export function defaultState() {
     figuraMarcada: {},        // exerciseId -> { date, nota } quando ele marca a figura como errada
     logs: [],                 // sessões registadas
     swaps: {},                // "YYYY-MM-DD" -> { exerciseId: replacementId }
+    movidos: {},              // "YYYY-MM-DD" -> "YYYY-MM-DD": treino trocado para outro dia
     kneeFlag: false,          // joelho a queixar-se esta semana
     updatedAt: Date.now(),
   };
@@ -119,6 +120,16 @@ export function marcarFigura(exId, nota) {
 }
 
 export function figuraMarcada(exId) { return !!state.figuraMarcada?.[exId]; }
+
+// Trocar o treino de um dia com o de outro, dentro da mesma semana. Guarda-se a
+// troca e não o resultado, para o plano continuar a ser gerado e a semana a ter os
+// dias de treino que o perfil pede. Chamar com o mesmo par desfaz.
+export function moverTreino(de, para) {
+  if (!state.movidos) state.movidos = {};
+  if (state.movidos[de] === para) delete state.movidos[de];
+  else state.movidos[de] = para;
+  persist();
+}
 
 export function importJSON(text) {
   const parsed = JSON.parse(text);
