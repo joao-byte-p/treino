@@ -62,6 +62,7 @@ export function defaultState() {
     logs: [],                 // sessões registadas
     swaps: {},                // "YYYY-MM-DD" -> { exerciseId: replacementId }
     movidos: {},              // "YYYY-MM-DD" -> "YYYY-MM-DD": treino trocado para outro dia
+    pausas: [],               // [{ de, ate, motivo }]: férias, doença, viagem — o ciclo congela
     kneeFlag: false,          // joelho a queixar-se esta semana
     updatedAt: Date.now(),
   };
@@ -128,6 +129,22 @@ export function moverTreino(de, para) {
   if (!state.movidos) state.movidos = {};
   if (state.movidos[de] === para) delete state.movidos[de];
   else state.movidos[de] = para;
+  persist();
+}
+
+// Pausas: intervalos em que ele não vai treinar. Não são faltas, e o ciclo não anda.
+export function addPausa(de, ate, motivo = '') {
+  if (!state.pausas) state.pausas = [];
+  if (!de || !ate || ate < de) return false;
+  state.pausas = state.pausas.filter(p => !(p.de === de && p.ate === ate));
+  state.pausas.push({ de, ate, motivo: motivo.trim() });
+  state.pausas.sort((a, b) => a.de.localeCompare(b.de));
+  persist();
+  return true;
+}
+
+export function removePausa(de, ate) {
+  state.pausas = (state.pausas || []).filter(p => !(p.de === de && p.ate === ate));
   persist();
 }
 

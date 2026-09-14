@@ -56,7 +56,7 @@ voltam a discutir:
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
 ```bash
-node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/audit6.mjs && node tools/audit7.mjs && node tools/audit8.mjs && node tools/check.mjs && node tools/anklecheck.mjs && node tools/snapshot.mjs
+node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/audit6.mjs && node tools/audit7.mjs && node tools/audit8.mjs && node tools/audit9.mjs && node tools/check.mjs && node tools/anklecheck.mjs && node tools/snapshot.mjs
 ```
 | Ficheiro | O que verifica |
 |---|---|
@@ -73,6 +73,7 @@ node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node t
 | `snapshot.mjs` | fotografia do HTML dos 13 ecrãs; `--update` aceita mudanças de propósito |
 | `audit7.mjs` | sincronização: quem ganha o conflito, sessão a expirar, tabela em falta |
 | `audit8.mjs` | troca de treino entre dias: mantém os dias de treino, não vaza para outra semana |
+| `audit9.mjs` | pausas: congelam o ciclo, não contam como falta, não afetam o futuro |
 | `ytcheck.mjs` | confirma que cada vídeo referido ainda existe (pede ao YouTube) |
 | `diag.mjs` | `node tools/diag.mjs <id>` imprime as articulações de uma pose |
 

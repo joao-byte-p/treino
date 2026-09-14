@@ -1,5 +1,5 @@
-import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, moverTreino } from '../store.js';
-import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META } from '../engine/planner.js';
+import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, moverTreino, addPausa, removePausa } from '../store.js';
+import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META, emPausa } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
@@ -8,6 +8,18 @@ import { buildICS, downloadICS } from '../calendar.js';
 import * as sync from '../sync.js';
 
 // ─────────────────────────── HOJE ───────────────────────────
+// Ele pediu para ser empurrado para a piscina ("assim vou forçando, sei que é
+// melhor"). Só fala nisso num dia de cardio, e só ao fim de muitas semanas — insistir
+// todas as semanas transforma-se em ruído que se aprende a ignorar.
+function nadaHaMuito(state, sessaoHoje) {
+  if (sessaoHoje.type !== 'cardio' || sessaoHoje.blocks?.some(b => b.items?.some(i => i.ex?.chain === 'swim'))) return 0;
+  const nados = state.logs.filter(l => l.completed && l.cardio?.ex === 'swim-easy').map(l => l.date).sort();
+  const desde = nados.length ? nados[nados.length - 1] : (state.logs.find(l => l.completed)?.date || null);
+  if (!desde) return 0;
+  const semanas = Math.floor((new Date(iso(new Date())) - new Date(desde)) / (7 * 864e5));
+  return semanas >= 4 ? semanas : 0;
+}
+
 export function renderHome(nav) {
   const state = getState();
   const today = new Date();
@@ -28,14 +40,18 @@ export function renderHome(nav) {
   // Se ele já treinou antes e há dias que não aparece, a app diz-lhe quantos.
   // Sem drama e sem contar dias a quem está a começar: um zero não é uma falha.
   const ultimo = state.logs.filter(l => l.completed).map(l => l.date).sort().pop();
-  const diasParado = ultimo ? Math.floor((new Date(iso(today)) - new Date(ultimo)) / 864e5) : 0;
+  // Dias parados não contam durante uma pausa marcada: ele avisou, não faltou.
+  const emPausaHoje = emPausa(state, iso(today));
+  const diasParado = emPausaHoje || !ultimo ? 0 : Math.floor((new Date(iso(today)) - new Date(ultimo)) / 864e5);
   const ativos = wk.sessions.filter(x => x.type !== 'rest');
   const minsPlan = ativos.reduce((a, x) => a + (x.estMinutes || 0), 0);
   const minsDone = wk.sessions.reduce((a, x) => { const l = findLog(x.date); return a + (l?.completed ? (l.minutes || 0) : 0); }, 0);
   const cicloPct = Math.min(1, ((wk.week - 1) + (planned ? doneThisWeek / planned : 0)) / 4);
   // A frase de orientação: uma só, a que importa hoje. Um dia parado há muito ganha
   // ao foco da semana; senão, contexto de hoje mais o foco.
-  const orientacao = diasParado >= 3
+  const orientacao = emPausaHoje ? `${emPausaHoje.motivo || 'Pausa'} até ${fmtDate(emPausaHoje.ate)}. O ciclo fica à espera: quando voltares retomas na semana ${wk.week}.`
+    : nadaHaMuito(state, s) ? `Hoje é cardio e há ${nadaHaMuito(state, s)} semanas que não vais à piscina. Zero impacto, e disseste que era melhor para ti: o botão de trocar está aí em baixo.`
+    : diasParado >= 3
     ? `Último treino há ${diasParado} dias. ${diasParado >= 7 ? 'A semana recomeça quando quiseres: o ciclo não te espera nem te castiga.' : 'Hoje é um bom dia para voltar.'}`
     : s.type === 'rest' ? `Hoje é descanso. ${wk.focus.desc}`
     : log?.completed ? `A sessão de hoje está feita. ${wk.focus.desc}`
@@ -178,10 +194,20 @@ export function renderDay(nav, dateISO, altIndex = null) {
   ${log?.completed ? `<div class="notice">Feito. ${esc(log.summary || '')}</div>` : ''}
   ${blocks}
   ${s.type !== 'rest' ? `<div class="actions">
-    <button class="btn btn-primary btn-big" data-nav="session" data-date="${dateISO}" ${altIndex != null ? `data-alt="${altIndex}"` : ''}>Começar</button>
+    <button class="btn btn-primary btn-big" data-nav="session" data-date="${dateISO}" ${altIndex != null ? `data-alt="${altIndex}"` : ''}>${rotuloAcao(dateISO, log)}</button>
     ${s.alternatives.map((a, i) => `<button class="btn btn-ghost" data-nav="day" data-date="${dateISO}" data-alt="${i}">${esc(a.label)}</button>`).join('')}
   </div>` : ''}
   ${log?.completed ? '' : moverCard(state, dateISO, s)}`;
+}
+
+// O botão de um dia passado não pode dizer "Começar": o que se faz a um dia que já
+// passou é registá-lo ou corrigi-lo, e o texto tem de dizer isso.
+function rotuloAcao(dateISO, log) {
+  const hoje = iso(new Date());
+  if (log?.completed) return 'Rever ou corrigir o registo';
+  if (dateISO < hoje) return 'Registar este treino';
+  if (dateISO > hoje) return 'Fazer hoje, à frente do plano';
+  return 'Começar';
 }
 
 // Trocar o treino de dia. É uma troca com outro dia da mesma semana, e não um
@@ -306,7 +332,7 @@ export function renderProgress(nav) {
   const state = getState();
   const logs = state.logs.filter(l => l.completed);
   const totalMin = logs.reduce((a, l) => a + (l.minutes || 0), 0);
-  const { cycle } = cycleInfo(state.profile);
+  const { cycle } = cycleInfo(state.profile, new Date(), state);
   // sessões por semana (últimas 8)
   // só semanas a partir da primeira com registo: colunas a zero antes disso
   // ocupavam espaço sem dizer nada
@@ -353,6 +379,7 @@ export function renderProgress(nav) {
   </section>
   ${levels.length ? `<section class="card"><h3>Onde estás em cada progressão</h3><ul class="kv">${levels.map(l => `<li><span>${esc(l.name)}</span><strong>nível ${l.lvl}<small> de ${l.max}</small></strong></li>`).join('')}</ul></section>` : ''}
   ${loads.length ? `<section class="card"><h3>Cargas</h3><ul class="kv">${loads.map(l => `<li><span>${esc(l.ex.name)}</span><strong>${l.kg} kg${l.delta ? `<small class="delta ${l.delta > 0 ? 'up' : 'down'}"> ${l.delta > 0 ? '+' : ''}${l.delta} desde ${esc(fmtDate(l.since))}</small>` : ''}</strong></li>`).join('')}</ul></section>` : ''}
+  ${corridaCard(logs)}
   ${runs.length ? `<section class="card"><h3>Últimos treinos de cardio</h3><ul class="kv">${runs.map(l => `<li><span>${esc(fmtDate(l.date))}</span><strong>${esc(distLabel(l.cardio))} · ${l.cardio.minutes} min${pace(l.cardio) ? ` · ${pace(l.cardio)}` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${!logs.length ? `<p class="foot muted">Ainda sem registos. Depois da primeira sessão isto ganha vida.</p>` : ''}`;
 }
@@ -369,6 +396,51 @@ function pace(c) {
   if (!d || !c.minutes || (c.unit || 'km') !== 'km') return '';
   const p = c.minutes / d; const m = Math.floor(p); const s = Math.round((p - m) * 60);
   return `${m}:${String(s).padStart(2, '0')}/km`;
+}
+
+// A pergunta que ele fez na segunda mensagem e que a app nunca respondeu:
+// "5 km em 23-25 min, é um bom ritmo?". Aqui vai a tendência dele e uma referência.
+// Os escalões são a distribuição habitual de corredores recreativos aos 5 km; servem
+// para situar, não para avaliar — e a subida do percurso dele não entra em nenhuma.
+function segPorKm(c) {
+  const d = c.dist != null ? c.dist : c.km;
+  if (!d || !c.minutes || (c.unit || 'km') !== 'km') return null;
+  return (c.minutes * 60) / d;
+}
+const mmss = sec => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
+
+function escalao(sec) {
+  if (sec <= 240) return ['Competitivo', 'Ritmo de quem treina para competir.'];
+  if (sec <= 285) return ['Rápido', 'Acima da maioria dos corredores recreativos.'];
+  if (sec <= 330) return ['Bom', 'Ritmo sólido de corredor habitual.'];
+  if (sec <= 390) return ['Regular', 'Confortável e sustentável.'];
+  return ['A construir', 'A base aeróbica constrói-se assim mesmo.'];
+}
+
+function corridaCard(logs) {
+  const cs = logs.filter(l => l.cardio && segPorKm(l.cardio)).map(l => ({ date: l.date, s: segPorKm(l.cardio), km: l.cardio.dist ?? l.cardio.km }));
+  if (!cs.length) return '';
+  const ultimo = cs[cs.length - 1];
+  const [nome, frase] = escalao(ultimo.s);
+  // tendência: média das três últimas contra as três anteriores, se houver seis
+  let tend = '';
+  if (cs.length >= 6) {
+    const med = a => a.reduce((x, y) => x + y.s, 0) / a.length;
+    const nova = med(cs.slice(-3)), velha = med(cs.slice(-6, -3));
+    const d = Math.round(velha - nova);
+    tend = Math.abs(d) < 5
+      ? '<span class="muted">Estável nas últimas seis corridas.</span>'
+      : `<span class="delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '−' : '+'}${mmss(Math.abs(d))}/km</span> <span class="muted">nas três últimas contra as três anteriores.</span>`;
+  } else {
+    tend = `<span class="muted">Com ${6 - cs.length} ${6 - cs.length === 1 ? 'corrida' : 'corridas'} a mais mostro-te a tendência.</span>`;
+  }
+  return `<section class="card">
+    <h3>Ritmo de corrida</h3>
+    <div class="stats"><div class="stat"><span class="stat-n">${mmss(ultimo.s)}</span><span class="stat-l">min/km na última</span></div>
+      <div class="stat"><span class="stat-n">${nome}</span><span class="stat-l">para ${ultimo.km} km em piso plano</span></div></div>
+    <p class="small">${frase} ${tend}</p>
+    <p class="foot muted" style="text-align:left;margin-top:6px">Metade do teu percurso é a subir, e nenhuma referência conta com isso — em plano o mesmo esforço daria um ritmo mais rápido.</p>
+  </section>`;
 }
 
 function computeStreak(state) {
@@ -397,6 +469,27 @@ function copiaAviso(state) {
 
 function fmtDataHora(ms) {
   return new Date(ms).toLocaleString('pt-PT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+// Pausas: férias, doença, viagem. Não são faltas e o ciclo congela enquanto duram,
+// para ele não voltar de férias e encontrar a semana toda marcada como falhada.
+function pausasCard(state) {
+  const hoje = iso(new Date());
+  const ps = (state.pausas || []).filter(p => p.ate >= hoje);
+  return `<section class="card">
+    <h3>Pausas</h3>
+    <p class="muted small">Férias, viagem ou doença. Nesses dias não há treino marcado, não contam como falta, e o ciclo espera por ti.</p>
+    ${ps.length ? `<ul class="pausas">${ps.map(p => `<li class="row-between">
+      <span><strong>${esc(fmtDate(p.de))} a ${esc(fmtDate(p.ate))}</strong>${p.motivo ? `<br><small class="muted">${esc(p.motivo)}</small>` : ''}</span>
+      <button type="button" class="link" data-rm-pausa="${p.de}|${p.ate}">Remover</button>
+    </li>`).join('')}</ul>` : ''}
+    <div class="grid2">
+      <label class="field"><span>De</span><input type="date" data-pausa-de value="${hoje}"></label>
+      <label class="field"><span>Até</span><input type="date" data-pausa-ate value="${hoje}"></label>
+    </div>
+    <label class="field"><span>Motivo (opcional)</span><input type="text" placeholder="Férias" data-pausa-motivo></label>
+    <button type="button" class="btn btn-ghost" data-add-pausa>Marcar pausa</button>
+  </section>`;
 }
 
 // Lista das figuras que ele marcou como erradas, para eu as corrigir. A nota
@@ -511,6 +604,7 @@ export function renderSettings(nav, onboarding = false) {
       <button type="button" class="btn btn-ghost" data-ics>Adicionar 8 semanas ao calendário</button>
       <p class="foot muted">${(() => { try { return buildICS(state, icsOpts(p)).eventos; } catch { return 0; } })()} treinos, com aviso ${p.remindMin ?? 30} minutos antes. Repete quando mudares o plano.</p>
     </section>
+    ${pausasCard(state)}
     <section class="card">
       <h3>Ciclo</h3>
       <p class="muted small">Início do ciclo atual: ${esc(fmtDate(p.cycleStart))}. Reiniciar começa uma semana 1 na próxima segunda.</p>
@@ -548,6 +642,18 @@ export function bindSettings(root, nav, onboarding) {
     const recuo = campo === 'name' ? 'João' : campo === 'trainTime' ? '18:00' : '';
     setProfile({ [campo]: v || recuo });
     if (campo === 'trainTime') nav.rerender();
+  }));
+  root.querySelector('[data-add-pausa]')?.addEventListener('click', () => {
+    const de = root.querySelector('[data-pausa-de]')?.value;
+    const ate = root.querySelector('[data-pausa-ate]')?.value;
+    const motivo = root.querySelector('[data-pausa-motivo]')?.value || '';
+    if (!addPausa(de, ate, motivo)) return toast('Verifica as datas: o fim não pode ser antes do início');
+    toast('Pausa marcada. O ciclo espera por ti.');
+    nav.rerender();
+  });
+  root.querySelectorAll('[data-rm-pausa]').forEach(b => b.addEventListener('click', () => {
+    const [de, ate] = b.dataset.rmPausa.split('|');
+    removePausa(de, ate); toast('Pausa removida'); nav.rerender();
   }));
   root.querySelectorAll('[data-unflag]').forEach(b => b.addEventListener('click', () => {
     marcarFigura(b.dataset.unflag); nav.rerender();

@@ -6,10 +6,31 @@ export const WEEKDAYS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sáb
 export const WEEKDAYS_SHORT = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 // Semana do ciclo (1-4) e número do ciclo, a partir da data de início.
-export function cycleInfo(profile, date = new Date()) {
+// Pausas (férias, doença, viagem). Guardadas no estado como intervalos inclusivos.
+export function emPausa(state, dateISO) {
+  return (state?.pausas || []).find(p => dateISO >= p.de && dateISO <= p.ate) || null;
+}
+
+// Semanas de ciclo consumidas por pausas antes desta segunda-feira. O ciclo não pode
+// andar enquanto ele está fora: senão volta de férias na semana de deload sem ter
+// treinado as três anteriores, e com a semana toda marcada como falhada.
+function semanasPausadas(state, monday) {
+  let dias = 0;
+  for (const p of state?.pausas || []) {
+    const [a, b] = [new Date(p.de), new Date(p.ate)];
+    if (Number.isNaN(+a) || Number.isNaN(+b)) continue;
+    const fim = new Date(Math.min(b, monday - 1)); // só conta o que já passou
+    if (fim < a) continue;
+    dias += Math.floor((fim - a) / 864e5) + 1;
+  }
+  return Math.floor(dias / 7);
+}
+
+export function cycleInfo(profile, date = new Date(), state = null) {
   const start = mondayOf(new Date(profile.cycleStart));
   const monday = mondayOf(date);
-  const weeks = Math.max(0, Math.round((monday - start) / (7 * 86400000)));
+  const brutas = Math.max(0, Math.round((monday - start) / (7 * 86400000)));
+  const weeks = Math.max(0, brutas - (state ? semanasPausadas(state, monday) : 0));
   return { week: (weeks % 4) + 1, cycle: Math.floor(weeks / 4) + 1, weeksSinceStart: weeks, monday };
 }
 
@@ -435,7 +456,7 @@ function diaDaSemana(monday, dateISO) {
 
 export function buildWeek(state, date = new Date()) {
   const p = state.profile;
-  const { week, cycle, monday } = cycleInfo(p, date);
+  const { week, cycle, monday } = cycleInfo(p, date, state);
   const days = Math.min(7, Math.max(5, p.daysPerWeek || 5));
   const template = [...(TEMPLATES[p.goal]?.[days] || TEMPLATES.saude[5])];
   // Trocas de dia: quando ele não pode treinar num dia (escritório) e passa o treino
@@ -452,8 +473,14 @@ export function buildWeek(state, date = new Date()) {
   const sessions = template.map((type, i) => {
     const d = new Date(monday); d.setDate(monday.getDate() + i);
     const dateISO = iso(d);
-    const sess = buildSession(type, state, week, dateISO, type === 'cardio' ? cardioIndex : 0);
-    if (type === 'cardio') cardioIndex += 1;
+    const pausa = emPausa(state, dateISO);
+    const sess = buildSession(pausa ? 'rest' : type, state, week, dateISO, type === 'cardio' && !pausa ? cardioIndex : 0);
+    if (type === 'cardio' && !pausa) cardioIndex += 1;
+    if (pausa) {
+      sess.pausa = pausa;
+      sess.title = pausa.motivo || 'Pausa';
+      sess.subtitle = 'Fora do plano, sem falta a registar';
+    }
     applySwaps(sess, state);
     sess.weekday = WEEKDAYS[i];
     sess.weekdayShort = WEEKDAYS_SHORT[i];
