@@ -3,6 +3,12 @@
 
 const KEY = 'treino.v1';
 
+// Versão do formato dos dados. Sobe quando eu mudar a FORMA do estado (campos novos
+// não contam: esses ganham valor por omissão sozinhos). Um aparelho nunca aceita um
+// documento escrito por um formato mais recente do que o que sabe ler — sem isto, a
+// sincronização entre um telefone atualizado e outro por atualizar corrompia dados.
+export const SCHEMA = 1;
+
 export const GOALS = {
   saude: { label: 'Saúde geral', short: 'Saúde', desc: 'Força, cardio em zona 2, mobilidade e um HIIT. O plano mais equilibrado.' },
   musculo: { label: 'Criar músculo', short: 'Músculo', desc: 'Mais dias de força e mais séries. Menos HIIT, duas corridas.' },
@@ -24,7 +30,7 @@ export function iso(d) {
 
 export function defaultState() {
   return {
-    schema: 1,
+    schema: SCHEMA,
     onboarded: false,
     profile: {
       name: 'João',
@@ -102,8 +108,13 @@ export function exportJSON() {
 
 export function importJSON(text) {
   const parsed = JSON.parse(text);
-  if (!parsed || parsed.schema !== 1 || !parsed.profile) throw new Error('Ficheiro inválido');
-  state = { ...defaultState(), ...parsed };
+  if (!parsed || !parsed.profile || typeof parsed.schema !== 'number') throw new Error('Ficheiro inválido');
+  if (parsed.schema > SCHEMA) {
+    throw new Error('Estes dados vêm de uma versão mais recente da app. Atualiza este aparelho antes de os trazer.');
+  }
+  // O perfil junta-se campo a campo, como no arranque: uma cópia antiga não pode
+  // apagar definições que ainda não existiam quando foi feita.
+  state = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...parsed.profile } };
   persist();
 }
 

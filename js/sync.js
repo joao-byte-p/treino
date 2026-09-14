@@ -116,9 +116,14 @@ export async function empurrar(estado) {
 
 // Decide sozinho o que fazer, e devolve o que fez em palavras.
 // `aplicar` recebe o estado remoto quando é ele o mais recente.
+export const ERRO_FORMATO = 'O outro aparelho tem uma versão mais recente da app. Atualiza este antes de sincronizar.';
+
 export async function sincronizar(local, aplicar) {
   const remoto = await puxar();
   if (!remoto) { await empurrar(local); return { acao: 'enviado', texto: 'Primeira cópia enviada' }; }
+  // Um aparelho por atualizar nunca escreve por cima de um documento que já não sabe
+  // ler: ganharia pela hora e apagava os campos novos. Pára aqui e diz porquê.
+  if ((remoto.dados?.schema || 0) > (local.schema || 0)) throw new Error(ERRO_FORMATO);
   const tLocal = local.updatedAt || 0;
   const tRemoto = remoto.dados?.updatedAt || remoto.updatedAt || 0;
   if (tRemoto > tLocal) { aplicar(remoto.dados); return { acao: 'recebido', texto: 'Recebi a versão do outro aparelho' }; }

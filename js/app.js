@@ -153,13 +153,16 @@ if ('serviceWorker' in navigator) {
 // não fazer um pedido por cada tecla das definições. Falhar em silêncio é de propósito
 // — a app tem de continuar a funcionar sem rede, e o ecrã das Definições diz o estado.
 let porEnviar = null;
+let avisouFormato = false; // o aviso de formato diz-se uma vez por sessão, não a cada gravação
 subscribe(() => {
   if (!sync.ligado()) return;
   clearTimeout(porEnviar);
   porEnviar = setTimeout(() => {
-    sync.empurrar(getState())
+    // passa pelo `sincronizar` e não pelo `empurrar` direto: é ele que recusa escrever
+    // por cima de um documento de formato mais recente
+    sync.sincronizar(getState(), dados => { importJSON(JSON.stringify(dados)); render(false); })
       .then(() => setProfileSilencioso({ lastSync: Date.now() }))
-      .catch(() => {});
+      .catch(e => { if (e.message === sync.ERRO_FORMATO && !avisouFormato) { avisouFormato = true; toast(e.message); } });
   }, 4000);
 });
 
@@ -174,6 +177,6 @@ function setProfileSilencioso(campos) {
 if (sync.ligado()) {
   sync.sincronizar(getState(), dados => { importJSON(JSON.stringify(dados)); render(false); })
     .then(r => { if (r.acao === 'recebido') toast(r.texto); })
-    .catch(() => {});
+    .catch(e => { if (e.message === sync.ERRO_FORMATO) { avisouFormato = true; toast(e.message); } });
 }
 render();

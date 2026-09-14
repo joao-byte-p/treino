@@ -95,10 +95,43 @@ if (JSON.parse(localStorage.getItem('treino.sessao')).access_token !== 'tok2') f
 S.sair();
 if (S.ligado() || localStorage.getItem('treino.sessao')) falha('sair não apagou a sessão');
 
-// ── 9. o SQL da tabela liga a RLS ─────────────────────────────
+// ── 9. formato mais recente no servidor: não aplica nem escreve por cima ──
+await S.confirmarCodigo('treino@exemplo.pt', '123456');
+doc = { dados: { schema: 2, updatedAt: 9_000_000, logs: ['novo'] }, updated_at: new Date(9_000_000).toISOString() };
+const antes = JSON.stringify(doc);
+let aplicouFormatoNovo = false;
+try {
+  await S.sincronizar({ schema: 1, updatedAt: 9_500_000, logs: ['velho'] }, () => { aplicouFormatoNovo = true; });
+  falha('documento de formato mais recente foi aceite/escrito sem aviso');
+} catch (e) {
+  if (e.message !== S.ERRO_FORMATO) falha(`erro de formato com mensagem errada: ${e.message}`);
+}
+if (aplicouFormatoNovo) falha('aplicou localmente um documento que não sabe ler');
+if (JSON.stringify(doc) !== antes) falha('o aparelho antigo escreveu por cima do documento novo (o pior caso possível)');
+
+// ── 10. formato mais recente aqui, servidor antigo: envia normalmente ─────
+doc = { dados: { schema: 1, updatedAt: 100 }, updated_at: new Date(100).toISOString() };
+r = await S.sincronizar({ schema: 2, updatedAt: 200, logs: ['a'] }, () => falha('não devia aplicar'));
+if (r.acao !== 'enviado' || doc.dados.schema !== 2) falha('formato novo local não substituiu o antigo no servidor');
+
+// ── 11. importar uma cópia antiga não apaga definições novas ──────────────
+const store = await import('../js/store.js');
+const copiaAntiga = JSON.stringify({ schema: 1, profile: { name: 'João', goal: 'saude' }, logs: [] }); // sem trainTime, sem remindMin
+store.importJSON(copiaAntiga);
+const p = store.getState().profile;
+if (p.trainTime !== '18:00' || p.remindMin !== 30 || p.dumbbellMaxKg !== 12) falha(`cópia antiga apagou definições novas: ${JSON.stringify({ t: p.trainTime, r: p.remindMin, kg: p.dumbbellMaxKg })}`);
+if (p.name !== 'João') falha('cópia antiga perdeu o nome');
+try {
+  store.importJSON(JSON.stringify({ schema: 99, profile: {} }));
+  falha('importou um formato do futuro');
+} catch (e) {
+  if (!/versão mais recente/i.test(e.message)) falha(`recusa do futuro com mensagem pouco clara: ${e.message}`);
+}
+
+// ── 12. o SQL da tabela liga a RLS ─────────────────────────────
 if (!/enable row level security/i.test(S.SQL_TABELA)) falha('o SQL da tabela não liga RLS');
 if ((S.SQL_TABELA.match(/create policy/gi) || []).length < 3) falha('faltam políticas de RLS (ler, criar, alterar)');
 
-console.log(`sincronização: 9 cenários`);
+console.log(`sincronização: 12 cenários`);
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');
