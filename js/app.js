@@ -1,4 +1,4 @@
-import { getState, update, subscribe, importJSON } from './store.js';
+import { getState, update, subscribe, importJSON, marcarFigura } from './store.js';
 import * as sync from './sync.js';
 import { applyPendingGoal } from './engine/planner.js';
 import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, bindSettings } from './ui/views.js';
@@ -91,6 +91,11 @@ function render(scrollTop = true) {
     view.querySelector('[data-anim-toggle]')?.addEventListener('click', () => {
       update(s => { s.profile.animate = s.profile.animate === false; });
       render(false); // o rótulo do botão é derivado do estado em figCaption
+    });
+    view.querySelector('[data-flag]')?.addEventListener('click', e => {
+      const on = marcarFigura(e.currentTarget.dataset.flag);
+      toast(on ? 'Marcada. Fica no Perfil, com espaço para uma nota.' : 'Marca removida');
+      render(false);
     });
   }
   if (route.name === 'exercise') {

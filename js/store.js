@@ -58,6 +58,7 @@ export function defaultState() {
     repBonus: {},             // exerciseId -> reps extra, quando a carga chegou ao teto dos halteres
     timeBonus: {},            // exerciseId -> segundos extra numa isometria no topo da cadeia
     tetoAvisado: {},          // exerciseId -> data do último aviso de comprar mais peso
+    figuraMarcada: {},        // exerciseId -> { date, nota } quando ele marca a figura como errada
     logs: [],                 // sessões registadas
     swaps: {},                // "YYYY-MM-DD" -> { exerciseId: replacementId }
     kneeFlag: false,          // joelho a queixar-se esta semana
@@ -106,6 +107,18 @@ export function resetAll() {
 export function exportJSON() {
   return JSON.stringify(state, null, 2);
 }
+
+// Marcar uma figura como errada, durante ou fora do treino. Alterna, para poder
+// desmarcar sem sair do sítio. Vai no estado, logo viaja na cópia e na sincronização.
+export function marcarFigura(exId, nota) {
+  if (!state.figuraMarcada) state.figuraMarcada = {};
+  if (state.figuraMarcada[exId] && nota === undefined) delete state.figuraMarcada[exId];
+  else state.figuraMarcada[exId] = { date: iso(new Date()), nota: nota ?? state.figuraMarcada[exId]?.nota ?? '' };
+  persist();
+  return !!state.figuraMarcada[exId];
+}
+
+export function figuraMarcada(exId) { return !!state.figuraMarcada?.[exId]; }
 
 export function importJSON(text) {
   const parsed = JSON.parse(text);

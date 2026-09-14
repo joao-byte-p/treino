@@ -1,4 +1,4 @@
-import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso } from '../store.js';
+import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada } from '../store.js';
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
@@ -241,6 +241,14 @@ function figCaption(ex, state) {
   return `<button class="link hero-toggle" data-anim-toggle aria-pressed="${parada}">${parada ? 'Retomar o movimento' : 'Parar o movimento'}</button>`;
 }
 
+// Marcar a figura como errada, para eu a corrigir depois. Discreto de propósito:
+// é um relato, não uma ação principal do ecrã.
+function figFlag(ex) {
+  if (!hasPose(ex.id)) return '';
+  const on = figuraMarcada(ex.id);
+  return `<button class="link fig-flag${on ? ' on' : ''}" data-flag="${ex.id}" aria-pressed="${on}">${on ? '✓ Marcada como errada' : 'Esta figura está mal'}</button>`;
+}
+
 export function renderExercise(nav, id) {
   const state = getState();
   const ex = BY_ID[id];
@@ -257,7 +265,7 @@ export function renderExercise(nav, id) {
   <p class="lead">${esc(ex.nameEn)} · ${esc(ex.muscles.join(' · '))}</p>
   ${ex.knee === 'care' ? `<div class="notice notice-warn"><strong>Atenção ao joelho.</strong> ${esc(ex.mistakes.find(m => /joelho/i.test(m)) || 'Joelho alinhado com o pé em todas as repetições. Se doer, para.')}</div>` : ''}
   ${hasPose(ex.id) ? `<figure class="hero"><div class="hero-fig" data-fig="${ex.id}"></div>
-      <figcaption class="hero-cap">${figCaption(ex, state)}</figcaption></figure>`
+      <figcaption class="hero-cap">${figCaption(ex, state)}${figFlag(ex)}</figcaption></figure>`
     : `<figure class="hero"><div class="hero-ph">${illustration(ex, 150)}<span>Ilustração a caminho. Por agora, o vídeo e os passos abaixo.</span></div></figure>`}
   <div class="chips">${rx ? chip(rx) : ''}${ex.rest ? chip(`${ex.rest}s pausa`) : ''}${ex.tempo ? chip(ex.tempo) : ''}${load ? chip(`${load} kg`, 'chip-load') : ''}${ex.optionalLoad ? chip('Peso opcional') : ''}</div>
   ${hasPose(ex.id) ? `<section class="block"><h3 class="block-title">Passo a passo</h3>${stepsStrip(ex.id, { size: 150 })}</section>` : ''}
@@ -372,6 +380,22 @@ function fmtDataHora(ms) {
   return new Date(ms).toLocaleString('pt-PT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+// Lista das figuras que ele marcou como erradas, para eu as corrigir. A nota
+// escreve-se aqui e não durante o treino, onde escrever é atrito a mais.
+function marcadasCard(state) {
+  const m = state.figuraMarcada || {};
+  const ids = Object.keys(m).filter(id => BY_ID[id]);
+  if (!ids.length) return '';
+  return `<section class="card">
+    <h3>Figuras a corrigir <span class="muted">${ids.length}</span></h3>
+    <p class="muted small">Marcaste estas durante o treino. A nota é opcional e ajuda a perceber o que está mal.</p>
+    <ul class="marcadas">${ids.map(id => `<li>
+      <div class="row-between"><strong>${esc(BY_ID[id].name)}</strong><button type="button" class="link" data-unflag="${id}">Remover</button></div>
+      <input type="text" placeholder="O que está mal? (opcional)" value="${esc(m[id].nota || '')}" data-nota="${id}">
+    </li>`).join('')}</ul>
+  </section>`;
+}
+
 // Hora do treino guardada como "HH:MM" para o campo <input type="time">.
 export function icsOpts(p) {
   const [h, m] = String(p.trainTime || '18:00').split(':').map(Number);
@@ -412,6 +436,7 @@ export function renderSettings(nav, onboarding = false) {
       <label class="toggle"><input type="checkbox" data-knee-flag ${state.kneeFlag ? 'checked' : ''}><span>Joelho a queixar-se esta semana (troca corrida por piscina, pernas por isometrias)</span></label>
       <label class="field"><span>Nome</span><input type="text" value="${esc(p.name)}" data-text="name" autocomplete="off"></label>
     </section>
+    ${marcadasCard(state)}
     <section class="card">
       <h3>Aspeto</h3>
       <label class="field"><span>Tema</span><div class="seg">${[['dark', 'Escuro'], ['light', 'Claro'], ['auto', 'Automático']].map(([v, l]) => `<button type="button" class="${(p.theme || 'dark') === v ? 'on' : ''}" data-seg="theme" data-val="${v}">${l}</button>`).join('')}</div></label>
@@ -504,6 +529,12 @@ export function bindSettings(root, nav, onboarding) {
     const recuo = campo === 'name' ? 'João' : campo === 'trainTime' ? '18:00' : '';
     setProfile({ [campo]: v || recuo });
     if (campo === 'trainTime') nav.rerender();
+  }));
+  root.querySelectorAll('[data-unflag]').forEach(b => b.addEventListener('click', () => {
+    marcarFigura(b.dataset.unflag); nav.rerender();
+  }));
+  root.querySelectorAll('[data-nota]').forEach(i => i.addEventListener('change', () => {
+    marcarFigura(i.dataset.nota, i.value.trim()); toast('Nota guardada');
   }));
   root.querySelector('[data-ics]')?.addEventListener('click', () => {
     const st = getState();

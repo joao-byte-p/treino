@@ -1,5 +1,5 @@
 // Sessão guiada: transforma os blocos em passos e conduz com temporizador. No fim, registo simples.
-import { getState, saveLog, update, findLog } from '../store.js';
+import { getState, saveLog, update, findLog, marcarFigura, figuraMarcada } from '../store.js';
 import { sessionFor, buildWeek } from '../engine/planner.js';
 import { applyProgression, RPE } from '../engine/progression.js';
 import { BY_ID } from '../data/exercises.js';
@@ -236,10 +236,18 @@ export function mountSession(root, nav, dateISO, altIndex) {
       ${ex.mistakes.length ? `<h4>Erros comuns</h4><ul class="mistakes">${ex.mistakes.map(m => `<li>${esc(m)}</li>`).join('')}</ul>` : ''}
       <a class="btn btn-yt" href="${ytUrl(ex)}" target="_blank" rel="noopener">▶ Ver vídeo</a>
       <button class="btn btn-primary" data-close>Voltar à sessão</button>
+      ${hasPose(ex.id) ? `<button class="link srun-flag" data-flag>${figuraMarcada(ex.id) ? 'Figura marcada como errada — desmarcar' : 'Esta figura está mal'}</button>` : ''}
     </div>`;
     root.appendChild(dlg);
     const close = () => { dlg.remove(); timer?.resume(); };
     dlg.querySelector('[data-close]').addEventListener('click', close);
+    // Marcar no meio do treino tem de ser um toque e ficar ali: nada de escrever nem
+    // de sair do exercício. A nota, se ele quiser, escreve-se depois no Perfil.
+    dlg.querySelector('[data-flag]')?.addEventListener('click', e => {
+      const on = marcarFigura(ex.id);
+      e.target.textContent = on ? 'Figura marcada como errada — desmarcar' : 'Esta figura está mal';
+      toast(on ? 'Figura marcada. Fica no Perfil.' : 'Marca removida');
+    });
     dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
   }
 
