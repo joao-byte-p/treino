@@ -32,6 +32,8 @@ jobs:
       - run: node tools/anklecheck.mjs
       - name: Animações sem saltos
         run: node tools/suave.mjs
+      - name: Joelhos e cotovelos a dobrar para o lado certo
+        run: node tools/joelhos.mjs
       - run: node tools/figcheck.mjs
       - name: Marcação dos ecrãs igual à gravada
         run: node tools/snapshot.mjs
