@@ -2,6 +2,7 @@ import { getState, update, subscribe, importJSON, marcarFigura, moverTreino } fr
 import * as sync from './sync.js';
 import { applyPendingGoal } from './engine/planner.js';
 import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, bindSettings } from './ui/views.js';
+import { renderKit, renderKitItem } from './ui/kit.js';
 import { mountSession } from './ui/session.js';
 import { toast } from './ui/components.js';
 import { mountFigure } from './ui/figure.js';
@@ -21,7 +22,7 @@ let libFilter = 'todos';
 let libMine = false;
 let libMuscle = 'todos';
 
-const TAB_OF = { home: 'home', plan: 'plan', day: 'plan', library: 'library', exercise: 'library', progress: 'progress', settings: 'settings' };
+const TAB_OF = { home: 'home', plan: 'plan', day: 'plan', library: 'library', exercise: 'library', kit: 'library', 'kit-item': 'library', progress: 'progress', settings: 'settings' };
 
 const nav = {
   go(name, params = {}) {
@@ -66,6 +67,8 @@ function render(scrollTop = true) {
     case 'day': html = renderDay(nav, route.params.date, route.params.alt ?? null); break;
     case 'library': html = renderLibrary(nav, libQuery, libFilter, libMine, libMuscle); break;
     case 'exercise': html = renderExercise(nav, route.params.id); break;
+    case 'kit': html = renderKit(nav); break;
+    case 'kit-item': html = renderKitItem(nav, route.params.id); break;
     case 'progress': html = renderProgress(nav); break;
     case 'settings': html = renderSettings(nav, false); break;
     case 'session':
@@ -149,6 +152,7 @@ document.addEventListener('click', e => {
   if (n === 'session') return nav.go('session', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null });
   if (n === 'day') return nav.go('day', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null });
   if (n === 'exercise') return nav.go('exercise', { id: el.dataset.ex });
+  if (n === 'kit-item') return nav.go('kit-item', { id: el.dataset.kit });
   nav.go(n);
 });
 document.addEventListener('click', e => {

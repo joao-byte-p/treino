@@ -2,6 +2,7 @@ import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, r
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META, emPausa } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { GRUPOS, temGrupo } from '../data/muscles.js';
+import { KIT } from '../data/kit.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { lineChart, barChart, chartHead } from './charts.js';
@@ -268,6 +269,7 @@ export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = fals
   <div class="frow"><span class="frow-l">Movimento</span><div class="fchips" role="group" aria-label="Filtrar por movimento">${chips}</div></div>
   <div class="frow"><span class="frow-l">Músculo</span><div class="fchips" role="group" aria-label="Filtrar por músculo">${mchips}</div></div>
   <label class="toggle small only-mine"><input type="checkbox" data-lib-mine ${onlyMine ? 'checked' : ''}><span>Só com o material que tenho</span></label>
+  <button class="kit-entry" data-nav="kit"><span><strong>Como usar o material</strong><small>${KIT.length} guias · push-up board, halteres, corda</small></span><span aria-hidden="true">›</span></button>
   ${total ? groups.map(g => `
     <section class="block">
       <h3 class="block-title">${esc(PATTERN_LABEL[g.p])} <span class="muted">${g.items.length}</span></h3>
@@ -328,7 +330,8 @@ export function renderExercise(nav, id) {
   ${hasPose(ex.id) ? `<section class="block"><h3 class="block-title">Passo a passo</h3>${stepsStrip(ex.id, { size: 150 })}</section>` : ''}
   <section class="block"><h3 class="block-title">Como fazer</h3><ol class="steps">${ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol></section>
   ${ex.mistakes.length ? `<section class="block"><h3 class="block-title">Erros comuns</h3><ul class="mistakes">${ex.mistakes.map(m => `<li>${esc(m)}</li>`).join('')}</ul></section>` : ''}
-  <section class="block"><h3 class="block-title">Equipamento</h3><div class="chips">${ex.equipment.map(e => chip(equipmentLabel(e))).join('')}</div></section>
+  <section class="block"><h3 class="block-title">Equipamento</h3><div class="chips">${ex.equipment.map(e => chip(equipmentLabel(e))).join('')}</div>
+    ${ex.equipment.map(e => KIT.find(k => k.equip === e)).filter(Boolean).map(k => `<button class="link" data-nav="kit-item" data-kit="${k.id}">Como usar ${esc(k.name.toLowerCase())} →</button>`).join('')}</section>
   ${isProgression(ex.chain) ? `<section class="block"><h3 class="block-title">Cadeia de progressão</h3>
     <ol class="chain">${levels.map(l => `<li class="${l.level === cur ? 'now' : l.level < cur ? 'past' : ''} ${l.id === ex.id ? 'this' : ''}" data-nav="exercise" data-ex="${l.id}"><span class="chain-n">${l.level}</span><span>${esc(l.name)}</span></li>`).join('')}</ol>
     <div class="row-between" style="margin-top:10px">

@@ -57,6 +57,7 @@ const nav = { go() {}, back() {}, rerender() {} };
 const st = estado();
 localStorage.setItem('treino.v1', JSON.stringify(st));
 const store = await import('../js/store.js');
+const kit = await import('../js/ui/kit.js');
 store.update(s => { Object.assign(s, st, { profile: { ...s.profile, ...st.profile } }); });
 
 const ECRAS = {
@@ -70,6 +71,8 @@ const ECRAS = {
   'exercise-pushup': () => views.renderExercise(nav, 'pushup-board'),
   'exercise-isometria': () => views.renderExercise(nav, 'plank'),
   'exercise-teto': () => views.renderExercise(nav, 'goblet-squat'),
+  kit: () => kit.renderKit(nav),
+  'kit-board': () => kit.renderKitItem(nav, 'board'),
   progress: () => views.renderProgress(nav),
   settings: () => views.renderSettings(nav, false),
   onboarding: () => views.renderSettings(nav, true),
