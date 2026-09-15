@@ -506,8 +506,9 @@ function marcadasCard(state) {
   const ids = Object.keys(m).filter(id => BY_ID[id]);
   if (!ids.length) return '';
   return `<section class="card">
-    <h3>Figuras a corrigir <span class="muted">${ids.length}</span></h3>
-    <p class="muted small">Marcaste estas durante o treino. A nota é opcional e ajuda a perceber o que está mal.</p>
+    <div class="row-between"><h3>Figuras a corrigir <span class="muted">${ids.length}</span></h3>
+      <button type="button" class="link" data-copy-marcadas>Copiar lista</button></div>
+    <p class="muted small">Marcaste estas durante o treino. A nota é opcional e ajuda a perceber o que está mal. O botão copia a lista em texto, para ma mandares.</p>
     <ul class="marcadas">${ids.map(id => `<li>
       <div class="row-between"><strong>${esc(BY_ID[id].name)}</strong><button type="button" class="link" data-unflag="${id}">Remover</button></div>
       <input type="text" placeholder="O que está mal? (opcional)" value="${esc(m[id].nota || '')}" data-nota="${id}">
@@ -669,6 +670,16 @@ export function bindSettings(root, nav, onboarding) {
   root.querySelectorAll('[data-nota]').forEach(i => i.addEventListener('change', () => {
     marcarFigura(i.dataset.nota, i.value.trim()); toast('Nota guardada');
   }));
+  // As marcas vivem no aparelho dele; a única forma de eu as ver é ele mandar-mas.
+  // Texto simples com o id de cada exercício, que é o que eu preciso para corrigir.
+  root.querySelector('[data-copy-marcadas]')?.addEventListener('click', async () => {
+    const m = getState().figuraMarcada || {};
+    const ids = Object.keys(m).filter(id => BY_ID[id]);
+    const texto = `Figuras marcadas (${ids.length}) — ${iso(new Date())}\n` +
+      ids.map(id => `- ${BY_ID[id].name} [${id}]${m[id].nota ? `: ${m[id].nota}` : ''}`).join('\n');
+    try { await navigator.clipboard.writeText(texto); toast('Lista copiada'); }
+    catch { try { await navigator.share({ text: texto }); } catch { toast('Não consegui copiar'); } }
+  });
   root.querySelector('[data-ics]')?.addEventListener('click', () => {
     const st = getState();
     const n = downloadICS(st, icsOpts(st.profile));
