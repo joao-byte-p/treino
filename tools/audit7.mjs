@@ -128,10 +128,25 @@ try {
   if (!/versão mais recente/i.test(e.message)) falha(`recusa do futuro com mensagem pouco clara: ${e.message}`);
 }
 
-// ── 12. o SQL da tabela liga a RLS ─────────────────────────────
+// ── 12. a app nunca cria contas, e explica-se quando o email não tem conta ────
+{
+  const antes = globalThis.fetch;
+  let corpoEnviado = null;
+  globalThis.fetch = async (url, opts = {}) => {
+    corpoEnviado = JSON.parse(opts.body);
+    return { ok: false, status: 422, json: async () => ({ msg: 'Signups not allowed for otp' }) };
+  };
+  let msg = '';
+  try { await S.pedirCodigo('quem@exemplo.pt'); } catch (e) { msg = e.message; }
+  globalThis.fetch = antes;
+  if (corpoEnviado?.create_user !== false) falha('o pedido de código ainda pede para criar conta');
+  if (!/não há conta com este email/.test(msg)) falha(`email sem conta devia explicar-se, deu: ${msg}`);
+}
+
+// ── 13. o SQL da tabela liga a RLS ─────────────────────────────
 if (!/enable row level security/i.test(S.SQL_TABELA)) falha('o SQL da tabela não liga RLS');
 if ((S.SQL_TABELA.match(/create policy/gi) || []).length < 3) falha('faltam políticas de RLS (ler, criar, alterar)');
 
-console.log(`sincronização: 12 cenários`);
+console.log(`sincronização: 13 cenários`);
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');

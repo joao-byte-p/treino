@@ -49,8 +49,12 @@ async function pedir(caminho, opcoes = {}, comToken = true) {
 }
 
 // ── entrada por código no email (sem password para guardar) ───
+// `create_user: false`: a app nunca cria contas. As inscrições estão fechadas no
+// projeto, mas isso é uma definição do painel que se pode mudar sem ninguém dar
+// por ela — e a chave pública que autoriza este pedido está num repositório
+// público. Dito aqui, a app continua a recusar mesmo que a definição mude.
 export async function pedirCodigo(mail) {
-  const r = await pedir('/auth/v1/otp', { method: 'POST', body: JSON.stringify({ email: mail, create_user: true }) }, false);
+  const r = await pedir('/auth/v1/otp', { method: 'POST', body: JSON.stringify({ email: mail, create_user: false }) }, false);
   if (!r.ok) throw new Error(await mensagemErro(r, 'Não consegui enviar o código'));
   return true;
 }
@@ -90,6 +94,9 @@ async function mensagemErro(r, prefixo) {
     // projeto, e manda 2 por hora. Sem isto, a mensagem em inglês não explica nada.
     else if (/not authorized/i.test(detalhe)) detalhe = 'este endereço não pertence à equipa do projeto Supabase. Usa o email da tua conta Supabase, ou configura SMTP próprio no projeto';
     else if (r.status === 429 || /rate limit|too many/i.test(detalhe)) detalhe = 'o Supabase só manda 2 emails por hora sem SMTP próprio. Espera um pouco e tenta outra vez';
+    // Endereço que não tem conta: com as inscrições fechadas o Supabase recusa em
+    // vez de criar. Quase sempre é uma gralha no email.
+    else if (/signups? not allowed|user not found/i.test(detalhe)) detalhe = 'não há conta com este email. Confirma se está bem escrito — a app não cria contas novas';
   } catch { /* corpo vazio ou não-JSON */ }
   return `${prefixo}${detalhe ? `: ${detalhe}` : ` (HTTP ${r.status})`}`;
 }
