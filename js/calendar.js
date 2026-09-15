@@ -29,6 +29,8 @@ const escape = t => String(t)
   .split(BS).join(BS + BS)
   .split(';').join(BS + ';')
   .split(',').join(BS + ',')
+  .split(String.fromCharCode(13) + String.fromCharCode(10)).join(BS + 'n')
+  .split(String.fromCharCode(13)).join(BS + 'n')
   .split(String.fromCharCode(10)).join(BS + 'n');
 
 export function buildICS(state, { semanas = 8, hora = 18, minuto = 0, aviso = 30 } = {}) {

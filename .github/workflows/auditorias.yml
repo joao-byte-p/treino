@@ -10,6 +10,11 @@ on:
     - cron: '0 6 * * 1'
   workflow_dispatch:
 
+# Um PR de fora corre estas ferramentas no runner. Não há segredos aqui, e o
+# token fica explicitamente só de leitura para o caso de um dia haver.
+permissions:
+  contents: read
+
 jobs:
   offline:
     name: Motor, figuras e ecrãs

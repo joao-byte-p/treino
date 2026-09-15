@@ -12,6 +12,12 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <!-- A app guarda o token de sessão no localStorage, por isso qualquer script
+       estranho que corresse aqui levava-o consigo. Esta política diz ao browser
+       de onde pode vir código, estilo, letra e ligações de rede: tudo o resto é
+       recusado. Não corrige nenhuma falha conhecida — limita o estrago de uma
+       futura. Se acrescentares um recurso externo, tens de o declarar aqui. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://mdsmoqcaauihjvlwtbiu.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">

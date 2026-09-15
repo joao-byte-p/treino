@@ -12,7 +12,7 @@ function topo({ largura, altura, rot }) {
       <rect class="kit-pega" x="-9" y="-2.6" width="18" height="5.2" rx="2.6"/>
       <rect class="kit-mao" x="-3.4" y="-4.4" width="6.8" height="8.8" rx="3"/>
     </g>`;
-  return `<svg class="kit-topo" viewBox="0 0 100 74" width="100%" height="auto" aria-hidden="true">
+  return `<svg class="kit-topo" viewBox="0 0 100 74" aria-hidden="true">
     <ellipse class="kit-corpo" cx="50" cy="40" rx="11" ry="26"/>
     <circle class="kit-corpo" cx="50" cy="11" r="7"/>
     <line class="kit-braco" x1="${50 - largura}" y1="${altura}" x2="${41}" y2="26"/>

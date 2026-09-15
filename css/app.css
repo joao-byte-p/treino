@@ -633,7 +633,7 @@ body::before {
 
 /* Vista de cima: só o corpo e as mãos. A placa não é desenhada de propósito —
    ver o comentário em js/ui/kit.js. */
-.kit-topo { display: block; }
+.kit-topo { display: block; width: 100%; height: auto; }
 .kit-corpo { fill: var(--fill-2); }
 .kit-braco { stroke: var(--fig-ink); stroke-width: 3; opacity: 0.4; stroke-linecap: round; }
 .kit-pega { fill: var(--fig-ink); opacity: 0.45; }
