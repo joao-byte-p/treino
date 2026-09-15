@@ -142,8 +142,25 @@ function lerpFrame(a, b, u) {
       if (lg.a) return { ...lg, a: [A(lg.a[0], br.a[0]), A(lg.a[1], br.a[1])], foot: lg.foot == null ? null : A(lg.foot, br.foot) };
       return { ...lg, pin: [L(lg.pin[0], br.pin[0]), L(lg.pin[1], br.pin[1])], foot: lg.foot == null ? null : A(lg.foot, br.foot) };
     }),
-    items: a.items, marks: a.marks,
+    items: lerpList(a.items, b.items, u, ['dx', 'dy', 'rot', 'scale']),
+    props: lerpList(a.props, b.props, u, ['x1', 'y1', 'x2', 'y2', 'bow', 'spread', 'x', 'y', 'w', 'h']),
+    marks: a.marks,
   };
+}
+
+// Itens e adereços de cena interpolam campo a campo, pelo índice: sem isto o
+// halter ficava colado à primeira pose e só saltava no fim, e a corda não
+// acompanhava as mãos. Só mexe nos campos numéricos declarados.
+function lerpList(a, b, u, campos) {
+  if (!a) return a;
+  return a.map((it, i) => {
+    const o = b?.[i];
+    if (!o) return it;
+    const r = { ...it };
+    for (const k of campos) if (typeof it[k] === 'number' && typeof o[k] === 'number') r[k] = it[k] + (o[k] - it[k]) * u;
+    if (Array.isArray(it.at) && Array.isArray(o.at)) r.at = [it.at[0] + (o.at[0] - it.at[0]) * u, it.at[1] + (o.at[1] - it.at[1]) * u];
+    return r;
+  });
 }
 
 const easeInOut = u => (u < 0.5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u));
@@ -158,21 +175,34 @@ export function frameAt(frames, t) {
   const raw = tt * segs;
   const i = Math.min(segs - 1, Math.max(0, Math.floor(raw)));
   let u = raw - i;
-  const hold = 0.18;
+  // A pausa nos extremos existe para uma pose de duas posições respirar. Num ciclo
+  // de quatro (uma passada, uma corrida) a mesma pausa transforma o movimento em
+  // stop-motion: com mais instantes, a pausa encolhe.
+  const hold = frames.length >= 4 ? 0.04 : 0.18;
   u = u < hold ? 0 : u > 1 - hold ? 1 : (u - hold) / (1 - 2 * hold);
   return lerpFrame(loop[i], loop[i + 1], easeInOut(u));
 }
 
 // ---- cenário ----
-function propsSVG(props = []) {
+// Um cenário pode viver atrás do corpo (chão, parede) ou à frente dele (a barra
+// que passa diante do tronco num dip). `front: true` escolhe a camada. Alguns
+// adereços seguem o corpo: a corda agarra-se às mãos pelo nome da articulação.
+function propsSVG(props = [], j = null) {
   return (props || []).map(p => {
     if (p.type === 'floor') return `<line class="fig-floor" x1="${p.x1 ?? 2}" y1="${p.y}" x2="${p.x2 ?? 98}" y2="${p.y}"/>`;
     if (p.type === 'box') return `<rect class="fig-prop" x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="${p.rx ?? 1.5}"/>`;
     if (p.type === 'bar') return `<line class="fig-prop-line" x1="${p.x1}" y1="${p.y1}" x2="${p.x2}" y2="${p.y2}"/>`;
     if (p.type === 'wall') return `<line class="fig-prop-line" x1="${p.x}" y1="${p.y1 ?? 6}" x2="${p.x}" y2="${p.y2 ?? 92}"/>`;
     if (p.type === 'rope') {
-      const mx = (p.x1 + p.x2) / 2;
-      return `<path class="fig-rope" d="M ${p.x1} ${p.y1} Q ${mx} ${p.y1 + (p.bow ?? 60)} ${p.x2} ${p.y2}"/>`;
+      const A = Array.isArray(p.from) ? p.from : (p.from && j ? resolve(p.from, j) : [p.x1, p.y1]);
+      const B = Array.isArray(p.to) ? p.to : (p.to && j ? resolve(p.to, j) : [p.x2, p.y2]);
+      if (!A || !B) return '';
+      const bow = p.bow ?? 60;
+      // `spread` afasta os pontos de controlo para os lados: sem isso, duas mãos
+      // quase no mesmo sítio dariam um laço fino em vez do arco largo da corda.
+      const sp = p.spread ?? 0;
+      if (sp) return `<path class="fig-rope" d="M ${xy(A)} C ${xy([A[0] - sp, A[1] + bow])} ${xy([B[0] + sp, B[1] + bow])} ${xy(B)}"/>`;
+      return `<path class="fig-rope" d="M ${xy(A)} Q ${xy([(A[0] + B[0]) / 2, A[1] + bow])} ${xy(B)}"/>`;
     }
     if (p.type === 'water') {
       const y = p.y;
@@ -194,7 +224,11 @@ function dumbbell(at, rot = 0, scale = 1) {
 
 function itemsSVG(items = [], j) {
   return (items || []).map(it => {
-    const at = Array.isArray(it.at) ? it.at : resolve(it.at, j);
+    let at = Array.isArray(it.at) ? it.at : resolve(it.at, j);
+    // O halter fica onde a mão ou a anca estiver AGORA; `dx`/`dy` afastam-no o
+    // suficiente para não ficar enterrado no corpo. Preso a coordenadas fixas
+    // ficava parado enquanto a figura se mexia.
+    if (at && (it.dx || it.dy)) at = [at[0] + (it.dx || 0), at[1] + (it.dy || 0)];
     if (it.type === 'db') return dumbbell(at, it.rot || 0, it.scale || 1);
     if (it.type === 'ball' && at) return `<circle class="fig-ball" cx="${n(at[0])}" cy="${n(at[1])}" r="${it.r ?? 5}"/>`;
     return '';
@@ -328,15 +362,25 @@ function torsoSVG(j) {
     + `<path class="fig-torso" d="${d}"/>${neck('fig-neck')}`;
 }
 
+// O cenário de uma pose pode ser fixo (chão, banco) ou próprio de cada instante
+// (a corda a passar debaixo dos pés). Junta os dois e separa-os por camada.
+function allProps(P, f) {
+  const todos = [...(P.props || []), ...(f?.props || [])];
+  return { back: todos.filter(p => !p.front), front: todos.filter(p => p.front) };
+}
+
 function bodySVG(f, farOff, wide) {
   const j = joints(f, farOff, wide);
   const far = [];
   const near = [];
-  j.legs.forEach(l => (l.far ? far : near).push(legSVG(l)));
-  j.arms.forEach(a => (a.far ? far : near).push(armSVG(a)));
+  const over = [];   // `over: true` num membro põe-no por cima de tudo: é assim que
+                     // a coxa tapa o braço no curl concentrado, como na vida real
+  const onde = (spec, l) => (l.far ? far : (spec?.over ? over : near));
+  j.legs.forEach((l, i) => onde(f.legs?.[i], l).push(legSVG(l)));
+  j.arms.forEach((a, i) => onde(f.arms?.[i], a).push(armSVG(a)));
   const head = `<circle class="fig-head-halo" cx="${n(j.headC[0])}" cy="${n(j.headC[1])}" r="${SEG.head + 1.6}"/>`
     + `<circle class="fig-head" cx="${n(j.headC[0])}" cy="${n(j.headC[1])}" r="${SEG.head}"/>`;
-  return { far: far.join(''), torso: torsoSVG(j), near: near.join(''), head, marks: marksSVG(f.marks, j), j };
+  return { far: far.join(''), torso: torsoSVG(j), near: near.join(''), over: over.join(''), head, marks: marksSVG(f.marks, j), j };
 }
 
 // ---- SVG estático (miniaturas, tira passo a passo) ----
@@ -384,9 +428,12 @@ export function figureSVG(id, { frame = 0, size = 120, maxH = 0, showProps = tru
   const vb = (square && squareBox(id, frame)) || P.viewBox || '0 0 100 100';
   const [, , vw, vh] = vb.split(' ').map(Number);
   const [w, h] = fit(vw, vh, size, maxH || (square ? size : 0));
+  const cena = allProps(P, f);
   return `<svg class="fig ${className}" viewBox="${vb}" width="${w}" height="${h}" aria-hidden="true">
-    ${showProps ? propsSVG(P.props) : ''}
-    ${b.far}${b.torso}${b.head}${b.near}${b.marks}
+    ${showProps ? propsSVG(cena.back, b.j) : ''}
+    ${b.far}${b.torso}${b.head}
+    ${showProps ? propsSVG(cena.front, b.j) : ''}
+    ${b.near}${b.over}${b.marks}
     ${itemsSVG(f.items, b.j)}
     ${arrow ? arrowSVG(f.arrow || P.arrow || autoArrow(P, f, P.far || FAR, P.wide)) : ''}
   </svg>`;
@@ -396,17 +443,22 @@ export function figureSVG(id, { frame = 0, size = 120, maxH = 0, showProps = tru
 export function mountFigure(host, id, { size = 200, maxH = 0, period = 3200, animate = true, arrow = true } = {}) {
   const P = POSES[id];
   if (!P || !host) return () => {};
+  // Uma passada demora menos de um segundo: a cadência é da pose, não do ecrã.
+  period = P.period || period;
   const vb = P.viewBox || '0 0 100 100';
   const [, , vw, vh] = vb.split(' ').map(Number);
   const f0 = P.frames[0];
   const b0 = bodySVG(f0, P.far, P.wide);
   const [w, h] = fit(vw, vh, size, maxH);
+  const cena0 = allProps(P, f0);
   host.innerHTML = `<svg class="fig fig-anim" viewBox="${vb}" width="${w}" height="${h}" aria-hidden="true">
-    ${propsSVG(P.props)}
+    <g data-props-back>${propsSVG(cena0.back, b0.j)}</g>
     <g data-far>${b0.far}</g>
     <g data-torso>${b0.torso}</g>
     <g data-head>${b0.head}</g>
+    <g data-props-front>${propsSVG(cena0.front, b0.j)}</g>
     <g data-near>${b0.near}</g>
+    <g data-over>${b0.over}</g>
     <g data-marks>${b0.marks}</g>
     <g data-items>${itemsSVG(f0.items, b0.j)}</g>
     <g data-arrow>${arrow ? arrowSVG(f0.arrow || P.arrow || autoArrow(P, f0, P.far || FAR, P.wide)) : ''}</g>
@@ -419,8 +471,9 @@ export function mountFigure(host, id, { size = 200, maxH = 0, period = 3200, ani
   const g = {
     far: svg.querySelector('[data-far]'), torso: svg.querySelector('[data-torso]'),
     near: svg.querySelector('[data-near]'), head: svg.querySelector('[data-head]'),
-    marks: svg.querySelector('[data-marks]'), items: svg.querySelector('[data-items]'),
-    arrow: svg.querySelector('[data-arrow]'),
+    over: svg.querySelector('[data-over]'), marks: svg.querySelector('[data-marks]'),
+    items: svg.querySelector('[data-items]'), arrow: svg.querySelector('[data-arrow]'),
+    back: svg.querySelector('[data-props-back]'), front: svg.querySelector('[data-props-front]'),
   };
   let raf = null;
   let visible = true;
@@ -430,11 +483,15 @@ export function mountFigure(host, id, { size = 200, maxH = 0, period = 3200, ani
     if (visible) {
       const f = frameAt(P.frames, (Math.max(0, now - t0) % period) / period);
       const b = bodySVG(f, P.far, P.wide);
+      const cena = allProps(P, f);
       g.far.innerHTML = b.far;
       g.torso.innerHTML = b.torso;
       g.near.innerHTML = b.near;
+      g.over.innerHTML = b.over;
       g.head.innerHTML = b.head;
       g.marks.innerHTML = b.marks;
+      g.back.innerHTML = propsSVG(cena.back, b.j);
+      g.front.innerHTML = propsSVG(cena.front, b.j);
       g.items.innerHTML = itemsSVG(f.items, b.j);
       if (g.arrow && arrow) g.arrow.innerHTML = arrowSVG(f.arrow || P.arrow || autoArrow(P, f, P.far || FAR, P.wide));
     }

@@ -341,7 +341,10 @@ export const POSES = {
   // ── Dips em paralelas ──
   'bar-dips': {
     viewBox: '28 -4 44 104',
-    props: [{ type: 'bar', x1: 40, y1: 48, x2: 66, y2: 48 }, { type: 'bar', x1: 36, y1: 52, x2: 62, y2: 52 }],
+    // A barra de trás fica atrás do corpo e a da frente passa-lhe diante do tronco:
+    // é essa diferença de camada que faz ler duas barras paralelas e não uma só.
+    props: [{ type: 'bar', x1: 30, y1: 47, x2: 58, y2: 47 },
+            { type: 'bar', x1: 40, y1: 48, x2: 70, y2: 48, front: true }],
     frames: [
       {
         label: 'Braços esticados, tronco ligeiramente à frente',
@@ -641,18 +644,21 @@ export const POSES = {
   // ── Pistol squat assistido ───────────────────────────────────
   'pistol-assisted': {
     viewBox: '10 10 88 86',
-    props: [{ type: 'floor', y: 90, x1: 12, x2: 96 }, { type: 'wall', x: 78, y1: 20, y2: 90 }],
+    // Apoio numa mesa ou bancada em vez de parede: a perna da frente estica-se
+    // por baixo do tampo, que é o que acontece de facto — contra uma parede o pé
+    // atravessava-a.
+    props: [{ type: 'floor', y: 90, x1: 12, x2: 96 }, { type: 'bar', x1: 58, y1: 48, x2: 96, y2: 48 }],
     frames: [
       {
-        label: 'Segura numa porta ou mesa',
+        label: 'Segura na bancada ou no aro de uma porta',
         hip: [50, 54], torso: 86, head: 0,
-        arms: [{ a: [-30, -12], far: true }, { pin: [74, 48], bend: -1 }],
+        arms: [{ pin: [72, 48], bend: -1, far: true }, { pin: [76, 48], bend: -1 }],
         legs: [{ a: [-16, -8], foot: 60, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
       },
       {
         label: 'Desce lento até onde o joelho aceita',
         hip: [50, 65], torso: 72, head: -8,
-        arms: [{ a: [-20, 0], far: true }, { pin: [74, 48], bend: -1 }],
+        arms: [{ pin: [72, 48], bend: -1, far: true }, { pin: [76, 48], bend: -1 }],
         legs: [{ a: [-4, 2], foot: 60, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
       },
@@ -887,20 +893,20 @@ export const POSES = {
 
   // ── Ponte de glúteos ─────────────────────────────────────────
   'glute-bridge': {
-    viewBox: '17 58 76 36',
-    props: [{ type: 'floor', y: 89, x1: 16, x2: 94 }],
+    viewBox: '6 56 88 40',
+    props: [{ type: 'floor', y: 88, x1: 8, x2: 92 }],
     frames: [
       {
         label: 'Anca no chão, pés à largura da anca',
-        hip: [46, 86], torso: -2, head: 0,
-        arms: [{ a: [-178, -181], far: true }, { a: [-180, -183] }],
-        legs: [{ pin: [22, 87], foot: 180, bend: 1, far: true }, { pin: [22, 87], foot: 176, bend: 1 }],
+        hip: [46, 83], torso: 0, head: 10,
+        arms: [{ a: [-178, -180], far: true }, { a: [-180, -180] }],
+        legs: [{ pin: [22, 86], foot: 180, bend: 1, far: true }, { pin: [22, 86], foot: 176, bend: 1 }],
       },
       {
         label: 'Empurra pelos calcanhares até à linha',
-        hip: [46, 74], torso: -22, head: 0,
-        arms: [{ a: [-178, -181], far: true }, { a: [-180, -183] }],
-        legs: [{ pin: [22, 87], foot: 180, bend: 1, far: true }, { pin: [22, 87], foot: 176, bend: 1 }],
+        hip: [46, 72], torso: -26, head: 38,
+        arms: [{ a: [-180, -180], far: true }, { a: [-180, -180] }],
+        legs: [{ pin: [22, 86], foot: 180, bend: 1, far: true }, { pin: [22, 86], foot: 176, bend: 1 }],
       },
     ],
   },
@@ -908,21 +914,22 @@ export const POSES = {
   // ── Hip thrust com halter ────────────────────────────────────
   'db-hip-thrust': {
     viewBox: '16 54 84 40',
-    props: [{ type: 'floor', y: 90, x1: 18, x2: 98 }, { type: 'box', x: 68, y: 68, w: 26, h: 22 }],
+    props: [{ type: 'floor', y: 90, x1: 18, x2: 98 }, { type: 'box', x: 58, y: 68, w: 36, h: 22 }],
     frames: [
       {
         label: 'Ombros no banco, halter na anca',
-        hip: [42, 80], torso: 20, head: -6,
+        hip: [42, 80], torso: 26, head: -26,
         arms: [{ a: [-174, -178], far: true }, { a: [-172, -176] }],
         legs: [{ pin: [24, 86], foot: 22, bend: 1, far: true }, { pin: [24, 86], foot: 18, bend: 1 }],
-        items: [{ type: 'db', at: [42, 74], rot: 90 }],
+        // preso à anca e não a um ponto fixo: sobe com ela em vez de ficar parado
+        items: [{ type: 'db', at: 'hip', dy: -6, rot: 90 }],
       },
       {
         label: 'Extensão completa, glúteo apertado',
-        hip: [42, 68], torso: 8, head: -6,
+        hip: [42, 68], torso: -5, head: 5,
         arms: [{ a: [-174, -178], far: true }, { a: [-172, -176] }],
         legs: [{ pin: [24, 86], foot: 22, bend: 1, far: true }, { pin: [24, 86], foot: 18, bend: 1 }],
-        items: [{ type: 'db', at: [42, 62], rot: 90 }],
+        items: [{ type: 'db', at: 'hip', dy: -6, rot: 90 }],
       },
     ],
   },
@@ -968,9 +975,9 @@ export const POSES = {
     frames: [
       {
         label: 'Punhos fechados, tensão máxima',
-        hip: [45.1, 71.3], torso: 16.6, head: 0,
-        arms: [{ a: [-90, 14], far: true }, { a: [-90, 10] }],
-        legs: [{ pin: [10.6, 83.6], foot: -42, bend: 1, far: true }, { pin: [10.6, 83.6], foot: -45, bend: 1 }],
+        hip: [45.1, 74.6], torso: 16.6, head: 0,
+        arms: [{ a: [-90, 4], far: true }, { a: [-90, 0] }],
+        legs: [{ pin: [12, 83.6], foot: -42, bend: 1, far: true }, { pin: [12, 83.6], foot: -45, bend: 1 }],
       },
     ],
   },
@@ -1011,14 +1018,16 @@ export const POSES = {
 
   // ── Prancha de Copenhague ────────────────────────────────────
   'copenhagen-plank': {
-    viewBox: '0 44 98 48',
-    props: [{ type: 'floor', y: 88, x1: 2, x2: 96 }, { type: 'box', x: 6, y: 78, w: 36, h: 10 }],
+    viewBox: '0 40 98 54',
+    // O banco é alto e fica longe da anca: o corpo faz uma prancha inclinada do
+    // cotovelo no chão até ao pé em cima do banco. É essa diagonal que define tudo.
+    props: [{ type: 'floor', y: 88, x1: 2, x2: 96 }, { type: 'box', x: 2, y: 69, w: 32, h: 19 }],
     frames: [
       {
-        label: 'Perna de cima no banco, de baixo recolhida',
-        hip: [45.1, 73.3], torso: 16.6, head: 0,
-        arms: [{ a: [78, 84], far: true }, { a: [-90, 0] }],
-        legs: [{ a: [191, 186], foot: 172, far: true }, { a: [215, 180], foot: 190 }],
+        label: 'Perna de cima no banco, joelho de baixo pousado',
+        hip: [45, 79], torso: 23, head: 0,
+        arms: [{ pin: [46, 76], bend: 1, far: true }, { a: [-90, 0] }],
+        legs: [{ a: [141, -70], foot: -30, far: true }, { pin: [10.5, 66.5], foot: 180, bend: -1 }],
       },
     ],
   },
@@ -1047,14 +1056,14 @@ export const POSES = {
   // A lombar tem de assentar no chão: era o que a legenda dizia e o desenho não fazia,
   // com o corpo todo a flutuar 8 unidades acima da linha.
   'hollow-hold': {
-    viewBox: '8 50 104 44',
-    props: [{ type: 'floor', y: 88, x1: 10, x2: 110 }],
+    viewBox: '6 52 108 42',
+    props: [{ type: 'floor', y: 88, x1: 8, x2: 112 }],
     frames: [
       {
-        label: 'Lombar no chão, ombros e pernas no ar',
-        hip: [60, 86], torso: 150, head: -14,
-        arms: [{ a: [147, 152], far: true }, { a: [150, 155] }],
-        legs: [{ a: [22, 20], foot: -3, far: true }, { a: [25, 23], foot: 0 }],
+        label: 'Lombar no chão, ombros e pernas a um palmo',
+        hip: [64, 86], torso: 157, head: -16,
+        arms: [{ a: [158, 163], far: true }, { a: [161, 166] }],
+        legs: [{ a: [20, 17], foot: -6, far: true }, { a: [23, 20], foot: -3 }],
       },
     ],
   },
@@ -1139,7 +1148,7 @@ export const POSES = {
         label: 'Joelho ao peito, ritmo constante',
         hip: [47.1, 65.2], torso: 30.7, head: 0,
         arms: PRONE_HANDS,
-        legs: [{ pin: [16.2, 83.6], foot: -42, bend: 1, far: true }, { pin: [50, 74], foot: -30, bend: 1 }],
+        legs: [{ pin: [16.2, 83.6], foot: -42, bend: 1, far: true }, { pin: [48, 78], foot: -70, bend: -1 }],
       },
     ],
   },
@@ -1207,20 +1216,25 @@ export const POSES = {
 
   // ── HIIT: corda de saltar ────────────────────────────────────
   'rope-skip-light': {
-    viewBox: '10 6 84 92',
-    props: [{ type: 'floor', y: 90, x1: 12, x2: 92 }, { type: 'rope', x1: 40, y1: 56, x2: 62, y2: 56, bow: 46 }],
+    viewBox: '10 -6 84 104',
+    period: 1400,
+    // A corda é cenário de cada instante, não do exercício: agarra-se às mãos e o
+    // arco passa por cima da cabeça num extremo e por baixo dos pés no outro.
+    props: [{ type: 'floor', y: 90, x1: 12, x2: 92 }],
     frames: [
       {
-        label: 'Saltos de dois centímetros',
+        label: 'Pés no chão, corda a passar por cima',
         hip: [50, 54], torso: 90, head: 0,
-        arms: [{ a: [-58, -30], far: true }, { a: [-55, -26] }],
-        legs: [{ pin: [50, 90], foot: 4, bend: -1, far: true }, { pin: [50, 90], foot: 0, bend: -1 }],
+        arms: [{ pin: [60, 56], bend: 1, far: true }, { pin: [60, 56], bend: 1 }],
+        legs: [{ pin: [50, 88], foot: 4, bend: -1, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
+        props: [{ type: 'rope', from: 'wrist0', to: 'wrist1', bow: -76, spread: 34, front: true }],
       },
       {
-        label: 'Aterra na ponta dos pés',
-        hip: [50, 50], torso: 90, head: 0,
-        arms: [{ a: [-58, -30], far: true }, { a: [-55, -26] }],
-        legs: [{ pin: [50, 86], foot: -40, bend: -1, far: true }, { pin: [50, 86], foot: -44, bend: -1 }],
+        label: 'Salto de dois dedos, corda passa por baixo',
+        hip: [50, 52], torso: 90, head: 0,
+        arms: [{ pin: [60, 56], bend: 1, far: true }, { pin: [60, 56], bend: 1 }],
+        legs: [{ pin: [50, 85], foot: -34, bend: -1, far: true }, { pin: [50, 85], foot: -38, bend: -1 }],
+        props: [{ type: 'rope', from: 'wrist0', to: 'wrist1', bow: 50, spread: 34, front: true }],
       },
     ],
   },
@@ -1249,38 +1263,64 @@ export const POSES = {
   // ── Cardio: corrida ──────────────────────────────────────────
   'run-z2': {
     viewBox: '14 6 76 92',
+    period: 1800,
     props: STAND_FLOOR,
     frames: [
       {
-        label: 'Passada curta, pé debaixo da anca',
-        hip: [50, 52], torso: 84, head: 4,
-        arms: [{ a: [-58, -112], far: true }, { a: [-128, -62] }],
-        legs: [{ a: [-128, -68], foot: -30, far: true }, { a: [-52, -100], foot: -12 }],
+        label: 'Apoio: pé debaixo da anca',
+        hip: [50, 54], torso: 84, head: 4,
+        arms: [{ a: [-114, -166], far: true }, { a: [-40, -94] }],
+        legs: [{ a: [-44, -106], foot: -18, far: true }, { a: [-67.7, -105.5], foot: -4 }],
       },
       {
-        label: 'Troca de pernas, ritmo conversável',
-        hip: [50, 50], torso: 84, head: 4,
-        arms: [{ a: [-128, -62], far: true }, { a: [-58, -112] }],
-        legs: [{ a: [-52, -100], foot: -12, far: true }, { a: [-132, -44], foot: -40 }],
+        label: 'Impulso atrás, ritmo conversável',
+        hip: [50, 49], torso: 84, head: 4,
+        arms: [{ a: [-74, -128], far: true }, { a: [-78, -132] }],
+        legs: [{ a: [-32, -100], foot: -14, far: true }, { a: [-124, -142], foot: -56 }],
+      },
+      {
+        label: 'Aterra o outro pé',
+        hip: [50, 54], torso: 84, head: 4,
+        arms: [{ a: [-40, -94], far: true }, { a: [-114, -166] }],
+        legs: [{ a: [-67.7, -105.5], foot: -4, far: true }, { a: [-44, -106], foot: -18 }],
+      },
+      {
+        label: 'E o impulso do outro lado',
+        hip: [50, 49], torso: 84, head: 4,
+        arms: [{ a: [-78, -132], far: true }, { a: [-74, -128] }],
+        legs: [{ a: [-124, -142], foot: -56, far: true }, { a: [-32, -100], foot: -14 }],
       },
     ],
   },
 
   'run-tempo': {
     viewBox: '14 6 76 92',
+    period: 1500,
     props: STAND_FLOOR,
     frames: [
       {
-        label: 'Ritmo firme, joelho mais alto',
-        hip: [50, 50], torso: 80, head: 6,
-        arms: [{ a: [-50, -120], far: true }, { a: [-136, -54] }],
-        legs: [{ a: [-136, -56], foot: -34, far: true }, { a: [-36, -104], foot: -10 }],
+        label: 'Apoio curto, joelho mais alto',
+        hip: [50, 53], torso: 80, head: 6,
+        arms: [{ a: [-118, -172], far: true }, { a: [-34, -88] }],
+        legs: [{ a: [-34, -112], foot: -22, far: true }, { a: [-72.5, -97.7], foot: -6 }],
       },
       {
-        label: 'Impulso atrás, tronco estável',
-        hip: [50, 48], torso: 80, head: 6,
-        arms: [{ a: [-136, -54], far: true }, { a: [-50, -120] }],
-        legs: [{ a: [-36, -104], foot: -10, far: true }, { a: [-142, -36], foot: -44 }],
+        label: 'Voo: impulso completo atrás',
+        hip: [50, 47], torso: 80, head: 6,
+        arms: [{ a: [-72, -126], far: true }, { a: [-76, -130] }],
+        legs: [{ a: [-24, -104], foot: -16, far: true }, { a: [-130, -150], foot: -62 }],
+      },
+      {
+        label: 'Aterra o outro pé',
+        hip: [50, 53], torso: 80, head: 6,
+        arms: [{ a: [-34, -88], far: true }, { a: [-118, -172] }],
+        legs: [{ a: [-72.5, -97.7], foot: -6, far: true }, { a: [-34, -112], foot: -22 }],
+      },
+      {
+        label: 'E o voo do outro lado',
+        hip: [50, 47], torso: 80, head: 6,
+        arms: [{ a: [-76, -130], far: true }, { a: [-72, -126] }],
+        legs: [{ a: [-130, -150], foot: -62, far: true }, { a: [-24, -104], foot: -16 }],
       },
     ],
   },
@@ -1308,19 +1348,32 @@ export const POSES = {
   // ── Cardio: caminhada rápida ─────────────────────────────────
   'walk-brisk': {
     viewBox: '14 6 76 92',
+    period: 2400,
     props: STAND_FLOOR,
     frames: [
       {
-        label: 'Passo firme, braços a acompanhar',
-        hip: [50, 52], torso: 88, head: 0,
-        arms: [{ a: [-72, -100], far: true }, { a: [-108, -74] }],
-        legs: [{ a: [-112, -92], foot: -20, far: true }, { pin: [58, 88], foot: 18, bend: -1 }],
+        label: 'Calcanhar à frente',
+        hip: [50, 55], torso: 88, head: 0,
+        arms: [{ a: [-58, -76], far: true }, { a: [-122, -140] }],
+        legs: [{ a: [-97.2, -122.7], foot: -19, far: true }, { a: [-56.4, -89.8], foot: 22 }],
       },
       {
-        label: 'Troca de perna',
+        label: 'Anca por cima do pé de apoio',
         hip: [50, 52], torso: 88, head: 0,
-        arms: [{ a: [-108, -74], far: true }, { a: [-72, -100] }],
-        legs: [{ a: [-72, -104], foot: -20, far: true }, { pin: [46, 88], foot: -10, bend: -1 }],
+        arms: [{ a: [-88, -106], far: true }, { a: [-92, -110] }],
+        legs: [{ a: [-60, -100], foot: -14, far: true }, { a: [-88.6, -91.4], foot: 4 }],
+      },
+      {
+        label: 'Troca: o outro calcanhar à frente',
+        hip: [50, 55], torso: 88, head: 0,
+        arms: [{ a: [-122, -140], far: true }, { a: [-58, -76] }],
+        legs: [{ a: [-56.4, -89.8], foot: 22, far: true }, { a: [-97.2, -122.7], foot: -19 }],
+      },
+      {
+        label: 'Impulso pela ponta do pé de trás',
+        hip: [50, 52], torso: 88, head: 0,
+        arms: [{ a: [-92, -110], far: true }, { a: [-88, -106] }],
+        legs: [{ a: [-88.6, -91.4], foot: 4, far: true }, { a: [-60, -100], foot: -14 }],
       },
     ],
   },
@@ -1353,10 +1406,11 @@ export const POSES = {
     props: [{ type: 'floor', y: 90, x1: 10, x2: 90 }],
     frames: [
       {
-        label: 'Afundo baixo, glúteo de trás apertado',
-        hip: [48, 62], torso: 92, head: 0,
+        label: 'Meio ajoelhado, glúteo de trás apertado',
+        // o joelho de trás está POUSADO no chão: antes ficava suspenso no ar
+        hip: [50, 72], torso: 92, head: 0,
         arms: [{ a: [-80, -84], far: true }, { a: [-78, -86] }],
-        legs: [{ a: [-150, -30], foot: 0, far: true }, { pin: [64, 88], foot: 0, bend: -1 }],
+        legs: [{ a: [-119, 180], foot: 176, far: true }, { pin: [66, 88], foot: 0, bend: -1 }],
       },
     ],
   },
@@ -1380,14 +1434,17 @@ export const POSES = {
   // Uma pose só: interpolar a troca de lado fazia as pernas passarem esticadas
   // pelo chão. A troca está descrita nas indicações do exercício.
   'ninety-ninety': {
-    viewBox: '18 22 54 72',
-    props: [{ type: 'floor', y: 88, x1: 20, x2: 70 }],
+    // Vista de frente e sentado no chão: de lado esta posição não se lê, porque
+    // uma das canelas aponta para a câmara e desaparece.
+    viewBox: '14 34 76 62',
+    wide: true,
+    props: [{ type: 'floor', y: 90, x1: 16, x2: 88 }],
     frames: [
       {
-        label: 'Ambas as pernas a 90°, costas retas',
-        hip: [46, 66], torso: 84, head: -6,
-        arms: [{ a: [-64, -70], far: true }, { a: [-60, -74] }],
-        legs: [{ a: [-8, -96], foot: -170, far: true }, { a: [-172, -86], foot: -10 }],
+        label: 'Sentado no chão, os dois joelhos a 90°',
+        hip: [50, 82], torso: 88, head: 0,
+        arms: [{ a: [-104, -88], far: true }, { a: [-76, -92] }],
+        legs: [{ a: [-20, -4], foot: -4, far: true }, { a: [200, -4], foot: 4 }],
       },
     ],
   },
@@ -1415,19 +1472,20 @@ export const POSES = {
   // ── Mobilidade: rotação torácica ─────────────────────────────
   'thoracic-rotation': {
     viewBox: '0 30 100 60',
-    props: [{ type: 'floor', y: 86, x1: 2, x2: 98 }],
+    props: [{ type: 'floor', y: 88, x1: 2, x2: 98 }],
     frames: [
       {
-        label: 'Cotovelo ao cotovelo oposto',
-        hip: [40, 65], torso: 18, head: 0,
-        arms: [{ pin: [62.8, 84.5], bend: 1, far: true }, { pin: [58, 66], bend: 1 }],
-        legs: [{ pin: [22, 83], foot: 178, bend: -1, far: true }, { pin: [22, 83], foot: 178, bend: -1 }],
+        label: 'Quatro apoios, joelhos no chão',
+        hip: [40, 66], torso: 18, head: 0,
+        arms: [{ pin: [62.8, 86], bend: 1, far: true }, { pin: [50, 82], bend: 1 }],
+        // joelho pousado e canela estendida atrás: é o apoio de quatro apoios
+        legs: [{ a: [-90, 180], foot: 178, far: true }, { a: [-90, 180], foot: 176 }],
       },
       {
         label: 'Abre para o céu, anca fixa',
-        hip: [40, 65], torso: 18, head: 24,
-        arms: [{ pin: [62.8, 84.5], bend: 1, far: true }, { pin: [72, 40], bend: 1 }],
-        legs: [{ pin: [22, 83], foot: 178, bend: -1, far: true }, { pin: [22, 83], foot: 178, bend: -1 }],
+        hip: [40, 66], torso: 18, head: 24,
+        arms: [{ pin: [62.8, 86], bend: 1, far: true }, { pin: [72, 38], bend: 1 }],
+        legs: [{ a: [-90, 180], foot: 178, far: true }, { a: [-90, 180], foot: 176 }],
       },
     ],
   },
@@ -1435,19 +1493,20 @@ export const POSES = {
   // ── Mobilidade: tornozelo na parede ──────────────────────────
   'ankle-mobility': {
     viewBox: '18 10 60 82',
-    props: [{ type: 'floor', y: 88, x1: 20, x2: 76 }, { type: 'wall', x: 70, y1: 14, y2: 88 }],
+    props: [{ type: 'floor', y: 90, x1: 20, x2: 76 }, { type: 'wall', x: 70, y1: 14, y2: 90 }],
     frames: [
       {
-        label: 'Pé a um palmo da parede',
-        hip: [44, 58], torso: 86, head: 0,
+        label: 'Pé a um palmo da parede, mãos na parede',
+        hip: [48, 58], torso: 86, head: 0,
         arms: [{ pin: [68, 48], bend: -1, far: true }, { pin: [68, 52], bend: -1 }],
-        legs: [{ a: [-140, -50], foot: 0, far: true }, { pin: [60, 88], foot: 0, bend: -1 }],
+        legs: [{ pin: [30, 88], foot: 0, bend: -1, far: true }, { pin: [58, 88], foot: 0, bend: -1 }],
       },
       {
         label: 'Joelho à parede sem levantar o calcanhar',
-        hip: [48, 62], torso: 84, head: 0,
+        hip: [53, 62], torso: 84, head: 0,
         arms: [{ pin: [68, 48], bend: -1, far: true }, { pin: [68, 52], bend: -1 }],
-        legs: [{ a: [-140, -50], foot: 0, far: true }, { pin: [60, 88], foot: 0, bend: -1 }],
+        // no instante à frente o calcanhar de trás levanta, como levanta mesmo
+        legs: [{ pin: [30, 88], foot: -20, bend: -1, far: true }, { pin: [58, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
       },
     ],
@@ -1524,28 +1583,33 @@ export const POSES = {
 
   // ── Mobilidade: respiração diafragmática ─────────────────────
   'diaphragm-breathing': {
-    viewBox: '24 52 66 40',
+    // Deitado de costas, cabeça à esquerda e pés à direita. Antes as pernas
+    // apontavam para o mesmo lado da cabeça e a figura lia-se dobrada ao meio.
+    viewBox: '14 54 84 42',
     far: [0, -3],
-    props: [{ type: 'floor', y: 86, x1: 26, x2: 88 }],
+    props: [{ type: 'floor', y: 90, x1: 16, x2: 96 }],
     frames: [
       {
         label: 'Uma mão no peito, outra na barriga',
-        hip: [66, 78], torso: 180, head: 0,
-        arms: [{ a: [-6, -2], far: true }, { pin: [58, 74], bend: -1 }],
-        legs: [{ pin: [46, 84], foot: 168, bend: 1, far: true }, { pin: [44, 84], foot: 170, bend: 1 }],
+        hip: [58, 82], torso: 176, head: -8,
+        arms: [{ pin: [52, 81], bend: 1, far: true }, { a: [-25, 150] }],
+        legs: [{ pin: [84, 88], foot: 0, bend: -1, far: true }, { pin: [84, 88], foot: 0, bend: -1 }],
       },
       {
         label: 'Inspira 4 segundos, só a barriga sobe',
-        hip: [66, 78], torso: 180, head: 0,
-        arms: [{ a: [-6, -2], far: true }, { pin: [58, 71], bend: -1 }],
-        legs: [{ pin: [46, 84], foot: 168, bend: 1, far: true }, { pin: [44, 84], foot: 170, bend: 1 }],
+        hip: [58, 82], torso: 176, head: -8,
+        arms: [{ pin: [52, 78], bend: 1, far: true }, { a: [-25, 150] }],
+        legs: [{ pin: [84, 88], foot: 0, bend: -1, far: true }, { pin: [84, 88], foot: 0, bend: -1 }],
       },
     ],
   },
 
   // ── Aquecimento: círculos de braços ──────────────────────────
   'arm-circles': {
+    // Quatro instantes para dar a volta inteira: com dois só se via meio círculo,
+    // à frente e acima, e o braço voltava para trás pelo mesmo caminho.
     viewBox: '10 -2 80 100',
+    period: 4000,
     props: STAND_FLOOR,
     frames: [
       {
@@ -1555,9 +1619,21 @@ export const POSES = {
         legs: STAND_LEGS,
       },
       {
-        label: 'Círculos grandes, ambas as direções',
+        label: 'Sobem por cima da cabeça',
         hip: [50, 52], torso: 90, head: 0,
         arms: [{ a: [86, 92], far: true }, { a: [90, 94] }],
+        legs: STAND_LEGS,
+      },
+      {
+        label: 'Passam para trás',
+        hip: [50, 52], torso: 90, head: 0,
+        arms: [{ a: [176, 182], far: true }, { a: [180, 184] }],
+        legs: STAND_LEGS,
+      },
+      {
+        label: 'E descem, círculo completo',
+        hip: [50, 52], torso: 90, head: 0,
+        arms: [{ a: [266, 272], far: true }, { a: [270, 274] }],
         legs: STAND_LEGS,
       },
     ],
@@ -1571,13 +1647,14 @@ export const POSES = {
       {
         label: 'Mãos na anca, balanço para a frente',
         hip: [50, 52], torso: 90, head: 0,
-        arms: [{ a: [-118, -8], far: true }, { a: [-115, -4] }],
+        // mãos presas à anca: em ângulos soltos ficavam a meio palmo dela
+        arms: [{ pin: [52, 50], bend: 1, far: true }, { pin: [52, 50], bend: -1 }],
         legs: [{ a: [-56, -78], foot: -10, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
       },
       {
         label: 'E para trás, amplitude progressiva',
         hip: [50, 52], torso: 90, head: 0,
-        arms: [{ a: [-118, -8], far: true }, { a: [-115, -4] }],
+        arms: [{ pin: [52, 50], bend: 1, far: true }, { pin: [52, 50], bend: -1 }],
         legs: [{ a: [-124, -104], foot: -30, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
       },
     ],
@@ -1679,14 +1756,15 @@ export const POSES = {
         label: 'Cotovelo na face interna da coxa',
         hip: [44, 62], torso: 45, head: -10,
         arms: [{ a: [-100, -95], far: true }, { a: [-90, -85] }],
-        legs: [[4, -86, 0, true], [0, -90, 0]],
+        // a coxa passa À FRENTE do braço: o cotovelo encosta por dentro dela
+        legs: [[4, -86, 0, true], { a: [0, -90], foot: 0, over: true }],
         items: [{ type: 'db', at: 'wrist1' }],
       },
       {
         label: 'Sobe sem mexer o ombro',
         hip: [44, 62], torso: 45, head: -10,
         arms: [{ a: [-100, -95], far: true }, { a: [-90, 80] }],
-        legs: [[4, -86, 0, true], [0, -90, 0]],
+        legs: [[4, -86, 0, true], { a: [0, -90], foot: 0, over: true }],
         items: [{ type: 'db', at: 'wrist1' }],
       },
     ],
@@ -1695,19 +1773,20 @@ export const POSES = {
   // Dips com pernas à frente: o mesmo dip, com as pernas a fazer de contrapeso.
   'bar-dips-lsit': {
     viewBox: '24 -4 78 104',
-    props: [{ type: 'bar', x1: 40, y1: 48, x2: 66, y2: 48 }, { type: 'bar', x1: 36, y1: 52, x2: 62, y2: 52 }],
+    props: [{ type: 'bar', x1: 30, y1: 47, x2: 58, y2: 47 },
+            { type: 'bar', x1: 40, y1: 48, x2: 70, y2: 48, front: true }],
     frames: [
       {
         label: 'Pernas esticadas à frente, à altura da anca',
         hip: [49.1, 43], torso: 92, head: -6,
         arms: [{ pin: [52, 48], bend: 1, far: true }, { pin: [52, 48], bend: 1 }],
-        legs: [[10, 6, 34, true], [6, 2, 30]],
+        legs: [[2, -2, 32, true], [-2, -6, 28]],
       },
       {
         label: 'Ombro ao nível do cotovelo, pernas na linha',
         hip: [49.1, 57], torso: 92, head: -6,
         arms: [{ pin: [52, 48], bend: 1, far: true }, { pin: [52, 48], bend: 1 }],
-        legs: [[10, 6, 34, true], [6, 2, 30]],
+        legs: [[2, -2, 32, true], [-2, -6, 28]],
       },
     ],
   },
