@@ -65,7 +65,7 @@ voltam a discutir:
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
 ```bash
-node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node tools/audit4.mjs && node tools/audit5.mjs && node tools/audit6.mjs && node tools/audit7.mjs && node tools/audit8.mjs && node tools/audit9.mjs && node tools/check.mjs && node tools/anklecheck.mjs && node tools/snapshot.mjs
+for f in audit audit2 audit3 audit4 audit5 audit6 audit7 audit8 audit9 audit10 check anklecheck figcheck suave joelhos sw snapshot; do node tools/$f.mjs || break; done
 ```
 | Ficheiro | O que verifica |
 |---|---|
@@ -83,6 +83,10 @@ node tools/audit.mjs && node tools/audit2.mjs && node tools/audit3.mjs && node t
 | `audit7.mjs` | sincronização: quem ganha o conflito, sessão a expirar, tabela em falta |
 | `audit8.mjs` | troca de treino entre dias: mantém os dias de treino, não vaza para outra semana |
 | `audit9.mjs` | pausas: congelam o ciclo, não contam como falta, não afetam o futuro |
+| `audit10.mjs` | grupos musculares: nenhum termo fica sem tradução, nenhum exercício fora dos filtros |
+| `sw.mjs` | todos os módulos estão na lista do service worker: um módulo de fora parte a app offline |
+| `suave.mjs` | percorre a animação de cada pose e apanha saltos: um instante grande com instantes pequenos ao lado |
+| `joelhos.mjs` | o joelho e o cotovelo dobram sempre para o mesmo lado, e nunca a mais de 168° |
 | `ytcheck.mjs` | confirma que cada vídeo referido ainda existe (pede ao YouTube) |
 | `diag.mjs` | `node tools/diag.mjs <id>` imprime as articulações de uma pose |
 
@@ -98,6 +102,9 @@ Regras que evitam os erros mais comuns:
 - **Plano de vista tem de coincidir com o plano do movimento.** Uma elevação de joelhos de frente não mostra flexão da anca.
 - O `foot:` também interpola pelo arco mais curto: se o caminho passar por baixo, a ponta atravessa o chão a meio da animação (foi o caso do cão-cobra).
 - `mirror: true` + `wide: true` dão vista de frente (elevações laterais, elevações, pull-aparts).
+- **A canela escreve-se pela flexão do joelho** (`coxa - flexão`), nunca por um ângulo solto: um joelho dobra para um lado só, e a interpolação entre duas poses certas pode passar pelo lado errado. O mesmo para o cotovelo. `joelhos.mjs` mede-o em 60 instantes de cada pose.
+- **A cinemática inversa não tem solução estável quando o alvo passa em cima da própria articulação.** Se a mão tiver de ir de um lado ao outro do ombro, ou se usa ângulos ou se acrescenta um instante pelo caminho. `suave.mjs` apanha o estalo.
+- **Qualquer campo de texto com letra abaixo de 16px faz o Safari do iPhone dar zoom à página sozinho.** A regra global em `css/app.css` põe `font-size: max(16px, 1em)` em todos; não a contrariar com uma regra de classe.
 
 ## Automático
 `.github/workflows/auditorias.yml` corre tudo isto a cada push para `main`. Às segundas

@@ -1,6 +1,7 @@
 import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, moverTreino, addPausa, removePausa } from '../store.js';
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META, emPausa } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
+import { GRUPOS, temGrupo } from '../data/muscles.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { lineChart, barChart, chartHead } from './charts.js';
@@ -241,21 +242,26 @@ export function applyAlt(session, altIndex) {
 }
 
 // ─────────────────────────── BIBLIOTECA ───────────────────────────
-export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = false) {
+export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = false, muscle = 'todos') {
   const state = getState();
   const q = query.trim().toLowerCase();
   const eq = state.profile.equipment || {};
   const order = ['push', 'pull', 'squat', 'knee', 'hinge', 'glute', 'core', 'hiit', 'cardio', 'mobility', 'warmup'];
+  // Os dois filtros somam-se em vez de se substituírem: "Puxar" + "Bíceps" é uma
+  // pergunta que faz sentido, e separada seria preciso procurar duas vezes.
   const matches = e => (!q || e.name.toLowerCase().includes(q) || e.nameEn.toLowerCase().includes(q) || e.muscles.join(' ').toLowerCase().includes(q))
     && (filter === 'todos' || e.pattern === filter)
+    && temGrupo(e, muscle)
     && (!onlyMine || e.equipment.every(k => eq[k] !== false));
   const groups = order.map(p => ({ p, items: EXERCISES.filter(e => e.pattern === p && matches(e)) })).filter(g => g.items.length);
   const total = groups.reduce((a, g) => a + g.items.length, 0);
   const chips = ['todos', ...order].map(p => `<button class="fchip ${filter === p ? 'on' : ''}" data-lib-filter="${p}">${p === 'todos' ? 'Todos' : esc(PATTERN_LABEL[p])}</button>`).join('');
+  const mchips = [['todos', 'Todos'], ...GRUPOS].map(([k, l]) => `<button class="fchip ${muscle === k ? 'on' : ''}" data-lib-muscle="${k}">${esc(l)}</button>`).join('');
   return `
   <header class="top"><div><div class="eyebrow">Biblioteca</div><h1>${total} ${total === 1 ? 'exercício' : 'exercícios'}</h1></div></header>
   <input class="search" type="search" placeholder="Procurar exercício ou músculo" value="${esc(query)}" data-lib-search aria-label="Procurar">
-  <div class="fchips" role="group" aria-label="Filtrar por tipo">${chips}</div>
+  <div class="frow"><span class="frow-l">Movimento</span><div class="fchips" role="group" aria-label="Filtrar por movimento">${chips}</div></div>
+  <div class="frow"><span class="frow-l">Músculo</span><div class="fchips" role="group" aria-label="Filtrar por músculo">${mchips}</div></div>
   <label class="toggle small only-mine"><input type="checkbox" data-lib-mine ${onlyMine ? 'checked' : ''}><span>Só com o material que tenho</span></label>
   ${total ? groups.map(g => `
     <section class="block">
@@ -270,7 +276,7 @@ export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = fals
           <div class="exrow-right">${prog ? `<span class="pill ${isCurrent ? 'pill-now' : ''}">N${ex.level}</span>` : ''}</div>
         </li>`;
       }).join('')}</ul>
-    </section>`).join('') : '<p class="foot muted">Nada encontrado. Limpa a procura ou muda o filtro.</p>'}`;
+    </section>`).join('') : '<p class="foot muted">Nada encontrado. Limpa a procura ou muda um dos filtros.</p>'}`;
 }
 
 // Legenda da figura. Nas isometrias não há movimento para parar, por isso em vez do

@@ -85,7 +85,12 @@
 :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; border-radius: 6px; }
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
 body { min-height: 100dvh; overscroll-behavior-y: none; }
-button, input { font: inherit; color: inherit; }
+button, input, textarea, select { font: inherit; color: inherit; }
+/* O Safari do iPhone dá zoom à página sozinho quando se toca num campo com letra
+   abaixo de 16px, e depois fica encavalitada — não há como desfazer sem bloquear
+   o zoom de pinça, que é acessibilidade a menos. 16px é o mínimo que o evita, e
+   `1em` deixa crescer qualquer campo que herde letra maior. */
+input, textarea, select { font-size: max(16px, 1em); }
 button { cursor: pointer; border: 0; background: none; }
 a { color: inherit; text-decoration: none; }
 h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -0.02em; }
@@ -269,6 +274,8 @@ body::before {
 .search { width: 100%; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 13px 16px; margin-bottom: 6px; outline: none; -webkit-appearance: none; }
 .search:focus { border-color: var(--line-strong); }
 
+.frow { display: flex; align-items: center; gap: 10px; }
+.frow-l { flex: none; width: 66px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3); }
 .fchips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; mask-image: linear-gradient(to right, #000 88%, transparent); }
 .fchips::-webkit-scrollbar { display: none; }
 .fchip { flex: none; padding: 8px 14px; border-radius: 999px; background: var(--fill); color: var(--text-2); font-size: 13px; font-weight: 700; white-space: nowrap; }
@@ -531,7 +538,7 @@ body::before {
 .fig-flag.on { color: var(--amber); }
 .marcadas { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .marcadas li { background: var(--fill); border-radius: 12px; padding: 10px 12px; }
-.marcadas input { width: 100%; margin-top: 8px; background: var(--card); border: 1px solid var(--line-strong); border-radius: 10px; padding: 9px 11px; outline: none; font-size: 14px; }
+.marcadas input { width: 100%; margin-top: 8px; background: var(--card); border: 1px solid var(--line-strong); border-radius: 10px; padding: 9px 11px; outline: none; }
 .srun-flag { display: block; width: 100%; text-align: center; margin-top: 6px; color: var(--text-3); font-size: 13px; }
 
 /* ---- trocar o treino de dia ---- */
