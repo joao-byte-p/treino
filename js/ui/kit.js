@@ -56,16 +56,22 @@ export function renderKitItem(nav, id) {
 
   ${k.posicoes.length ? `<section class="card">
     <h3>As posições <span class="muted">${k.posicoes.length}</span></h3>
-    <p class="muted small">O código de cores está impresso no centro da placa e muda de modelo para modelo — por isso descrevo-as pelo sítio das mãos, que é o que decide o músculo. Encontra a cor na placa e confirma com o desenho.</p>
+    <p class="muted small">As cores são as do boneco impresso ao centro da placa. Põe as duas pegas nos furos da cor que queres; o desenho mostra onde isso te deixa as mãos em relação ao peito.</p>
     <ul class="kitpos">${k.posicoes.map(p => `<li>
       <div class="kitpos-art">${topo(p)}</div>
       <div class="kitpos-body">
+        <div class="kitpos-alvo">${p.hex ? `<i class="kitpos-cor" style="background:${p.hex}"></i>` : ''}<span>${esc(p.cor ? `${p.cor} · ${p.alvo}` : p.alvo)}</span></div>
         <div class="kitpos-name">${esc(p.nome)}</div>
-        <div class="kitpos-alvo">${esc(p.alvo)}</div>
         <p>${esc(p.como)}</p>
         ${p.nota ? `<p class="kitpos-nota">${esc(p.nota)}</p>` : ''}
       </div>
     </li>`).join('')}</ul>
+  </section>` : ''}
+
+  ${k.manual ? `<section class="card">
+    <h3>O que o manual propõe <span class="muted">${k.manual.length}</span></h3>
+    <p class="muted small">Os sete painéis do folheto, com o que penso de cada um. Nem todos te servem.</p>
+    <ul class="kitman">${k.manual.map(([t, d, v]) => `<li class="v-${v}"><strong>${esc(t)}</strong><span>${esc(d)}</span></li>`).join('')}</ul>
   </section>` : ''}
 
   ${bloco('Erros que custam caro', `<dl class="kitdl">${k.erros.map(([t, d]) => `<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join('')}</dl>`)}

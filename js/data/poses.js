@@ -47,6 +47,30 @@ export const POSES = {
     ],
   },
 
+  // ── Elevação do corpo sentado na board ───────────────────────
+  // Sentado entre as pegas: em baixo os braços estão dobrados e a anca no chão,
+  // em cima os braços esticam e a anca sai. Os calcanhares ficam onde estão.
+  'board-body-lift': {
+    viewBox: '28 40 66 56',
+    accent: 'arms',
+    props: [{ type: 'floor', y: 90, x1: 30, x2: 92 },
+            { type: 'box', x: 49, y: 80, w: 6, h: 10 }],
+    frames: [
+      {
+        label: 'Sentado, mãos nas pegas',
+        hip: [46, 84], torso: 84, head: 0,
+        arms: [{ pin: [52, 80], bend: -1, far: true }, { pin: [52, 80], bend: -1 }],
+        legs: [{ a: [-4, -2], foot: 40, far: true }, { a: [-6, -4], foot: 36 }],
+      },
+      {
+        label: 'Empurra até a anca sair do chão',
+        hip: [46, 76], torso: 84, head: 0,
+        arms: [{ pin: [52, 80], bend: -1, far: true }, { pin: [52, 80], bend: -1 }],
+        legs: [{ a: [-16, -14], foot: 34, far: true }, { a: [-18, -16], foot: 30 }],
+      },
+    ],
+  },
+
   // ── Goblet squat ─────────────────────────────────────────────
   'goblet-squat': {
     viewBox: '14 6 72 92',

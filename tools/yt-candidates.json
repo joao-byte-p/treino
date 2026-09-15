@@ -4990,5 +4990,61 @@
         "live": false
       }
     ]
+  },
+  "board-body-lift": {
+    "name": "Elevação do corpo sentado, board",
+    "nameEn": "Seated body lift",
+    "term": "seated body lift push up board L sit tutorial",
+    "error": null,
+    "candidates": [
+      {
+        "id": "HxDP7SqggpI",
+        "title": "From ZERO to L-SIT in 8 Steps | L-Sit Exercises and Progression At Home",
+        "channel": "Vitality",
+        "dur": 484,
+        "views": 453025,
+        "live": false
+      },
+      {
+        "id": "yb-asjaBRnM",
+        "title": "I Learned to L-Sit in 13 Days",
+        "channel": "Edward Feng",
+        "dur": 234,
+        "views": 833248,
+        "live": false
+      },
+      {
+        "id": "jWyD_Ri93YE",
+        "title": "Home L-Sit Workout For Absolute Beginners | NO EQUIPMENT (Calisthenics for Beginners)",
+        "channel": "Ashton Fitness",
+        "dur": 291,
+        "views": 412435,
+        "live": false
+      },
+      {
+        "id": "eywCpp0p7lg",
+        "title": "The Perfect L-Sit Tutorial - Beginner Friendly",
+        "channel": "STRIQfit",
+        "dur": 105,
+        "views": 89411,
+        "live": false
+      },
+      {
+        "id": "eOuPZjDzDUQ",
+        "title": "L Sit Drills for Total Body Strength",
+        "channel": "Kelsie",
+        "dur": 780,
+        "views": 51884,
+        "live": false
+      },
+      {
+        "id": "kwOGACG2DCQ",
+        "title": "Why EVERYTHING Changes AFTER You Can L-Sit For 10 Seconds",
+        "channel": "THENX",
+        "dur": 635,
+        "views": 105179,
+        "live": false
+      }
+    ]
   }
 }

@@ -129,6 +129,19 @@ export const EXERCISES = [
     ytId: 'J0DnG1_S92I', ytTitle: 'ScottHermanFitness — How To: Diamond Push-Up',
   },
   {
+    // Do manual da push-up board (painel G). Entra porque é a única coisa que ele
+    // não consegue fazer com mais nada que tenha em casa: apoio de braços esticados
+    // com as pernas à frente, sem nada a pedir ao joelho.
+    id: 'board-body-lift', name: 'Elevação do corpo sentado, board', nameEn: 'Seated body lift',
+    pattern: 'push', chain: 'body-lift', level: 1, equipment: ['board'], mode: 'reps',
+    sets: 3, reps: [8, 12], rest: 60, knee: 'safe', load: false,
+    muscles: ['Tríceps', 'Ombros', 'Core'],
+    cues: ['Senta-te entre as pegas, pernas esticadas à frente', 'Ombros para baixo, longe das orelhas, antes de empurrares', 'Empurra o chão até a anca sair, braços a esticar', 'Segura um segundo em cima e desce controlado'],
+    mistakes: ['Encolher os ombros para subir', 'Dobrar os joelhos para ajudar', 'Descer de repente até ao chão'],
+    yt: 'seated body lift push up board L sit tutorial',
+    ytId: 'HxDP7SqggpI', ytTitle: 'Vitality — From ZERO to L-SIT in 8 Steps | L-Sit Exercises and Progression At Home',
+  },
+  {
     id: 'chair-dips', name: 'Dips em cadeira', nameEn: 'Bench dips',
     pattern: 'push', chain: 'dips', level: 1, equipment: ['chair'], mode: 'reps',
     sets: 3, reps: [10, 15], rest: 60, knee: 'safe', load: false,

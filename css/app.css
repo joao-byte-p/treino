@@ -619,7 +619,7 @@ body::before {
 .kitpos-art { flex: none; width: 98px; background: var(--well); border-radius: 14px; padding: 8px 6px; align-self: flex-start; }
 .kitpos-body { min-width: 0; }
 .kitpos-name { font-weight: 700; font-size: 15px; }
-.kitpos-alvo { font-size: 12px; font-weight: 700; color: var(--accent, var(--mint)); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+.kitpos-alvo { font-size: 12px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
 .kitpos-body p { margin: 6px 0 0; font-size: 14px; color: var(--text-2); line-height: 1.45; }
 .kitpos-nota { color: var(--text-3) !important; font-size: 13px !important; }
 
@@ -630,3 +630,16 @@ body::before {
 .kit-braco { stroke: var(--fig-ink); stroke-width: 3; opacity: 0.4; stroke-linecap: round; }
 .kit-pega { fill: var(--fig-ink); opacity: 0.45; }
 .kit-mao { fill: var(--accent, var(--mint)); }
+.kitpos-cor { flex: none; width: 11px; height: 11px; border-radius: 50%; margin: 2px 7px 0 0; box-shadow: 0 0 0 1px rgba(128,128,128,0.35); }
+.kitpos-alvo { display: flex; align-items: flex-start; }
+.kitpos-alvo > span { min-width: 0; }
+
+.kitman { list-style: none; margin: 10px 0 0; padding: 0; }
+.kitman li { display: flex; flex-direction: column; gap: 3px; padding: 10px 0 10px 13px; border-left: 3px solid var(--line-strong); }
+.kitman li + li { margin-top: 6px; }
+.kitman strong { font-size: 14px; }
+.kitman span { font-size: 13px; color: var(--text-2); line-height: 1.45; }
+.kitman .v-ok { border-left-color: var(--mint); }
+.kitman .v-cuidado { border-left-color: var(--amber); }
+.kitman .v-nao { border-left-color: var(--text-3); }
+.kitman .v-nao strong { color: var(--text-2); }

@@ -26,37 +26,52 @@ export const KIT = [
       'Os protetores de borracha colam-se por baixo, ao longo dos lados compridos. Sem eles a placa desliza em soalho.',
       'A placa fica debaixo do PEITO, não debaixo dos ombros. À frente de mais, o ombro passa a fazer o trabalho todo.',
     ],
-    // As quatro posições, descritas pelo que fazem e não pela cor — o código de
-    // cores está impresso no centro da placa e varia de modelo para modelo.
+    // As quatro cores impressas na placa, lidas no boneco ao centro: vermelho no
+    // trapézio, azul no peito, amarelo nos deltoides, verde no tríceps. As pegas
+    // vão nos furos da cor que queres; o desenho mostra onde isso te põe as mãos.
     posicoes: [
       {
-        nome: 'Estreita, debaixo do peito',
+        cor: 'Verde', hex: '#22a06b',
+        nome: 'Pegas juntas, debaixo do peito',
         alvo: 'Tríceps',
         largura: 7, altura: 46, rot: 0,
-        como: 'Pegas juntas, à largura da anca ou menos, à altura do esterno. Cotovelos rentes às costelas durante todo o percurso.',
-        nota: 'É a mais difícil das quatro. Se a anca começa a ceder, é sinal de que ainda não é a tua.',
+        como: 'Cotovelos rentes às costelas durante todo o percurso, a apontar para trás e não para os lados. Desce até o braço ficar paralelo ao tronco.',
+        nota: 'É a mais difícil das quatro. Se a anca começa a ceder, ainda não é a tua — passa ao azul e volta cá daqui a umas semanas.',
       },
       {
-        nome: 'À largura dos ombros',
-        alvo: 'Peito e ombros',
-        largura: 15, altura: 44, rot: 0,
-        como: 'Pegas à largura dos ombros, viradas para a frente. Cotovelos a cerca de 45° do tronco.',
-        nota: 'A mais neutra das quatro e a que deves usar por defeito. É esta que está no teu plano como flexão base.',
-      },
-      {
-        nome: 'Larga, ao nível do peito',
+        cor: 'Azul', hex: '#2f7fd1',
+        nome: 'Pegas largas, ao nível do peito',
         alvo: 'Peito',
         largura: 24, altura: 43, rot: 24,
-        como: 'Pegas bem afastadas e viradas ligeiramente para fora, à altura dos mamilos. Peito a descer entre as mãos.',
-        nota: 'Não abras os cotovelos até aos 90°: a amplitude que ganhas não compensa o que pedes à frente do ombro.',
+        como: 'Pegas bem afastadas, à altura dos mamilos, viradas ligeiramente para fora. O peito desce entre as mãos.',
+        nota: 'Não abras os cotovelos até aos 90°: a amplitude que ganhas não compensa o que pedes à frente do ombro. Cerca de 45° chega.',
       },
       {
-        nome: 'Larga com as pegas viradas para dentro',
-        alvo: 'Marcada como "costas" na placa',
-        largura: 23, altura: 50, rot: -30,
-        como: 'Pegas afastadas e rodadas para dentro, um pouco abaixo do peito. Puxa os ombros para baixo e para trás antes de descer.',
-        nota: 'Aqui sou honesto contigo: uma flexão não treina costas. O que esta posição faz é obrigar as omoplatas a segurar — trabalho de estabilizador, não de dorsal. Para costas a sério, as barras da rua valem-te mais do que a placa.',
+        cor: 'Amarelo', hex: '#d9a521',
+        nome: 'Pegas à frente, anca mais alta',
+        alvo: 'Ombros',
+        largura: 15, altura: 34, rot: 0,
+        como: 'Mãos mais perto da cabeça e anca levantada, para o empurrão ficar mais vertical. Quanto mais sobes a anca, mais o ombro trabalha e menos o peito.',
+        nota: 'É meio caminho para o pike push-up que já tens na biblioteca. Se quiseres mesmo carregar o ombro, faz o pike; esta serve para variar sem mudar de exercício.',
       },
+      {
+        cor: 'Vermelho', hex: '#d1483f',
+        nome: 'Pegas largas e um pouco atrás',
+        alvo: 'Trapézio e omoplatas',
+        largura: 23, altura: 52, rot: -30,
+        como: 'Antes de descer, puxa os ombros para baixo e para trás e mantém-nos assim. No topo, empurra o chão e deixa as omoplatas afastarem-se.',
+        nota: 'Aqui sou honesto contigo: uma flexão não treina costas. O vermelho do boneco está no trapézio, e o que esta posição faz é obrigar as omoplatas a segurar — trabalho de estabilizador, não de dorsal. Para costas a sério, as barras da rua valem-te mais.',
+      },
+    ],
+    // O manual traz sete painéis (C a I). Nem todos te servem, e o porquê importa.
+    manual: [
+      ['C · Flexão estreita', 'É a posição verde. Já está acima.', 'ok'],
+      ['D · Joelho ao peito', 'O manual pede que troques as pernas a saltar. Com os teus joelhos, faz a versão lenta — é o "mountain climbers controlados" que já tens na biblioteca.', 'cuidado'],
+      ['E · Elevação de perna em prancha', 'Prancha de braços esticados nas pegas, uma perna a subir dois segundos e a descer. Não tens igual e vale a pena: é core sem nada em cima do joelho.', 'ok'],
+      ['F · Flexão de joelhos', 'Regressão para quem está a começar. Com sete anos de treino, salta.', 'nao'],
+      ['G · Elevação do corpo sentado', 'Sentas-te entre as pegas com as pernas esticadas à frente e empurras até a anca sair do chão. É a melhor da lista e é a única que não consegues fazer com mais nada que tenhas em casa.', 'ok'],
+      ['H · Flexão com salto dos pés', 'Saltar com os pés a abrir e fechar. Outra vez salto, outra vez não.', 'nao'],
+      ['I · Não é exercício', 'É o espaço livre: 0,6 m de cada lado da placa. Vale a pena reparar antes de te estenderes numa sala apertada.', 'ok'],
     ],
     erros: [
       ['Placa à frente de mais', 'As mãos ficam à altura dos ombros ou acima. Desce a placa até as pegas te ficarem à altura do peito.'],

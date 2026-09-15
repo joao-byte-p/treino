@@ -20,6 +20,8 @@ const ESCOLHA_MANUAL = {
   'walk-brisk': 'PXHWMt5nvcE',          // técnica de marcha, não benefícios
   'march-in-place': 'u1gmWFvEluM',      // marcha no lugar demonstrada
   'db-swing-hiit': 'v1LoYk4qdLc',       // mesmo movimento do swing: o vídeo é o mesmo
+  'board-body-lift': 'HxDP7SqggpI',     // progressão desde a elevação sentada; o tutorial de
+                                        // L-sit mostra a posição final, que não é a do exercício
   'plank': 'A2b2EmIg0dA',               // prancha com progressões, fonte de reabilitação
   'side-plank': 'XeN4pEZZJNI',          // prancha lateral explicada de ponta a ponta
   'pullup': 'eGo4IYlbE5g',              // elevação perfeita, em vez de uma dica de 47s
