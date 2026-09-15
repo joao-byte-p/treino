@@ -247,6 +247,11 @@ export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = fals
   const q = query.trim().toLowerCase();
   const eq = state.profile.equipment || {};
   const order = ['push', 'pull', 'squat', 'knee', 'hinge', 'glute', 'core', 'hiit', 'cardio', 'mobility', 'warmup'];
+  // A lista continua agrupada pelos onze padrões, mas só cinco viram filtro: Pernas,
+  // Joelho, Anca, Glúteos, Core e Cardio são músculos com outro nome e já vivem na
+  // linha de baixo. Ter os dois era a mesma pergunta feita duas vezes.
+  const MOVIMENTOS = ['push', 'pull', 'hiit', 'mobility', 'warmup'];
+  if (!MOVIMENTOS.includes(filter)) filter = 'todos';
   // Os dois filtros somam-se em vez de se substituírem: "Puxar" + "Bíceps" é uma
   // pergunta que faz sentido, e separada seria preciso procurar duas vezes.
   const matches = e => (!q || e.name.toLowerCase().includes(q) || e.nameEn.toLowerCase().includes(q) || e.muscles.join(' ').toLowerCase().includes(q))
@@ -255,7 +260,7 @@ export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = fals
     && (!onlyMine || e.equipment.every(k => eq[k] !== false));
   const groups = order.map(p => ({ p, items: EXERCISES.filter(e => e.pattern === p && matches(e)) })).filter(g => g.items.length);
   const total = groups.reduce((a, g) => a + g.items.length, 0);
-  const chips = ['todos', ...order].map(p => `<button class="fchip ${filter === p ? 'on' : ''}" data-lib-filter="${p}">${p === 'todos' ? 'Todos' : esc(PATTERN_LABEL[p])}</button>`).join('');
+  const chips = ['todos', ...MOVIMENTOS].map(p => `<button class="fchip ${filter === p ? 'on' : ''}" data-lib-filter="${p}">${p === 'todos' ? 'Todos' : esc(PATTERN_LABEL[p])}</button>`).join('');
   const mchips = [['todos', 'Todos'], ...GRUPOS].map(([k, l]) => `<button class="fchip ${muscle === k ? 'on' : ''}" data-lib-muscle="${k}">${esc(l)}</button>`).join('');
   return `
   <header class="top"><div><div class="eyebrow">Biblioteca</div><h1>${total} ${total === 1 ? 'exercício' : 'exercícios'}</h1></div></header>

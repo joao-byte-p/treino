@@ -21,6 +21,16 @@ for (const e of EXERCISES) {
 }
 for (const [k, n] of Object.entries(contagem)) if (!n) problemas.push(`grupo "${k}" está vazio: filtro que não dá nada`);
 
+// Nenhum rótulo pode aparecer nas duas linhas de filtro: a mesma pergunta feita
+// duas vezes só faz o utilizador duvidar da diferença entre elas.
+const MOVIMENTOS = ['push', 'pull', 'hiit', 'mobility', 'warmup'];
+const { PATTERN_LABEL } = await import('../js/data/exercises.js');
+const musculos = new Set(GRUPOS.map(g => g[1].toLowerCase()));
+for (const p of MOVIMENTOS) {
+  const l = PATTERN_LABEL[p].toLowerCase();
+  if (musculos.has(l)) problemas.push(`"${PATTERN_LABEL[p]}" está nas duas linhas de filtro`);
+}
+
 console.log(`grupos musculares: ${EXERCISES.length} exercícios`);
 console.log('  ' + GRUPOS.map(([k, l]) => `${l} ${contagem[k]}`).join(' · '));
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
