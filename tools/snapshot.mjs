@@ -73,6 +73,7 @@ const ECRAS = {
   'exercise-teto': () => views.renderExercise(nav, 'goblet-squat'),
   kit: () => kit.renderKit(nav),
   'kit-board': () => kit.renderKitItem(nav, 'board'),
+  extra: () => views.renderExtra(nav, iso(new Date())),
   progress: () => views.renderProgress(nav),
   settings: () => views.renderSettings(nav, false),
   onboarding: () => views.renderSettings(nav, true),

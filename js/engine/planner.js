@@ -72,6 +72,7 @@ export const DAY_META = {
   hiit: { title: 'HIIT', sub: 'Intervalos sem impacto', tone: 'hiit', icon: 'H' },
   cardio: { title: 'Corrida', sub: 'Zona 2', tone: 'cardio', icon: 'R' },
   mobilidade: { title: 'Mobilidade + Core', sub: 'Lento e intencional', tone: 'mobility', icon: 'M' },
+  core: { title: 'Core', sub: 'Anti-extensão · Anti-rotação', tone: 'mobility', icon: 'K' },
   ativo: { title: 'Ativo leve', sub: 'Caminhada · Basket · Piscina', tone: 'mobility', icon: '~' },
   rest: { title: 'Descanso', sub: 'Sono, água, caminhar', tone: 'rest', icon: '·' },
 };
@@ -438,6 +439,14 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
       s.blocks.push(f.c);
       break;
     }
+    case 'core': {
+      const f = frame(['cat-cow', 'hip-circles'], ['diaphragm-breathing', 'figure-four']);
+      s.blocks.push(f.w);
+      s.blocks.push(strengthBlock('Core', ['antiext', 'plank', 'sideplank', 'birddog', 'hangcore'], state, week, f.budget, { sets: 3, min: 3, max: 5, maxSets: 3 }));
+      s.blocks.push(f.c);
+      s.notes.push('O core treina-se a resistir ao movimento, não a fazê-lo. Se a lombar arqueia, encurta a alavanca.');
+      break;
+    }
     case 'ativo': {
       const minutes = p.minutes;
       const walk = BY_ID['walk-brisk'];
@@ -513,7 +522,11 @@ export function buildWeek(state, date = new Date()) {
     const d = new Date(monday); d.setDate(monday.getDate() + i);
     const dateISO = iso(d);
     const pausa = emPausa(state, dateISO);
-    const sess = buildSession(pausa ? 'rest' : type, state, week, dateISO, type === 'cardio' && !pausa ? cardioIndex : 0);
+    // Um treino avulso ocupa um dia de descanso e mais nada: nunca substitui um
+    // treino planeado nem entra durante uma pausa marcada.
+    const avulso = !pausa && type === 'rest' ? (state.extras || {})[dateISO] : null;
+    const sess = avulso ? buildExtra(state, dateISO, avulso.tipo, avulso.minutos)
+      : buildSession(pausa ? 'rest' : type, state, week, dateISO, type === 'cardio' && !pausa ? cardioIndex : 0);
     if (type === 'cardio' && !pausa) cardioIndex += 1;
     if (pausa) {
       sess.pausa = pausa;
@@ -528,6 +541,49 @@ export function buildWeek(state, date = new Date()) {
     return sess;
   });
   return { week, cycle, monday, focus: WEEK_FOCUS[week], sessions };
+}
+
+// ── Treino avulso num dia de descanso ────────────────────────────────────────
+// Ele planeia cinco dias e às vezes, ao sábado, apetece-lhe um sexto. Isto não é
+// um segundo motor: escolhe um dos tipos que o motor já sabe montar e monta-o
+// para aquele dia. O que muda é o estatuto — um extra NÃO conta como dia
+// planeado, e por isso não pode virar falta se ele não o fizer. Foi ele que o
+// pediu, não é o plano a exigir-lho.
+export const TIPOS_EXTRA = [
+  { id: 'mobilidade', label: 'Mobilidade e core', porque: 'A escolha certa na maior parte dos sábados: dá-te sessão estruturada sem acrescentar carga a um corpo que já treinou cinco dias.' },
+  { id: 'ativo', label: 'Recuperação ativa', porque: 'Caminhada, piscina ou basket. Serve para recuperar do que fizeste, não para treinar mais.' },
+  { id: 'core', label: 'Core', porque: 'Trabalho de tronco isolado. Pouco stress nas articulações e não interfere com os treinos de força da semana.' },
+  { id: 'cima', label: 'Parte de cima', porque: 'Força a sério, mas só do tronco para cima — as pernas, que já levam cinco dias, ficam de fora.' },
+  { id: 'cardio', label: 'Cardio leve', porque: 'Se as corridas da semana já foram feitas, sai natação: continuas a somar volume sem somar impacto.' },
+];
+
+// "Parte de cima" resolve-se no momento: empurrar ou puxar, o que andar mais
+// atrasado nos últimos dez dias. Dito no ecrã, para ele saber o que vai apanhar.
+export function resolveTipoExtra(tipo, state, dateISO) {
+  if (tipo !== 'cima') return tipo;
+  const limite = new Date(dateISO); limite.setDate(limite.getDate() - 10);
+  const recentes = (state.logs || []).filter(l => l.completed && new Date(l.date) >= limite);
+  const conta = t => recentes.filter(l => (l.type || '') === t).length;
+  return conta('pull') + conta('forcaB') <= conta('push') + conta('forcaA') ? 'pull' : 'push';
+}
+
+export function buildExtra(state, dateISO, tipo, minutos) {
+  const real = resolveTipoExtra(tipo, state, dateISO);
+  if (!DAY_META[real]) return null;
+  const [y, m, d] = String(dateISO).split('-').map(Number);
+  const dia = new Date(y, m - 1, d);
+  const { week } = cycleInfo(state.profile, dia, state);
+  // O tempo pedido entra pelo perfil, que é por onde o orçamento já se calcula.
+  const comMinutos = { ...state, profile: { ...state.profile, minutes: Math.max(MIN_MINUTOS, minutos || MIN_MINUTOS) } };
+  // Cardio extra vem DEPOIS das corridas da semana: contadas aqui para o motor
+  // escolher a piscina em vez de lhe pôr uma terceira corrida em cima.
+  const template = TEMPLATES[state.profile.goal]?.[Math.min(7, Math.max(5, state.profile.daysPerWeek || 5))] || TEMPLATES.saude[5];
+  const cardios = template.filter(t => t === 'cardio').length;
+  const sess = buildSession(real, comMinutos, week, dateISO, cardios);
+  sess.extra = true;
+  sess.extraTipo = tipo;
+  sess.subtitle = `${sess.subtitle} · treino extra`;
+  return sess;
 }
 
 export function sessionFor(state, date = new Date()) {

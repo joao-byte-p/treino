@@ -1,5 +1,5 @@
-import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, moverTreino, addPausa, removePausa } from '../store.js';
-import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META, emPausa } from '../engine/planner.js';
+import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, moverTreino, addPausa, removePausa, marcarExtra, removerExtra, extraDe } from '../store.js';
+import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META, emPausa, TIPOS_EXTRA, buildExtra, resolveTipoExtra, MIN_MINUTOS } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { GRUPOS, temGrupo } from '../data/muscles.js';
 import { KIT } from '../data/kit.js';
@@ -29,8 +29,12 @@ export function renderHome(nav) {
   const s = sessionFor(state, today);
   const log = findLog(s.date);
   const wk = buildWeek(state, today);
-  const planned = wk.sessions.filter(x => x.type !== 'rest').length;
-  const doneThisWeek = wk.sessions.filter(x => findLog(x.date)?.completed).length;
+  // Um treino avulso não conta como dia planeado: se contasse, pedi-lo passava a
+  // aumentar a dívida da semana, e um dia que ele pediu não pode virar falta.
+  const planeados = wk.sessions.filter(x => x.type !== 'rest' && !x.extra);
+  const planned = planeados.length;
+  const doneThisWeek = planeados.filter(x => findLog(x.date)?.completed).length;
+  const extrasFeitos = wk.sessions.filter(x => x.extra && findLog(x.date)?.completed).length;
   const p = state.profile;
 
   const goalNotice = p.pendingGoal ? `
@@ -46,7 +50,7 @@ export function renderHome(nav) {
   // Dias parados não contam durante uma pausa marcada: ele avisou, não faltou.
   const emPausaHoje = emPausa(state, iso(today));
   const diasParado = emPausaHoje || !ultimo ? 0 : Math.floor((new Date(iso(today)) - new Date(ultimo)) / 864e5);
-  const ativos = wk.sessions.filter(x => x.type !== 'rest');
+  const ativos = wk.sessions.filter(x => x.type !== 'rest' && !x.extra);
   const minsPlan = ativos.reduce((a, x) => a + (x.estMinutes || 0), 0);
   const minsDone = wk.sessions.reduce((a, x) => { const l = findLog(x.date); return a + (l?.completed ? (l.minutes || 0) : 0); }, 0);
   const cicloPct = Math.min(1, ((wk.week - 1) + (planned ? doneThisWeek / planned : 0)) / 4);
@@ -67,6 +71,7 @@ export function renderHome(nav) {
         <div class="card-kicker">Hoje</div>
         <h2 class="card-title">Descanso</h2>
         <p class="muted">Sem treino estruturado. Caminhada leve, água e sono. O músculo constrói-se hoje.</p>
+        <button class="btn btn-ghost" data-nav="extra" data-date="${iso(today)}">Mas hoje apetece-me treinar</button>
       </section>`;
   } else if (log?.completed) {
     main = `
@@ -106,7 +111,7 @@ export function renderHome(nav) {
   ${goalNotice}${kneeNotice}
   <section class="card card-dials">
     <div class="dials">
-      ${dial(planned ? doneThisWeek / planned : 0, { num: `${doneThisWeek}`, unit: `/${planned}`, label: 'Semana', sub: doneThisWeek >= planned && planned ? 'completa' : `${planned - doneThisWeek} por fazer`, tone: 'mint' })}
+      ${dial(planned ? doneThisWeek / planned : 0, { num: `${doneThisWeek}`, unit: `/${planned}`, label: 'Semana', sub: doneThisWeek >= planned && planned ? (extrasFeitos ? `completa · +${extrasFeitos} extra` : 'completa') : `${planned - doneThisWeek} por fazer`, tone: 'mint' })}
       ${dial(minsPlan ? minsDone / minsPlan : 0, { num: `${minsDone}`, unit: 'min', label: 'Tempo', sub: `de ${minsPlan} planeados`, tone: 'amber' })}
       ${dial(cicloPct, { num: `S${wk.week}`, unit: '/4', label: 'Ciclo', sub: wk.focus.label, tone: 'sky' })}
     </div>
@@ -200,7 +205,49 @@ export function renderDay(nav, dateISO, altIndex = null) {
     <button class="btn btn-primary btn-big" data-nav="session" data-date="${dateISO}" ${altIndex != null ? `data-alt="${altIndex}"` : ''}>${rotuloAcao(dateISO, log)}</button>
     ${s.alternatives.map((a, i) => `<button class="btn btn-ghost" data-nav="day" data-date="${dateISO}" data-alt="${i}">${esc(a.label)}</button>`).join('')}
   </div>` : ''}
+  ${s.type === 'rest' && !s.pausa ? `<div class="actions">
+    <button class="btn btn-ghost" data-nav="extra" data-date="${dateISO}">Montar um treino para hoje</button>
+  </div>` : ''}
+  ${s.extra && !log?.completed ? `<button class="link" data-rm-extra="${dateISO}">Afinal não — voltar a descanso</button>` : ''}
   ${log?.completed ? '' : moverCard(state, dateISO, s)}`;
+}
+
+// ── Treino avulso ────────────────────────────────────────────────────────────
+// Escolher tipo e duração. O porquê de cada opção está escrito ao lado: um sexto
+// dia a seguir a cinco só é boa ideia se não for mais do mesmo, e isso é mais
+// importante do que a lista ficar curta.
+export function renderExtra(nav, dateISO) {
+  const state = getState();
+  const ja = extraDe(dateISO);
+  const min = Math.max(MIN_MINUTOS, state.profile.minutes || 30);
+  return `
+  <header class="top">
+    <button class="iconbtn" data-nav="back" aria-label="Voltar">‹</button>
+    <div><div class="eyebrow">${esc(fmtDate(dateISO))}</div><h1>Treino extra</h1></div>
+  </header>
+  <p class="lead">Um dia a mais, pedido por ti. Não entra na conta da semana e não vira falta se não o fizeres.</p>
+  <section class="card">
+    <h3>Quanto tempo</h3>
+    <div class="fchips" role="group" aria-label="Duração">
+      ${[30, 45, 60].map(m => `<button class="fchip ${m === (ja?.minutos || min) ? 'on' : ''}" data-extra-min="${m}">${m} min</button>`).join('')}
+    </div>
+  </section>
+  <ul class="kitlist">${TIPOS_EXTRA.map(t => {
+    const real = resolveTipoExtra(t.id, state, dateISO);
+    const meta = DAY_META[real];
+    const escolhido = ja?.tipo === t.id;
+    return `<li class="kitrow${escolhido ? ' on' : ''}" data-extra-tipo="${t.id}" role="button" tabindex="0" aria-label="${esc(t.label)}">
+      <div class="kitrow-body">
+        <div class="kitrow-name">${esc(t.label)}${t.id === 'cima' ? ` <span class="muted">· hoje calha ${esc(meta.title)}</span>` : ''}</div>
+        <div class="kitrow-sub">${esc(t.porque)}</div>
+      </div>
+      <span class="kitrow-go" aria-hidden="true">${escolhido ? '✓' : '›'}</span>
+    </li>`;
+  }).join('')}</ul>
+  ${ja ? `<div class="actions">
+    <button class="btn btn-primary btn-big" data-nav="day" data-date="${dateISO}">Ver o treino</button>
+    <button class="btn btn-ghost" data-rm-extra="${dateISO}">Apagar</button>
+  </div>` : ''}`;
 }
 
 // O botão de um dia passado não pode dizer "Começar": o que se faz a um dia que já

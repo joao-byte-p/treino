@@ -62,6 +62,7 @@ export function defaultState() {
     logs: [],                 // sessões registadas
     swaps: {},                // "YYYY-MM-DD" -> { exerciseId: replacementId }
     movidos: {},              // "YYYY-MM-DD" -> "YYYY-MM-DD": treino trocado para outro dia
+    extras: {},               // "YYYY-MM-DD" -> { tipo, minutos }: treino pedido por ele num dia de descanso
     pausas: [],               // [{ de, ate, motivo }]: férias, doença, viagem — o ciclo congela
     kneeFlag: false,          // joelho a queixar-se esta semana
     updatedAt: Date.now(),
@@ -121,6 +122,23 @@ export function marcarFigura(exId, nota) {
   persist();
   return !!state.figuraMarcada[exId];
 }
+
+// Treino avulso num dia de descanso. Guardo só o pedido (tipo e duração), não a
+// sessão montada: assim o treino é construído com o estado de HOJE — nível das
+// cadeias, cargas, joelho — e não com o do dia em que carregou no botão.
+export function marcarExtra(dateISO, tipo, minutos) {
+  if (!state.extras) state.extras = {};
+  state.extras[dateISO] = { tipo, minutos: Number(minutos) || 30, criado: iso(new Date()) };
+  persist();
+  return true;
+}
+
+export function removerExtra(dateISO) {
+  if (state.extras) delete state.extras[dateISO];
+  persist();
+}
+
+export function extraDe(dateISO) { return state.extras?.[dateISO] || null; }
 
 export function figuraMarcada(exId) { return !!state.figuraMarcada?.[exId]; }
 

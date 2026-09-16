@@ -1,7 +1,7 @@
-import { getState, update, subscribe, importJSON, marcarFigura, moverTreino } from './store.js';
+import { getState, update, subscribe, importJSON, marcarFigura, moverTreino, marcarExtra, removerExtra, extraDe } from './store.js';
 import * as sync from './sync.js';
 import { applyPendingGoal } from './engine/planner.js';
-import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, bindSettings } from './ui/views.js';
+import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, renderExtra, bindSettings } from './ui/views.js';
 import { renderKit, renderKitItem } from './ui/kit.js';
 import { mountSession } from './ui/session.js';
 import { toast } from './ui/components.js';
@@ -22,7 +22,7 @@ let libFilter = 'todos';
 let libMine = false;
 let libMuscle = 'todos';
 
-const TAB_OF = { home: 'home', plan: 'plan', day: 'plan', library: 'library', exercise: 'library', kit: 'library', 'kit-item': 'library', progress: 'progress', settings: 'settings' };
+const TAB_OF = { home: 'home', plan: 'plan', day: 'plan', extra: 'plan', library: 'library', exercise: 'library', kit: 'library', 'kit-item': 'library', progress: 'progress', settings: 'settings' };
 
 const nav = {
   go(name, params = {}) {
@@ -65,6 +65,7 @@ function render(scrollTop = true) {
     case 'home': html = renderHome(nav); break;
     case 'plan': html = renderPlan(nav, planOffset); break;
     case 'day': html = renderDay(nav, route.params.date, route.params.alt ?? null); break;
+    case 'extra': html = renderExtra(nav, route.params.date); break;
     case 'library': html = renderLibrary(nav, libQuery, libFilter, libMine, libMuscle); break;
     case 'exercise': html = renderExercise(nav, route.params.id); break;
     case 'kit': html = renderKit(nav); break;
@@ -110,6 +111,28 @@ function render(scrollTop = true) {
       toast('Nível ajustado'); render(false);
     }));
   }
+  // Treino avulso: a duração escolhe-se primeiro e fica; o tipo confirma.
+  if (route.name === 'extra') {
+    const data = route.params.date;
+    let minutos = extraDe(data)?.minutos || Math.max(30, getState().profile.minutes || 30);
+    view.querySelectorAll('[data-extra-min]').forEach(b => b.addEventListener('click', () => {
+      minutos = Number(b.dataset.extraMin);
+      const ja = extraDe(data);
+      if (ja) marcarExtra(data, ja.tipo, minutos);
+      view.querySelectorAll('[data-extra-min]').forEach(o => o.classList.toggle('on', o === b));
+    }));
+    view.querySelectorAll('[data-extra-tipo]').forEach(b => b.addEventListener('click', () => {
+      marcarExtra(data, b.dataset.extraTipo, minutos);
+      toast('Treino montado. Não conta para a semana.');
+      nav.go('day', { date: data });
+    }));
+  }
+  view.querySelectorAll('[data-rm-extra]').forEach(b => b.addEventListener('click', () => {
+    removerExtra(b.dataset.rmExtra);
+    toast('Voltou a ser dia de descanso');
+    nav.go('home');
+  }));
+
   view.querySelectorAll('[data-mover]').forEach(b => b.addEventListener('click', () => {
     const { mover, para } = b.dataset;
     moverTreino(mover, para);
@@ -151,6 +174,7 @@ document.addEventListener('click', e => {
   if (n === 'back') return nav.back();
   if (n === 'session') return nav.go('session', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null });
   if (n === 'day') return nav.go('day', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null });
+  if (n === 'extra') return nav.go('extra', { date: el.dataset.date });
   if (n === 'exercise') return nav.go('exercise', { id: el.dataset.ex });
   if (n === 'kit-item') return nav.go('kit-item', { id: el.dataset.kit });
   nav.go(n);

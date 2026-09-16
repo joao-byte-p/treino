@@ -65,7 +65,7 @@ voltam a discutir:
 ## Auditorias
 Correr depois de mexer no motor, nas poses ou no registo:
 ```bash
-for f in audit audit2 audit3 audit4 audit5 audit6 audit7 audit8 audit9 audit10 check anklecheck figcheck suave joelhos sw snapshot; do node tools/$f.mjs || break; done
+for f in audit audit2 audit3 audit4 audit5 audit6 audit7 audit8 audit9 audit10 audit11 check anklecheck figcheck suave joelhos sw snapshot; do node tools/$f.mjs || break; done
 ```
 | Ficheiro | O que verifica |
 |---|---|
@@ -84,6 +84,7 @@ for f in audit audit2 audit3 audit4 audit5 audit6 audit7 audit8 audit9 audit10 c
 | `audit8.mjs` | troca de treino entre dias: mantém os dias de treino, não vaza para outra semana |
 | `audit9.mjs` | pausas: congelam o ciclo, não contam como falta, não afetam o futuro |
 | `audit10.mjs` | grupos musculares: nenhum termo fica sem tradução, nenhum exercício fora dos filtros |
+| `audit11.mjs` | treino avulso: só em dia de descanso, nunca em pausa, não mexe no plano nem no ciclo |
 | `sw.mjs` | todos os módulos estão na lista do service worker: um módulo de fora parte a app offline |
 
 Guias do material vivem em `js/data/kit.js` e ligam-se aos exercícios pelo mesmo código de equipamento das fichas — a app descobre sozinha que exercícios cada guia serve. Só entra material sobre o qual haja mesmo alguma coisa a dizer.
