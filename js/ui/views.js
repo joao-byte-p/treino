@@ -588,13 +588,14 @@ function marcadasCard(state) {
   const ids = Object.keys(m).filter(id => BY_ID[id]);
   if (!ids.length) return '';
   return `<section class="card">
-    <div class="row-between"><h3>Figuras a corrigir <span class="muted">${ids.length}</span></h3>
-      <button type="button" class="link" data-copy-marcadas>Copiar lista</button></div>
-    <p class="muted small">Marcaste estas durante o treino. A nota é opcional e ajuda a perceber o que está mal. O botão copia a lista em texto, para ma mandares.</p>
+    <h3>Figuras a corrigir <span class="muted">${ids.length}</span></h3>
+    <p class="muted small">Marcaste estas durante o treino. A nota é opcional e ajuda a perceber o que está mal. "Copiar lista" copia-a em texto, para ma mandares; depois de eu as corrigir, "Limpar lista" apaga-as de uma vez.</p>
     <ul class="marcadas">${ids.map(id => `<li>
       <div class="row-between"><strong>${esc(BY_ID[id].name)}</strong><button type="button" class="link" data-unflag="${id}">Remover</button></div>
       <input type="text" placeholder="O que está mal? (opcional)" value="${esc(m[id].nota || '')}" data-nota="${id}">
     </li>`).join('')}</ul>
+    <div class="row-gap"><button type="button" class="link" data-copy-marcadas>Copiar lista</button>
+      <button type="button" class="link" data-clear-marcadas>Limpar lista</button></div>
   </section>`;
 }
 
@@ -761,6 +762,13 @@ export function bindSettings(root, nav, onboarding) {
       ids.map(id => `- ${BY_ID[id].name} [${id}]${m[id].nota ? `: ${m[id].nota}` : ''}`).join('\n');
     try { await navigator.clipboard.writeText(texto); toast('Lista copiada'); }
     catch { try { await navigator.share({ text: texto }); } catch { toast('Não consegui copiar'); } }
+  });
+  // Depois de eu as corrigir, a lista limpa-se de uma vez em vez de uma a uma.
+  root.querySelector('[data-clear-marcadas]')?.addEventListener('click', () => {
+    const n = Object.keys(getState().figuraMarcada || {}).length;
+    if (!confirm(n === 1 ? 'Limpar a figura marcada e a nota?' : `Limpar as ${n} figuras marcadas e as notas?`)) return;
+    update(s => { s.figuraMarcada = {}; });
+    toast('Lista limpa'); nav.rerender();
   });
   root.querySelector('[data-ics]')?.addEventListener('click', () => {
     const st = getState();

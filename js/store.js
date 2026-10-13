@@ -82,6 +82,16 @@ function corrigeTempos(st) {
   }
 }
 
+// As figuras marcadas até à 0.20 foram todas revistas. Limpo as marcas anteriores
+// a este dia, e não "todas", para que uma figura que ele volte a marcar depois de
+// atualizar sobreviva. Idempotente, e apanha também a cópia que vem da sincronização.
+const FIGURAS_REVISTAS_ATE = '2026-10-13';
+function limpaFigurasRevistas(st) {
+  for (const [id, m] of Object.entries(st.figuraMarcada || {})) {
+    if (!m?.date || m.date < FIGURAS_REVISTAS_ATE) delete st.figuraMarcada[id];
+  }
+}
+
 let state = load();
 const listeners = new Set();
 
@@ -93,6 +103,7 @@ function load() {
     const st = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...(parsed.profile || {}) } };
     if (st.profile.minutes < 30) st.profile.minutes = 30; // 30 min passou a ser o mínimo
     corrigeTempos(st);
+    limpaFigurasRevistas(st);
     return st;
   } catch {
     return defaultState();
@@ -192,6 +203,7 @@ export function importJSON(text) {
   // apagar definições que ainda não existiam quando foi feita.
   state = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...parsed.profile } };
   corrigeTempos(state);
+  limpaFigurasRevistas(state);
   persist();
 }
 
