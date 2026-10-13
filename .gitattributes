@@ -1,0 +1,2 @@
+# As capturas comparam-se texto a texto: guardadas sempre em LF, em qualquer sistema.
+tools/snapshots/*.html text eol=lf
