@@ -56,7 +56,11 @@ function frase(e) {
   return 'Progresso registado';
 }
 
-export function mountSession(root, nav, dateISO, altIndex) {
+// `soRegistar`: o treino já foi feito sem o telemóvel (uma corrida, quase sempre)
+// e só falta registá-lo. Vai direto ao ecrã de registo, sem passos guiados — e sem
+// ficar marcado como interrompido, que era o que acontecia a quem saía a meio da
+// sessão guiada só para chegar ao registo.
+export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false } = {}) {
   const state = getState();
   // sessionFor já aplica as trocas por versão em casa guardadas para o dia
   const session = applyAlt(sessionFor(state, new Date(dateISO)), altIndex);
@@ -69,8 +73,7 @@ export function mountSession(root, nav, dateISO, altIndex) {
   const results = {};
   let finished = false;
 
-  unlockAudio();
-  keepAwake(true);
+  if (!soRegistar) { unlockAudio(); keepAwake(true); }
 
   function stopTimer() { if (timer) { timer.stop(); timer = null; } }
 
@@ -78,8 +81,8 @@ export function mountSession(root, nav, dateISO, altIndex) {
   function weekAfter() {
     const st = getState();
     const wk = buildWeek(st, new Date(dateISO));
-    const previstos = wk.sessions.filter(x => x.type !== 'rest').length;
-    const feitos = wk.sessions.filter(x => {
+    const previstos = wk.sessions.filter(x => x.type !== 'rest' && !x.extra).length;
+    const feitos = wk.sessions.filter(x => !x.extra).filter(x => {
       const l = st.logs.find(y => y.date === x.date);
       return (l && l.completed) || x.date === dateISO;
     }).length;
@@ -260,7 +263,9 @@ export function mountSession(root, nav, dateISO, altIndex) {
     stopTimer();
     stopFig();
     keepAwake(false);
-    beep('done');
+    if (!soRegistar) beep('done');
+    // Tempo que a app viu passar. Numa corrida feita sem telemóvel é só o tempo de
+    // registar — por isso, mais abaixo, ganha o tempo que ele escreve se for maior.
     const minutes = Math.max(1, Math.round((Date.now() - startedAt) / 60000));
     const strength = session.blocks.flatMap(b => b.kind === 'strength' ? b.items : []);
     const cardio = session.blocks.flatMap(b => b.kind === 'cardio' ? b.items : [])[0];
@@ -268,9 +273,9 @@ export function mountSession(root, nav, dateISO, altIndex) {
     root.innerHTML = `
       <header class="srun-top"><span class="srun-count">Registo</span></header>
       <div class="srun srun-log">
-        <div class="srun-kicker">${early ? 'Sessão interrompida' : 'Sessão terminada'}</div>
+        <div class="srun-kicker">${soRegistar ? 'Registar treino feito' : early ? 'Sessão interrompida' : 'Sessão terminada'}</div>
         <h2 class="srun-title">${esc(session.title)}</h2>
-        <div class="stats"><div class="stat"><span class="stat-n">${minutes}</span><span class="stat-l">min</span></div>${weekAfter()}</div>
+        <div class="stats">${cardio && soRegistar ? '' : `<div class="stat"><span class="stat-n">${minutes}</span><span class="stat-l">min</span></div>`}${weekAfter()}</div>
         ${strength.length ? `<ul class="loglist">${strength.map(it => {
           const r = results[it.ex.id] || { done: false, top: true, rpe: null, kg: it.load?.kg ?? null };
           return `<li class="logrow" data-log="${it.ex.id}">
@@ -288,7 +293,12 @@ export function mountSession(root, nav, dateISO, altIndex) {
         ${cardio ? `<div class="card cardio-log">
           <h4>${esc(cardio.ex.name)}</h4>
           <div class="grid2">
-            <label class="field"><span>Minutos</span><input type="number" inputmode="numeric" value="${Math.round(cardio.time / 60)}" data-c-min></label>
+            <div class="field"><span>Tempo</span>
+              <div class="mmss">
+                <label><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="600" value="${Math.floor(cardio.time / 60)}" data-c-min aria-label="Minutos"><small>min</small></label>
+                <label><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" value="${String(cardio.time % 60).padStart(2, '0')}" data-c-seg aria-label="Segundos"><small>s</small></label>
+              </div>
+            </div>
             <label class="field"><span>${cardio.ex.chain === 'swim' ? 'Metros' : 'Km'}</span><input type="number" inputmode="decimal" step="${cardio.ex.chain === 'swim' ? '50' : '0.1'}" placeholder="${cardio.ex.chain === 'swim' ? '800' : '5.0'}" data-c-dist></label>
           </div>
           <div class="rpe" data-cardio-rpe>${RPE.map(x => `<button type="button" data-rpe="${x.value}">${esc(x.label)}</button>`).join('')}</div>
@@ -336,7 +346,16 @@ export function mountSession(root, nav, dateISO, altIndex) {
       if (cardio) {
         const dist = Number(root.querySelector('[data-c-dist]')?.value) || null;
         const unit = cardio.ex.chain === 'swim' ? 'm' : 'km';
-        log.cardio = { ex: cardio.ex.id, minutes: Number(root.querySelector('[data-c-min]')?.value) || Math.round(cardio.time / 60), dist, unit, rpe: cardioRpe, kneePain: !!root.querySelector('[data-knee-pain]')?.checked };
+        // Minutos e segundos escritos à parte. "75 segundos" vira 1:15 em vez de dar
+        // erro: o que ele quis dizer é óbvio e recusar só o obrigava a fazer a conta.
+        const mi = Math.max(0, Math.floor(Number(root.querySelector('[data-c-min]')?.value) || 0));
+        const se = Math.max(0, Math.floor(Number(root.querySelector('[data-c-seg]')?.value) || 0));
+        const seconds = mi * 60 + se || cardio.time;
+        log.cardio = { ex: cardio.ex.id, seconds, minutes: seconds / 60, dist, unit, rpe: cardioRpe, kneePain: !!root.querySelector('[data-knee-pain]')?.checked };
+        // O tempo que conta na semana é o maior dos dois: o que a app viu e o que ele
+        // escreveu. Sem telemóvel ganha o escrito; com a sessão guiada ligada do
+        // princípio ao fim, ganha o da app, que inclui aquecimento e alongamentos.
+        log.minutes = Math.max(log.minutes, Math.round(seconds / 60));
         if (log.cardio.kneePain) { update(s => { s.kneeFlag = true; }); events.push('Joelho a queixar-se: a próxima corrida passa a piscina'); }
       }
       update(s => {
@@ -344,13 +363,18 @@ export function mountSession(root, nav, dateISO, altIndex) {
         events = events.concat(ev.map(frase));
       });
       const doneN = strength.filter(it => results[it.ex.id]?.done).length;
-      log.summary = strength.length ? `${doneN} de ${strength.length} exercícios · ${minutes} min` : `${minutes} min`;
+      log.summary = strength.length ? `${doneN} de ${strength.length} exercícios · ${log.minutes} min`
+        : log.cardio ? `${mmss(log.cardio.seconds)}${log.cardio.dist ? ` · ${log.cardio.dist} ${log.cardio.unit}` : ''}`
+        : `${log.minutes} min`;
       log.events = events;
       saveLog(log);
       return events;
     }
   }
 
-  renderStep();
+  if (soRegistar) finish(false);
+  else renderStep();
   return () => { stopTimer(); stopFig(); keepAwake(false); };
 }
+
+const mmss = sec => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;

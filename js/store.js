@@ -69,6 +69,19 @@ export function defaultState() {
   };
 }
 
+// Até à 0.19 o tempo de um treino era o que a app via passar entre "Começar" e
+// "Guardar". Numa corrida feita sem telemóvel isso é um ou dois minutos, e o tempo
+// que ele escreveu ficava guardado à parte sem contar para nada. Corrige registos
+// antigos: idempotente, corre a cada arranque e a cada sincronização sem estragar.
+function corrigeTempos(st) {
+  for (const l of st.logs || []) {
+    const c = l.cardio;
+    if (!c) continue;
+    if (c.seconds == null && c.minutes) c.seconds = Math.round(c.minutes * 60);
+    if (c.seconds && (l.minutes || 0) < Math.round(c.seconds / 60)) l.minutes = Math.round(c.seconds / 60);
+  }
+}
+
 let state = load();
 const listeners = new Set();
 
@@ -79,6 +92,7 @@ function load() {
     const parsed = JSON.parse(raw);
     const st = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...(parsed.profile || {}) } };
     if (st.profile.minutes < 30) st.profile.minutes = 30; // 30 min passou a ser o mínimo
+    corrigeTempos(st);
     return st;
   } catch {
     return defaultState();
@@ -177,6 +191,7 @@ export function importJSON(text) {
   // O perfil junta-se campo a campo, como no arranque: uma cópia antiga não pode
   // apagar definições que ainda não existiam quando foi feita.
   state = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...parsed.profile } };
+  corrigeTempos(state);
   persist();
 }
 

@@ -202,7 +202,8 @@ export function renderDay(nav, dateISO, altIndex = null) {
   ${log?.completed ? `<div class="notice">Feito. ${esc(log.summary || '')}</div>` : ''}
   ${blocks}
   ${s.type !== 'rest' ? `<div class="actions">
-    <button class="btn btn-primary btn-big" data-nav="session" data-date="${dateISO}" ${altIndex != null ? `data-alt="${altIndex}"` : ''}>${rotuloAcao(dateISO, log)}</button>
+    <button class="btn btn-primary btn-big" data-nav="session" data-date="${dateISO}" ${altIndex != null ? `data-alt="${altIndex}"` : ''} ${dateISO < iso(new Date()) || log?.completed ? 'data-registar="1"' : ''}>${rotuloAcao(dateISO, log)}</button>
+    ${jaFeito(s, dateISO, log, altIndex)}
     ${s.alternatives.map((a, i) => `<button class="btn btn-ghost" data-nav="day" data-date="${dateISO}" data-alt="${i}">${esc(a.label)}</button>`).join('')}
   </div>` : ''}
   ${s.type === 'rest' && !s.pausa ? `<div class="actions">
@@ -248,6 +249,18 @@ export function renderExtra(nav, dateISO) {
     <button class="btn btn-primary btn-big" data-nav="day" data-date="${dateISO}">Ver o treino</button>
     <button class="btn btn-ghost" data-rm-extra="${dateISO}">Apagar</button>
   </div>` : ''}`;
+}
+
+// Corrida ou natação feitas sem o telemóvel: ele chega a casa e só quer escrever o
+// tempo. Sem isto tinha de começar a sessão guiada e sair a meio para chegar ao
+// registo, e o treino ficava gravado como interrompido. Só aparece hoje, num dia
+// por fazer: num dia passado o botão principal já vai direto ao registo.
+function jaFeito(s, dateISO, log, altIndex) {
+  if (log?.completed || dateISO !== iso(new Date())) return '';
+  const c = s.blocks.flatMap(b => b.kind === 'cardio' ? b.items : [])[0];
+  if (!c) return '';
+  const verbo = c.ex.chain === 'swim' ? 'Já nadei' : c.ex.id.startsWith('walk') ? 'Já caminhei' : c.ex.id.startsWith('run') ? 'Já corri' : 'Já fiz';
+  return `<button class="btn btn-ghost" data-nav="session" data-date="${dateISO}" data-registar="1" ${altIndex != null ? `data-alt="${altIndex}"` : ''}>${verbo} — só registar</button>`;
 }
 
 // O botão de um dia passado não pode dizer "Começar": o que se faz a um dia que já
@@ -448,8 +461,14 @@ export function renderProgress(nav) {
   ${levels.length ? `<section class="card"><h3>Onde estás em cada progressão</h3><ul class="kv">${levels.map(l => `<li><span>${esc(l.name)}</span><strong>nível ${l.lvl}<small> de ${l.max}</small></strong></li>`).join('')}</ul></section>` : ''}
   ${loads.length ? `<section class="card"><h3>Cargas</h3><ul class="kv">${loads.map(l => `<li><span>${esc(l.ex.name)}</span><strong>${l.kg} kg${l.delta ? `<small class="delta ${l.delta > 0 ? 'up' : 'down'}"> ${l.delta > 0 ? '+' : ''}${l.delta} desde ${esc(fmtDate(l.since))}</small>` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${corridaCard(logs)}
-  ${runs.length ? `<section class="card"><h3>Últimos treinos de cardio</h3><ul class="kv">${runs.map(l => `<li><span>${esc(fmtDate(l.date))}</span><strong>${esc(distLabel(l.cardio))} · ${l.cardio.minutes} min${pace(l.cardio) ? ` · ${pace(l.cardio)}` : ''}</strong></li>`).join('')}</ul></section>` : ''}
+  ${runs.length ? `<section class="card"><h3>Últimos treinos de cardio</h3><ul class="kv">${runs.map(l => `<li><span>${esc(fmtDate(l.date))}</span><strong>${esc(distLabel(l.cardio))} · ${esc(duracao(l.cardio))}${pace(l.cardio) ? ` · ${pace(l.cardio)}` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${!logs.length ? `<p class="foot muted">Ainda sem registos. Depois da primeira sessão isto ganha vida.</p>` : ''}`;
+}
+
+// Tempo de um registo de cardio. Os novos têm segundos; os antigos só minutos.
+function duracao(c) {
+  const seg = c.seconds ?? Math.round((c.minutes || 0) * 60);
+  return `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}`;
 }
 
 function distLabel(c) {
@@ -461,9 +480,10 @@ function distLabel(c) {
 // O ritmo so faz sentido em km. Registos em metros (natacao) mostram so distancia.
 function pace(c) {
   const d = c.dist != null ? c.dist : c.km;
-  if (!d || !c.minutes || (c.unit || 'km') !== 'km') return '';
-  const p = c.minutes / d; const m = Math.floor(p); const s = Math.round((p - m) * 60);
-  return `${m}:${String(s).padStart(2, '0')}/km`;
+  const seg = c.seconds ?? (c.minutes ? c.minutes * 60 : 0);
+  if (!d || !seg || (c.unit || 'km') !== 'km') return '';
+  const porKm = Math.round(seg / d);
+  return `${Math.floor(porKm / 60)}:${String(porKm % 60).padStart(2, '0')}/km`;
 }
 
 // A pergunta que ele fez na segunda mensagem e que a app nunca respondeu:
@@ -472,8 +492,9 @@ function pace(c) {
 // para situar, não para avaliar — e a subida do percurso dele não entra em nenhuma.
 function segPorKm(c) {
   const d = c.dist != null ? c.dist : c.km;
-  if (!d || !c.minutes || (c.unit || 'km') !== 'km') return null;
-  return (c.minutes * 60) / d;
+  const seg = c.seconds ?? (c.minutes ? c.minutes * 60 : 0);
+  if (!d || !seg || (c.unit || 'km') !== 'km') return null;
+  return seg / d;
 }
 const mmss = sec => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
 

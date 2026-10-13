@@ -74,7 +74,7 @@ function render(scrollTop = true) {
     case 'settings': html = renderSettings(nav, false); break;
     case 'session':
       view.innerHTML = '';
-      cleanup = mountSession(view, nav, route.params.date, route.params.alt ?? null);
+      cleanup = mountSession(view, nav, route.params.date, route.params.alt ?? null, { soRegistar: !!route.params.registar });
       return;
   }
   view.innerHTML = html;
@@ -172,7 +172,7 @@ document.addEventListener('click', e => {
   if (!el || el.closest('.srun')) return;
   const n = el.dataset.nav;
   if (n === 'back') return nav.back();
-  if (n === 'session') return nav.go('session', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null });
+  if (n === 'session') return nav.go('session', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null, registar: el.dataset.registar === '1' });
   if (n === 'day') return nav.go('day', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null });
   if (n === 'extra') return nav.go('extra', { date: el.dataset.date });
   if (n === 'exercise') return nav.go('exercise', { id: el.dataset.ex });

@@ -648,3 +648,14 @@ body::before {
 .kitman .v-cuidado { border-left-color: var(--amber); }
 .kitman .v-nao { border-left-color: var(--text-3); }
 .kitman .v-nao strong { color: var(--text-2); }
+
+/* Tempo de cardio: minutos e segundos em dois campos. Um só campo "24:37" pediria
+   dois pontos, e o teclado numérico do iPhone não os tem. */
+.mmss { display: flex; gap: 8px; }
+/* O tempo leva a linha inteira: em meia largura, com "min" ao lado, um "24" já não
+   cabia e aparecia cortado. A distância passa para a linha de baixo. */
+.cardio-log .grid2 > .field:first-child { grid-column: 1 / -1; }
+.mmss label { flex: 1; display: flex; align-items: center; gap: 6px; background: var(--fill); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; }
+.mmss label:focus-within { border-color: var(--line-strong); }
+.mmss input { width: 100%; min-width: 0; background: none; border: 0; outline: none; padding: 12px 0; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.mmss small { color: var(--text-3); font-size: 13px; font-weight: 600; }
