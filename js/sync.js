@@ -137,3 +137,21 @@ export async function sincronizar(local, aplicar) {
   if (tLocal > tRemoto) { await empurrar(local); return { acao: 'enviado', texto: 'Enviei a versão deste aparelho' }; }
   return { acao: 'igual', texto: 'Já estava igual nos dois lados' };
 }
+
+// Ao entrar num aparelho, a hora não serve para decidir. Um iPad novo acabou de
+// passar pelo perfil inicial, logo o estado dele é o mais recente — e, pela regra
+// de cima, enviava um histórico vazio por cima do iPhone. Aqui manda o que já está
+// no servidor; deste aparelho só se aproveitam os treinos que lá não existam.
+export async function entrar(local, aplicar) {
+  const remoto = await puxar();
+  if (!remoto) { await empurrar(local); return { acao: 'enviado', texto: 'Primeira cópia enviada' }; }
+  if ((remoto.dados?.schema || 0) > (local.schema || 0)) throw new Error(ERRO_FORMATO);
+  const deLa = remoto.dados.logs || [];
+  const datas = new Set(deLa.map(l => l.date));
+  const soCa = (local.logs || []).filter(l => !datas.has(l.date));
+  const logs = [...deLa, ...soCa].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  aplicar({ ...remoto.dados, logs });
+  if (soCa.length) await empurrar({ ...remoto.dados, logs, updatedAt: Date.now() });
+  const n = soCa.length;
+  return { acao: 'recebido', texto: n ? `Recebi os dados do outro aparelho e juntei ${n} ${n === 1 ? 'treino' : 'treinos'} deste` : 'Recebi os dados do outro aparelho' };
+}

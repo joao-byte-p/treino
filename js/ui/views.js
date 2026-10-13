@@ -805,7 +805,7 @@ export function bindSettings(root, nav, onboarding) {
     if (!codigo) return toast('Falta o código do email');
     try {
       await sync.confirmarCodigo(campoEmail(), codigo);
-      const r = await sync.sincronizar(getState(), dados => importJSON(JSON.stringify(dados)));
+      const r = await sync.entrar(getState(), dados => importJSON(JSON.stringify(dados)));
       setProfile({ lastSync: Date.now() });
       toast(r.texto);
       nav.rerender();

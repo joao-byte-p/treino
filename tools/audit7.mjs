@@ -147,6 +147,30 @@ try {
 if (!/enable row level security/i.test(S.SQL_TABELA)) falha('o SQL da tabela não liga RLS');
 if ((S.SQL_TABELA.match(/create policy/gi) || []).length < 3) falha('faltam políticas de RLS (ler, criar, alterar)');
 
-console.log(`sincronização: 13 cenários`);
+// ── 14. entrar num aparelho novo não apaga o outro ─────────────
+// O iPad acabou de fazer o perfil inicial: o estado dele é mais recente que o do
+// iPhone, mas não tem treinos. Entrar tem de trazer o iPhone, não de o apagar.
+{
+  const iphone = { schema: 1, updatedAt: 1000, profile: { name: 'iPhone' }, logs: [{ date: '2026-10-01' }, { date: '2026-10-03' }] };
+  doc = { dados: iphone, updated_at: new Date(1000).toISOString() };
+  let recebido = null;
+  r = await S.entrar({ schema: 1, updatedAt: 9_999_999, profile: { name: 'iPad' }, logs: [] }, d => { recebido = d; });
+  if (r.acao !== 'recebido') falha(`entrar num aparelho novo devia receber, fez "${r.acao}"`);
+  if (recebido?.logs?.length !== 2 || recebido.profile.name !== 'iPhone') falha('entrar não trouxe os dados do outro aparelho');
+  if (doc.dados.logs.length !== 2 || doc.dados.profile.name !== 'iPhone') falha('entrar num aparelho novo escreveu por cima do outro (o caso do iPad)');
+
+  // treinos que só existem neste aparelho juntam-se, não se perdem
+  r = await S.entrar({ schema: 1, updatedAt: 5, logs: [{ date: '2026-10-02' }, { date: '2026-10-03' }] }, d => { recebido = d; });
+  if (recebido.logs.map(l => l.date).join() !== '2026-10-01,2026-10-02,2026-10-03') falha(`juntar treinos falhou: ${recebido.logs.map(l => l.date)}`);
+  if (doc.dados.logs.length !== 3) falha('o treino que só existia neste aparelho não chegou ao servidor');
+  if (!/juntei 1 treino deste/.test(r.texto)) falha(`mensagem ao juntar: ${r.texto}`);
+
+  // servidor vazio: entrar envia, como antes
+  doc = null;
+  r = await S.entrar({ schema: 1, updatedAt: 5, logs: [{ date: '2026-10-05' }] }, () => falha('servidor vazio não aplica nada'));
+  if (r.acao !== 'enviado' || doc?.dados.logs.length !== 1) falha('entrar com servidor vazio não enviou');
+}
+
+console.log(`sincronização: 14 cenários`);
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');
