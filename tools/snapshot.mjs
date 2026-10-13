@@ -94,9 +94,7 @@ for (const [nome, fn] of Object.entries(ECRAS)) {
   if (!fs.existsSync(ficheiro)) { fs.writeFileSync(ficheiro, bonito); novos.push(nome); continue; }
   // CRLF fora: no Windows o git converte as quebras de linha ao reescrever os
   // ficheiros (num rebase, por exemplo) e a captura falhava sem nada ter mudado.
-  const antes = fs.readFileSync(ficheiro, 'utf8').replace(/
-/g, '
-');
+  const antes = fs.readFileSync(ficheiro, 'utf8').replace(/\r\n/g, '\n');
   if (antes === bonito) continue;
   if (UPDATE) { fs.writeFileSync(ficheiro, bonito); mudou.push(nome); continue; }
   const a = antes.split('\n'); const b = bonito.split('\n');
