@@ -229,9 +229,21 @@ function setProfileSilencioso(campos) {
 }
 
 // Ao abrir, se houver sessão, vê se o outro aparelho tem novidades.
-if (sync.ligado()) {
+function buscarNovidades() {
+  if (!sync.ligado()) return;
   sync.sincronizar(getState(), dados => { importJSON(JSON.stringify(dados)); render(false); })
     .then(r => { if (r.acao === 'recebido') toast(r.texto); })
-    .catch(e => { if (e.message === sync.ERRO_FORMATO) { avisouFormato = true; toast(e.message); } });
+    .catch(e => { if (e.message === sync.ERRO_FORMATO && !avisouFormato) { avisouFormato = true; toast(e.message); } });
 }
+buscarNovidades();
+
+// No iPhone e no iPad a app não arranca de novo quando volta do segundo plano:
+// retoma onde estava. Sem isto, um iPad aberto há dias continuava com o estado
+// antigo e, ao primeiro toque, enviava-o por cima do treino feito no iPhone.
+let ultimaBusca = Date.now();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || Date.now() - ultimaBusca < 30000) return;
+  ultimaBusca = Date.now();
+  buscarNovidades();
+});
 render();
