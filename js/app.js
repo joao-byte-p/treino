@@ -1,4 +1,4 @@
-import { getState, update, subscribe, importJSON, marcarFigura, moverTreino, marcarExtra, removerExtra, extraDe } from './store.js';
+import { getState, update, subscribe, importJSON, marcarSincronizado, marcarFigura, moverTreino, marcarExtra, removerExtra, extraDe } from './store.js';
 import * as sync from './sync.js';
 import { applyPendingGoal } from './engine/planner.js';
 import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, renderExtra, bindSettings } from './ui/views.js';
@@ -204,46 +204,52 @@ if ('serviceWorker' in navigator) {
   }).catch(() => { /* offline ou file:// */ });
 }
 
-// Envio automático: só com sessão iniciada por ele, e com folga de 4 segundos para
-// não fazer um pedido por cada tecla das definições. Falhar em silêncio é de propósito
-// — a app tem de continuar a funcionar sem rede, e o ecrã das Definições diz o estado.
-let porEnviar = null;
+// Sincronização automática: só com sessão iniciada por ele. Falhar em silêncio é
+// de propósito — a app tem de continuar a funcionar sem rede, e o ecrã das
+// Definições diz quando foi a última vez que correu bem.
 let avisouFormato = false; // o aviso de formato diz-se uma vez por sessão, não a cada gravação
+let emCurso = Promise.resolve();
+
+// Uma de cada vez: duas a correr ao mesmo tempo liam o mesmo servidor e a segunda
+// podia enviar uma cópia sem o que a primeira acabou de juntar.
+function sincronizarJa({ avisar = false, keepalive = false } = {}) {
+  if (!sync.ligado()) return emCurso;
+  emCurso = emCurso.then(() => sync.sincronizar(getState(), dados => {
+    // Guarda a hora que vem no documento: ver `persist` em store.js.
+    importJSON(JSON.stringify(dados), { manterHora: true });
+    render(false);
+  }, { keepalive }))
+    .then(r => { marcarSincronizado(); if (avisar && (r.acao === 'recebido' || r.acao === 'juntado')) toast(r.texto); })
+    .catch(e => { if (e.message === sync.ERRO_FORMATO && !avisouFormato) { avisouFormato = true; toast(e.message); } });
+  return emCurso;
+}
+
+// Envio de cada alteração, com folga de 4 segundos para não fazer um pedido por
+// cada tecla das definições.
+let porEnviar = null;
 subscribe(() => {
   if (!sync.ligado()) return;
   clearTimeout(porEnviar);
-  porEnviar = setTimeout(() => {
-    // passa pelo `sincronizar` e não pelo `empurrar` direto: é ele que recusa escrever
-    // por cima de um documento de formato mais recente
-    sync.sincronizar(getState(), dados => { importJSON(JSON.stringify(dados)); render(false); })
-      .then(() => setProfileSilencioso({ lastSync: Date.now() }))
-      .catch(e => { if (e.message === sync.ERRO_FORMATO && !avisouFormato) { avisouFormato = true; toast(e.message); } });
-  }, 4000);
+  porEnviar = setTimeout(() => { porEnviar = null; sincronizarJa(); }, 4000);
 });
 
-// Marca a data sem disparar outro envio, senão isto nunca parava.
-function setProfileSilencioso(campos) {
-  const st = getState();
-  Object.assign(st.profile, campos);
-  try { localStorage.setItem('treino.v1', JSON.stringify(st)); } catch { /* sem espaço */ }
-}
-
-// Ao abrir, se houver sessão, vê se o outro aparelho tem novidades.
-function buscarNovidades() {
-  if (!sync.ligado()) return;
-  sync.sincronizar(getState(), dados => { importJSON(JSON.stringify(dados)); render(false); })
-    .then(r => { if (r.acao === 'recebido') toast(r.texto); })
-    .catch(e => { if (e.message === sync.ERRO_FORMATO && !avisouFormato) { avisouFormato = true; toast(e.message); } });
-}
-buscarNovidades();
+// Ao abrir, vê se o outro aparelho tem novidades.
+sincronizarJa({ avisar: true });
 
 // No iPhone e no iPad a app não arranca de novo quando volta do segundo plano:
-// retoma onde estava. Sem isto, um iPad aberto há dias continuava com o estado
-// antigo e, ao primeiro toque, enviava-o por cima do treino feito no iPhone.
+// retoma onde estava. Por isso:
+// - ao sair (bloquear o ecrã, mudar de app), envia já o que estava à espera dos 4
+//   segundos. Guardar o treino e bloquear o telefone logo a seguir é o normal, e
+//   sem isto o treino ficava no iPhone até à próxima vez que lhe pegasse.
+// - ao voltar, vai buscar o que o outro aparelho entretanto mandou.
 let ultimaBusca = Date.now();
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible' || Date.now() - ultimaBusca < 30000) return;
+  if (document.visibilityState === 'hidden') {
+    if (porEnviar) { clearTimeout(porEnviar); porEnviar = null; sincronizarJa({ keepalive: true }); }
+    return;
+  }
+  if (Date.now() - ultimaBusca < 30000) return;
   ultimaBusca = Date.now();
-  buscarNovidades();
+  sincronizarJa({ avisar: true });
 });
 render();

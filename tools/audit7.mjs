@@ -48,21 +48,21 @@ if (otp.cab.Authorization) falha('pedido de código levou Authorization, e ainda
 
 // ── 2. primeira sincronização: nada lá, envia ─────────────────
 let aplicado = null;
-const local = { updatedAt: 1000, logs: ['a'] };
+const local = { updatedAt: 1000, logs: [{ date: 'a' }] };
 let r = await S.sincronizar(local, d => { aplicado = d; });
 if (r.acao !== 'enviado') falha(`primeira sincronização devia enviar, fez "${r.acao}"`);
 if (aplicado) falha('primeira sincronização não devia aplicar nada localmente');
 if (!doc) falha('nada chegou ao servidor');
 
 // ── 3. remoto mais novo: recebe ───────────────────────────────
-doc = { dados: { updatedAt: 5000, logs: ['a', 'b'] }, updated_at: new Date(5000).toISOString() };
+doc = { dados: { updatedAt: 5000, logs: [{ date: 'a' }, { date: 'b' }] }, updated_at: new Date(5000).toISOString() };
 aplicado = null;
-r = await S.sincronizar({ updatedAt: 2000, logs: ['a'] }, d => { aplicado = d; });
+r = await S.sincronizar({ updatedAt: 2000, logs: [{ date: 'a' }] }, d => { aplicado = d; });
 if (r.acao !== 'recebido') falha(`remoto mais novo devia ser recebido, fez "${r.acao}"`);
 if (!aplicado || aplicado.logs.length !== 2) falha('não aplicou o estado remoto');
 
 // ── 4. local mais novo: envia e o remoto fica igual ───────────
-r = await S.sincronizar({ updatedAt: 9000, logs: ['a', 'b', 'c'] }, () => falha('não devia aplicar nada'));
+r = await S.sincronizar({ updatedAt: 9000, logs: [{ date: 'a' }, { date: 'b' }, { date: 'c' }] }, () => falha('não devia aplicar nada'));
 if (r.acao !== 'enviado') falha(`local mais novo devia ser enviado, fez "${r.acao}"`);
 if (doc.dados.logs.length !== 3) falha('o servidor não ficou com a versão local');
 
@@ -97,11 +97,11 @@ if (S.ligado() || localStorage.getItem('treino.sessao')) falha('sair não apagou
 
 // ── 9. formato mais recente no servidor: não aplica nem escreve por cima ──
 await S.confirmarCodigo('treino@exemplo.pt', '123456');
-doc = { dados: { schema: 2, updatedAt: 9_000_000, logs: ['novo'] }, updated_at: new Date(9_000_000).toISOString() };
+doc = { dados: { schema: 2, updatedAt: 9_000_000, logs: [{ date: 'novo' }] }, updated_at: new Date(9_000_000).toISOString() };
 const antes = JSON.stringify(doc);
 let aplicouFormatoNovo = false;
 try {
-  await S.sincronizar({ schema: 1, updatedAt: 9_500_000, logs: ['velho'] }, () => { aplicouFormatoNovo = true; });
+  await S.sincronizar({ schema: 1, updatedAt: 9_500_000, logs: [{ date: 'velho' }] }, () => { aplicouFormatoNovo = true; });
   falha('documento de formato mais recente foi aceite/escrito sem aviso');
 } catch (e) {
   if (e.message !== S.ERRO_FORMATO) falha(`erro de formato com mensagem errada: ${e.message}`);
@@ -111,7 +111,7 @@ if (JSON.stringify(doc) !== antes) falha('o aparelho antigo escreveu por cima do
 
 // ── 10. formato mais recente aqui, servidor antigo: envia normalmente ─────
 doc = { dados: { schema: 1, updatedAt: 100 }, updated_at: new Date(100).toISOString() };
-r = await S.sincronizar({ schema: 2, updatedAt: 200, logs: ['a'] }, () => falha('não devia aplicar'));
+r = await S.sincronizar({ schema: 2, updatedAt: 200, logs: [{ date: 'a' }] }, () => falha('não devia aplicar'));
 if (r.acao !== 'enviado' || doc.dados.schema !== 2) falha('formato novo local não substituiu o antigo no servidor');
 
 // ── 11. importar uma cópia antiga não apaga definições novas ──────────────
@@ -171,6 +171,51 @@ if ((S.SQL_TABELA.match(/create policy/gi) || []).length < 3) falha('faltam pol�
   if (r.acao !== 'enviado' || doc?.dados.logs.length !== 1) falha('entrar com servidor vazio não enviou');
 }
 
-console.log(`sincronização: 14 cenários`);
+// ── 15. o treino do iPhone que ainda não tinha subido não se perde ─────
+// O iPhone guardou um treino e foi bloqueado antes de o enviar. Entretanto o iPad
+// mexeu numa definição e ficou com o documento mais recente. Antes, o iPhone
+// recebia a cópia do iPad e o treino desaparecia.
+{
+  doc = { dados: { schema: 1, updatedAt: 8000, profile: { name: 'do iPad' }, logs: [{ date: '2026-10-10', updatedAt: 1 }] }, updated_at: new Date(8000).toISOString() };
+  let posto = null;
+  r = await S.sincronizar({ schema: 1, updatedAt: 6000, profile: { name: 'do iPhone' }, logs: [{ date: '2026-10-10', updatedAt: 1 }, { date: '2026-10-14', updatedAt: 6000 }] }, d => { posto = d; });
+  if (r.acao !== 'juntado') falha(`treino por enviar + documento remoto mais novo devia juntar, fez "${r.acao}"`);
+  if (posto?.logs?.length !== 2) falha('o treino do iPhone perdeu-se ao receber a versão do iPad');
+  if (doc.dados.logs.length !== 2) falha('o treino juntado não chegou ao servidor');
+  if (posto?.profile?.name !== 'do iPad') falha('as definições deviam vir do aparelho mexido por último');
+  if (posto.updatedAt !== doc.dados.updatedAt) falha('depois de juntar, os dois lados ficaram com horas diferentes e voltavam a trocar');
+
+  // o mesmo dia nos dois: fica o registo guardado por último
+  doc = { dados: { schema: 1, updatedAt: 9000, logs: [{ date: '2026-10-14', updatedAt: 100, rpe: 5 }] }, updated_at: new Date(9000).toISOString() };
+  r = await S.sincronizar({ schema: 1, updatedAt: 500, logs: [{ date: '2026-10-14', updatedAt: 400, rpe: 8 }] }, d => { posto = d; });
+  if (posto.logs[0].rpe !== 8 || doc.dados.logs[0].rpe !== 8) falha('no mesmo dia devia ficar o registo mais recente');
+}
+
+// ── 16. receber não carimba a hora deste aparelho ──────────────
+// Se carimbasse, o aparelho que só recebeu passava a parecer o último a mexer.
+{
+  const store = await import('../js/store.js');
+  store.importJSON(JSON.stringify({ schema: 1, updatedAt: 12345, profile: { name: 'x' }, logs: [] }), { manterHora: true });
+  if (store.getState().updatedAt !== 12345) falha(`receber mudou a hora do documento para ${store.getState().updatedAt}`);
+  store.importJSON(JSON.stringify({ schema: 1, updatedAt: 12345, profile: { name: 'x' }, logs: [] }));
+  if (store.getState().updatedAt === 12345) falha('importar uma cópia à mão devia contar como alteração deste aparelho');
+}
+
+// ── 17. um erro passageiro do servidor não termina a sessão ─────
+{
+  const antes = globalThis.fetch;
+  const s = JSON.parse(localStorage.getItem('treino.sessao'));
+  s.expira = Date.now() - 1000;
+  localStorage.setItem('treino.sessao', JSON.stringify(s));
+  globalThis.fetch = async () => ({ ok: false, status: 503, json: async () => ({}) });
+  try { await S.sincronizar({ updatedAt: 1 }, () => {}); } catch { /* esperado */ }
+  if (!S.ligado()) falha('um 503 ao renovar a sessão desligou a sincronização');
+  globalThis.fetch = async () => ({ ok: false, status: 400, json: async () => ({ msg: 'Invalid Refresh Token' }) });
+  try { await S.sincronizar({ updatedAt: 1 }, () => {}); } catch { /* esperado */ }
+  if (S.ligado()) falha('um refresh token recusado devia terminar a sessão');
+  globalThis.fetch = antes;
+}
+
+console.log(`sincronização: 17 cenários`);
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');

@@ -1,4 +1,4 @@
-import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, moverTreino, addPausa, removePausa, marcarExtra, removerExtra, extraDe } from '../store.js';
+import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, marcarSincronizado, moverTreino, addPausa, removePausa, marcarExtra, removerExtra, extraDe } from '../store.js';
 import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META, emPausa, TIPOS_EXTRA, buildExtra, resolveTipoExtra, MIN_MINUTOS } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { GRUPOS, temGrupo } from '../data/muscles.js';
@@ -665,7 +665,7 @@ export function renderSettings(nav, onboarding = false) {
       <h3>Sincronizar</h3>
       ${sync.ligado() ? `
         <p class="muted small">Ligado como <strong>${esc(sync.email())}</strong>. ${p.lastSync ? `Última sincronização: ${esc(fmtDataHora(p.lastSync))}.` : 'Ainda não sincronizou.'}</p>
-        <p class="muted small">Guarda-se no servidor europeu do Supabase, com uma linha só tua protegida por Row Level Security. Ganha sempre o aparelho onde mexeste por último.</p>
+        <p class="muted small">Guarda-se no servidor europeu do Supabase, com uma linha só tua protegida por Row Level Security. Os treinos dos dois aparelhos juntam-se; nas definições ganha o aparelho onde mexeste por último.</p>
         <button type="button" class="btn btn-ghost" data-sync-now>Sincronizar agora</button>
         <button type="button" class="link" data-sync-out>Terminar sessão</button>
       ` : `
@@ -805,16 +805,16 @@ export function bindSettings(root, nav, onboarding) {
     if (!codigo) return toast('Falta o código do email');
     try {
       await sync.confirmarCodigo(campoEmail(), codigo);
-      const r = await sync.entrar(getState(), dados => importJSON(JSON.stringify(dados)));
-      setProfile({ lastSync: Date.now() });
+      const r = await sync.entrar(getState(), dados => importJSON(JSON.stringify(dados), { manterHora: true }));
+      marcarSincronizado();
       toast(r.texto);
       nav.rerender();
     } catch (e) { toast(e.message); }
   });
   root.querySelector('[data-sync-now]')?.addEventListener('click', async () => {
     try {
-      const r = await sync.sincronizar(getState(), dados => importJSON(JSON.stringify(dados)));
-      setProfile({ lastSync: Date.now() });
+      const r = await sync.sincronizar(getState(), dados => importJSON(JSON.stringify(dados), { manterHora: true }));
+      marcarSincronizado();
       toast(r.texto);
       nav.rerender();
     } catch (e) { toast(e.message); }

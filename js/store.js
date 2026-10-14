@@ -110,8 +110,11 @@ function load() {
   }
 }
 
-function persist() {
-  state.updatedAt = Date.now();
+// `manterHora`: o estado veio do outro aparelho e traz a hora dele. Carimbar a hora
+// de agora fazia este aparelho parecer o último a mexer — e, na sincronização
+// seguinte, as alterações ainda por enviar do outro perdiam contra uma cópia.
+function persist(manterHora = false) {
+  if (!manterHora || !state.updatedAt) state.updatedAt = Date.now();
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* sem espaço ou modo privado */ }
   listeners.forEach(fn => fn(state));
 }
@@ -193,7 +196,7 @@ export function removePausa(de, ate) {
   persist();
 }
 
-export function importJSON(text) {
+export function importJSON(text, { manterHora = false } = {}) {
   const parsed = JSON.parse(text);
   if (!parsed || !parsed.profile || typeof parsed.schema !== 'number') throw new Error('Ficheiro inválido');
   if (parsed.schema > SCHEMA) {
@@ -204,7 +207,14 @@ export function importJSON(text) {
   state = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...parsed.profile } };
   corrigeTempos(state);
   limpaFigurasRevistas(state);
-  persist();
+  persist(manterHora);
+}
+
+// A hora da última sincronização é deste aparelho. Grava-se sem mexer em
+// `updatedAt` nem avisar ninguém: não é uma alteração que valha a pena enviar.
+export function marcarSincronizado() {
+  state.profile.lastSync = Date.now();
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* sem espaço */ }
 }
 
 // ---- registos ----
