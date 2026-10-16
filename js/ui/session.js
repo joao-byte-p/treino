@@ -4,9 +4,10 @@ import { sessionFor, buildWeek } from '../engine/planner.js';
 import { applyProgression, RPE } from '../engine/progression.js';
 import { BY_ID } from '../data/exercises.js';
 import { countdown, beep, unlockAudio, keepAwake, fmt, fmtLong } from '../timer.js';
-import { timerRing, setRing, ring } from './components.js';
+import { timerRing, setRing } from './components.js';
 import { esc, illustration, ytUrl, toast, prescription } from './components.js';
-import { contasDaSemana, oQueFechou, semanasCompletas, destaqueDaSemana, fraseDoFecho } from '../engine/fecho.js';
+import { contasDaSemana, oQueFechou } from '../engine/fecho.js';
+import { montarFecho } from './fecho.js';
 import { hasPose, mountFigure } from './figure.js';
 import { applyAlt } from './views.js';
 
@@ -335,7 +336,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
       const events = applyProgressionAndSave();
       const depois = contasDaSemana(getState(), new Date(dateISO));
       const fechou = oQueFechou(antes, depois);
-      if (fechou.semana) { mostrarFecho(antes, depois, events, fechou.tempo); return; }
+      if (fechou.semana) { montarFecho(root, nav, new Date(dateISO), { antesFeitos: antes.feitos, events }); return; }
       nav.go('home');
       // O anel do tempo sozinho vale uma linha, não um ecrã: é o menos importante
       // dos três e fecha-se também com treinos mais longos, sem mérito de constância.
@@ -344,35 +345,6 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
       if (!avisos.length) toast('Sessão guardada');
       avisos.forEach((t, k) => setTimeout(() => toast(t), 300 + k * 3000));
     });
-
-    // O ecrã de fecho: só quando este treino foi o que completou a semana. O anel
-    // parte de onde estava e enche até ao fim — é esse movimento que diz "fechaste".
-    function mostrarFecho(antes, depois, events, tempoFechou) {
-      const st = getState();
-      const seq = semanasCompletas(st, new Date(dateISO));
-      const destaque = destaqueDaSemana(st, depois.wk);
-      const deste = events.filter(e => !destaque || !destaque.startsWith(e));
-      root.innerHTML = `
-        <header class="srun-top"><span class="srun-count">Semana ${depois.wk.week} de 4 · ciclo ${depois.wk.cycle}</span></header>
-        <div class="srun fecho" role="status">
-          <div class="fecho-anel">${ring(antes.feitos / depois.planeados, { size: 176, stroke: 14, tone: 'mint', label: `Semana completa: ${depois.feitos} de ${depois.planeados} treinos` })}
-            <div class="fecho-num" aria-hidden="true">${depois.feitos}<small>/${depois.planeados}</small></div></div>
-          <h2 class="srun-title">Semana fechada</h2>
-          <p class="fecho-frase">${esc(fraseDoFecho(seq, st.profile.goal))}</p>
-          <div class="stats">
-            <div class="stat"><span class="stat-n">${depois.minsDone}</span><span class="stat-l">${tempoFechou || depois.minsDone >= depois.minsPlan ? 'min · tempo fechado' : `de ${depois.minsPlan} min`}</span></div>
-            <div class="stat"><span class="stat-n">${seq.atual}</span><span class="stat-l">${seq.atual === 1 ? 'semana completa' : 'semanas seguidas'}</span></div>
-          </div>
-          ${destaque ? `<div class="card fecho-destaque"><div class="card-kicker">Destaque da semana</div><p>${esc(destaque)}</p></div>` : ''}
-          ${deste.length ? `<ul class="events">${deste.map(e => `<li>${esc(e)}</li>`).join('')}</ul>` : ''}
-          <button class="btn btn-primary btn-big" data-fecho-ok>Continuar</button>
-        </div>`;
-      // dois frames: o primeiro pinta o anel onde estava, o segundo arranca a transição
-      const arco = root.querySelector('.fecho-anel .ring-fill');
-      requestAnimationFrame(() => requestAnimationFrame(() => arco?.setAttribute('stroke-dashoffset', '0')));
-      root.querySelector('[data-fecho-ok]').addEventListener('click', () => nav.go('home'));
-      root.querySelector('[data-fecho-ok]').focus({ preventScroll: true });
-    }
 
     function applyProgressionAndSave() {
       let events = [];

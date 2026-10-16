@@ -1,9 +1,10 @@
 import { getState, setProfile, update, findLog, GOALS, exportJSON, importJSON, resetAll, iso, marcarFigura, figuraMarcada, marcarSincronizado, moverTreino, addPausa, removePausa, marcarExtra, removerExtra, extraDe } from '../store.js';
-import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META, emPausa, TIPOS_EXTRA, buildExtra, resolveTipoExtra, MIN_MINUTOS } from '../engine/planner.js';
+import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, reinicioPendente, inicioAoCancelar, DAY_META, emPausa, TIPOS_EXTRA, buildExtra, resolveTipoExtra, MIN_MINUTOS } from '../engine/planner.js';
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { GRUPOS, temGrupo } from '../data/muscles.js';
 import { KIT } from '../data/kit.js';
 import { contasDaSemana, semanasCompletas } from '../engine/fecho.js';
+import { fechoPorVer } from './fecho.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { lineChart, barChart, chartHead } from './charts.js';
@@ -59,6 +60,17 @@ export function renderHome(nav) {
     : log?.completed ? `A sessão de hoje está feita. ${wk.focus.desc}`
     : `Hoje: ${s.title}, ${s.estMinutes} min. ${wk.focus.desc}`;
 
+  // A semana fechou e ele não viu o fecho: guardou o último treino noutro aparelho,
+  // ou numa versão que ainda não o tinha. O momento passou, mas o resumo não.
+  const porVer = fechoPorVer(state, today);
+  const fechoCard = porVer ? `
+    <section class="card card-fecho">
+      <div class="card-kicker">${porVer.wk.week === 4 ? `Ciclo ${porVer.wk.cycle} fechado` : 'Semana fechada'}</div>
+      <h2 class="card-title">${porVer.feitos} de ${porVer.planeados}</h2>
+      <p class="muted">${porVer.wk.week === 4 ? 'Fechaste a última semana do ciclo. O balanço das quatro está à tua espera.' : 'Fechaste a semana. O resumo está à tua espera.'}</p>
+      <button class="btn btn-primary" data-nav="fecho" data-date="${iso(today)}">${porVer.wk.week === 4 ? 'Ver o balanço do ciclo' : 'Ver o fecho da semana'}</button>
+    </section>` : '';
+
   let main;
   if (s.type === 'rest') {
     main = `
@@ -103,7 +115,7 @@ export function renderHome(nav) {
       <h1>Olá, ${esc(p.name)}</h1>
     </div>
   </header>
-  ${goalNotice}${kneeNotice}
+  ${fechoCard}${goalNotice}${kneeNotice}
   <section class="card card-dials">
     <div class="dials">
       ${dial(planned ? doneThisWeek / planned : 0, { num: `${doneThisWeek}`, unit: `/${planned}`, label: 'Semana', sub: doneThisWeek >= planned && planned ? (extrasFeitos ? `completa · +${extrasFeitos} extra` : 'completa') : `${planned - doneThisWeek} por fazer`, tone: 'mint' })}
@@ -582,6 +594,29 @@ function marcadasCard(state) {
   </section>`;
 }
 
+// Ciclo: reiniciar é para quem volta de uma paragem longa ou muda de rumo. Um toque
+// por engano repetia a semana 1, por isso pede confirmação e pode desfazer-se até à
+// segunda em que o ciclo novo começaria.
+function cicloCard(state) {
+  const p = state.profile;
+  const pendente = reinicioPendente(p);
+  if (pendente) {
+    const volta = inicioAoCancelar(state);
+    const prox = new Date(); prox.setDate(prox.getDate() + 7);
+    const semanaProx = cycleInfo({ ...p, cycleStart: volta }, prox, state).week;
+    return `<section class="card">
+      <h3>Ciclo</h3>
+      <p class="muted small">Reiniciaste o ciclo: a semana 1 recomeça na segunda, ${esc(fmtDate(pendente))}. Se foi engano, cancela e a próxima semana segue como semana ${semanaProx}.</p>
+      <button type="button" class="btn btn-ghost" data-cancel-restart>Cancelar o reinício</button>
+    </section>`;
+  }
+  return `<section class="card">
+    <h3>Ciclo</h3>
+    <p class="muted small">Início do ciclo atual: ${esc(fmtDate(p.cycleStart))}. Reiniciar começa uma semana 1 na próxima segunda — serve para quando voltas de uma paragem longa.</p>
+    <button type="button" class="btn btn-ghost" data-restart-cycle>Reiniciar ciclo na próxima segunda</button>
+  </section>`;
+}
+
 // Hora do treino guardada como "HH:MM" para o campo <input type="time">.
 export function icsOpts(p) {
   const [h, m] = String(p.trainTime || '18:00').split(':').map(Number);
@@ -680,11 +715,7 @@ export function renderSettings(nav, onboarding = false) {
       <p class="foot muted">${(() => { try { return buildICS(state, icsOpts(p)).eventos; } catch { return 0; } })()} treinos, com aviso ${p.remindMin ?? 30} minutos antes. Repete quando mudares o plano.</p>
     </section>
     ${pausasCard(state)}
-    <section class="card">
-      <h3>Ciclo</h3>
-      <p class="muted small">Início do ciclo atual: ${esc(fmtDate(p.cycleStart))}. Reiniciar começa uma semana 1 na próxima segunda.</p>
-      <button type="button" class="btn btn-ghost" data-restart-cycle>Reiniciar ciclo na próxima segunda</button>
-    </section>
+    ${cicloCard(state)}
     <p class="foot muted">${esc(CONFIG.appName)} v${esc(CONFIG.version)} · PWA · Supabase na UE</p>`}
   </form>`;
 }
@@ -813,8 +844,13 @@ export function bindSettings(root, nav, onboarding) {
     if (confirm('Apagar todos os registos e voltar ao início?')) { resetAll(); nav.go('home'); }
   });
   root.querySelector('[data-restart-cycle]')?.addEventListener('click', () => {
+    if (!confirm('Reiniciar o ciclo? Na próxima segunda voltas à semana 1.')) return;
     const d = new Date(); const day = (d.getDay() + 6) % 7; d.setDate(d.getDate() + (7 - day)); d.setHours(0, 0, 0, 0);
-    setProfile({ cycleStart: iso(d) }); toast('Ciclo reiniciado'); nav.rerender();
+    // guarda o início de agora, para o cancelamento voltar exatamente aqui
+    setProfile({ cycleStartAnterior: getState().profile.cycleStart, cycleStart: iso(d) }); toast('Ciclo reiniciado na segunda'); nav.rerender();
+  });
+  root.querySelector('[data-cancel-restart]')?.addEventListener('click', () => {
+    setProfile({ cycleStart: inicioAoCancelar(getState()), cycleStartAnterior: null }); toast('Reinício cancelado'); nav.rerender();
   });
 }
 

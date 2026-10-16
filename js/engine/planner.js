@@ -34,6 +34,33 @@ export function cycleInfo(profile, date = new Date(), state = null) {
   return { week: (weeks % 4) + 1, cycle: Math.floor(weeks / 4) + 1, weeksSinceStart: weeks, monday };
 }
 
+// Reinício marcado e ainda por começar: o início do ciclo está numa segunda que
+// ainda não chegou. Até lá a semana conta como 1 (ver o Math.max em cycleInfo),
+// e na segunda seguinte volta a ser 1 — uma semana 1 repetida.
+export function reinicioPendente(profile, date = new Date()) {
+  return profile.cycleStart > iso(mondayOf(date)) ? profile.cycleStart : null;
+}
+
+// Para onde volta o início do ciclo quando ele cancela um reinício. Se a app
+// guardou o início anterior, é esse. Se não (reinícios feitos antes de guardar),
+// escolhe o início que mantém o que ele vê agora — esta semana como semana 1 — e
+// conta os ciclos desde o primeiro treino, para o número do ciclo não voltar a 1.
+export function inicioAoCancelar(state, date = new Date()) {
+  const p = state.profile;
+  if (p.cycleStartAnterior && p.cycleStartAnterior <= iso(mondayOf(date))) return p.cycleStartAnterior;
+  const seg = mondayOf(date);
+  const primeiro = (state.logs || []).filter(l => l.completed).map(l => l.date).sort()[0];
+  if (primeiro) {
+    const [y, m, d] = primeiro.split('-').map(Number);
+    const ciclos = Math.floor(Math.round((seg - mondayOf(new Date(y, m - 1, d))) / 864e5) / 28);
+    const c = new Date(seg); c.setDate(seg.getDate() - ciclos * 28);
+    const candidato = iso(c);
+    // com pausas pelo meio as contas mudam: só serve se esta semana continuar a ser a 1
+    if (cycleInfo({ ...p, cycleStart: candidato }, date, state).week === 1) return candidato;
+  }
+  return iso(seg);
+}
+
 export const WEEK_FOCUS = {
   1: { label: 'Adaptação', desc: 'Consolidar técnica. Reps na base do intervalo, carga confortável.' },
   2: { label: 'Volume', desc: 'Mesma carga, reps a meio do intervalo. Uma corrida tempo.' },

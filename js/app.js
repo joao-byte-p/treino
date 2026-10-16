@@ -4,6 +4,7 @@ import { applyPendingGoal } from './engine/planner.js';
 import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, renderExtra, bindSettings } from './ui/views.js';
 import { renderKit, renderKitItem } from './ui/kit.js';
 import { mountSession } from './ui/session.js';
+import { montarFecho } from './ui/fecho.js';
 import { toast } from './ui/components.js';
 import { mountFigure } from './ui/figure.js';
 import { chainLevels } from './data/exercises.js';
@@ -22,7 +23,7 @@ let libFilter = 'todos';
 let libMine = false;
 let libMuscle = 'todos';
 
-const TAB_OF = { home: 'home', plan: 'plan', day: 'plan', extra: 'plan', library: 'library', exercise: 'library', kit: 'library', 'kit-item': 'library', progress: 'progress', settings: 'settings' };
+const TAB_OF = { home: 'home', fecho: 'home', plan: 'plan', day: 'plan', extra: 'plan', library: 'library', exercise: 'library', kit: 'library', 'kit-item': 'library', progress: 'progress', settings: 'settings' };
 
 const nav = {
   go(name, params = {}) {
@@ -55,7 +56,7 @@ function render(scrollTop = true) {
   figOffs = [];
   const state = getState();
   if (!state.onboarded && route.name !== 'onboarding') { route = { name: 'onboarding' }; }
-  const inSession = route.name === 'session';
+  const inSession = route.name === 'session' || route.name === 'fecho';
   app.classList.toggle('in-session', inSession);
   tabs.hidden = inSession || route.name === 'onboarding';
 
@@ -72,6 +73,14 @@ function render(scrollTop = true) {
     case 'kit-item': html = renderKitItem(nav, route.params.id); break;
     case 'progress': html = renderProgress(nav); break;
     case 'settings': html = renderSettings(nav, false); break;
+    case 'fecho': {
+      // é um ecrã inteiro como o fim da sessão, e usa o mesmo contentor
+      const [y, m, d] = String(route.params.date).split('-').map(Number);
+      view.innerHTML = '';
+      montarFecho(view, nav, new Date(y, m - 1, d));
+      if (scrollTop) window.scrollTo(0, 0);
+      return;
+    }
     case 'session':
       view.innerHTML = '';
       cleanup = mountSession(view, nav, route.params.date, route.params.alt ?? null, { soRegistar: !!route.params.registar });
@@ -175,6 +184,7 @@ document.addEventListener('click', e => {
   if (n === 'session') return nav.go('session', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null, registar: el.dataset.registar === '1' });
   if (n === 'day') return nav.go('day', { date: el.dataset.date, alt: el.dataset.alt != null ? Number(el.dataset.alt) : null });
   if (n === 'extra') return nav.go('extra', { date: el.dataset.date });
+  if (n === 'fecho') return nav.go('fecho', { date: el.dataset.date });
   if (n === 'exercise') return nav.go('exercise', { id: el.dataset.ex });
   if (n === 'kit-item') return nav.go('kit-item', { id: el.dataset.kit });
   nav.go(n);

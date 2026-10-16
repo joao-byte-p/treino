@@ -3,7 +3,7 @@
 //
 // As contas vivem aqui e não na Home para que o anel e a mensagem nunca discordem:
 // se a Home diz 5/5, o fecho apareceu; se não apareceu, a Home não diz 5/5.
-import { buildWeek } from './planner.js';
+import { buildWeek, cycleInfo, WEEK_FOCUS } from './planner.js';
 import { iso, mondayOf } from '../store.js';
 
 const feito = (state, dateISO) => state.logs.find(l => l.date === dateISO && l.completed);
@@ -108,4 +108,54 @@ export function fraseDoFecho({ atual, melhor }, objetivo) {
   if (atual === melhor && atual >= 3) return `${atual} semanas completas seguidas, a tua melhor sequência. ${porque}`;
   if (atual >= 4) return `${atual} semanas completas seguidas: um ciclo inteiro sem falhar. ${porque}`;
   return `${atual} semanas completas seguidas. ${porque}`;
+}
+
+// ── Fecho de ciclo ───────────────────────────────────────────────────────────
+// Aparece quando ele fecha a semana 4. Não é a semana com mais um enfeite: é o
+// balanço das quatro, e o que muda a seguir.
+export function balancoDoCiclo(state, date = new Date()) {
+  const { cycle } = cycleInfo(state.profile, date, state);
+  const seg = mondayOf(date);
+  const semanas = [];
+  for (let i = 0; i < 16 && semanas.length < 4; i++) {
+    const d = new Date(seg); d.setDate(seg.getDate() - i * 7);
+    if (cycleInfo(state.profile, d, state).cycle !== cycle) break;
+    const c = contasDaSemana(state, d);
+    if (c.planeados > 0) semanas.unshift(c); // uma semana toda em pausa não é do ciclo
+  }
+  const ini = iso(semanas[0]?.wk.monday || seg);
+  const fimD = new Date(seg); fimD.setDate(seg.getDate() + 6);
+  const logs = state.logs.filter(l => l.completed && l.date >= ini && l.date <= iso(fimD));
+  const eventos = logs.flatMap(l => l.events || []);
+
+  const niveis = [...new Set(eventos.filter(e => e.startsWith('Subiste de nível: ')).map(e => e.slice(18)))];
+  // a última carga de cada exercício: "Mais carga: Remo a 10 kg"
+  const cargas = new Map();
+  for (const e of eventos) {
+    const m = /^Mais carga: (.+) a ([\d.,]+) kg$/.exec(e);
+    if (m) cargas.set(m[1], m[2]);
+  }
+  const corridas = logs.map(l => ritmo(l.cardio)).filter(Boolean);
+  const ritmoTxt = corridas.length >= 2
+    ? (Math.min(...corridas) < corridas[0] ? `Ritmo: de ${mmss(corridas[0])} para ${mmss(Math.min(...corridas))}/km no melhor dia` : null)
+    : null;
+
+  return {
+    ciclo: cycle,
+    semanas: semanas.length,
+    completas: semanas.filter(semanaCompleta).length,
+    feitos: semanas.reduce((a, c) => a + c.feitos, 0),
+    planeados: semanas.reduce((a, c) => a + c.planeados, 0),
+    minutos: semanas.reduce((a, c) => a + c.minsDone, 0),
+    niveis,
+    cargas: [...cargas].map(([ex, kg]) => `${ex}: ${kg} kg`),
+    ritmo: ritmoTxt,
+    seguinte: { ciclo: cycle + 1, ...WEEK_FOCUS[1] },
+  };
+}
+
+export function fraseDoCiclo(b, objetivo) {
+  const porque = PORQUE[objetivo] || PORQUE.saude;
+  if (b.completas >= b.semanas) return `${b.semanas === 4 ? 'Quatro' : b.semanas} semanas completas em ${b.semanas === 4 ? 'quatro' : b.semanas}: o ciclo inteiro, do princípio ao fim. ${porque}`;
+  return `${b.completas} de ${b.semanas} semanas completas e ${b.feitos} treinos feitos. O ciclo conta pelo que fizeste, e fizeste a última semana até ao fim.`;
 }

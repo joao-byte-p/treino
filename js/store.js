@@ -63,6 +63,7 @@ export function defaultState() {
     swaps: {},                // "YYYY-MM-DD" -> { exerciseId: replacementId }
     movidos: {},              // "YYYY-MM-DD" -> "YYYY-MM-DD": treino trocado para outro dia
     extras: {},               // "YYYY-MM-DD" -> { tipo, minutos }: treino pedido por ele num dia de descanso
+    fechosVistos: {},         // segunda-feira "YYYY-MM-DD" -> true: o ecrã de fecho dessa semana já foi visto
     pausas: [],               // [{ de, ate, motivo }]: férias, doença, viagem — o ciclo congela
     kneeFlag: false,          // joelho a queixar-se esta semana
     updatedAt: Date.now(),

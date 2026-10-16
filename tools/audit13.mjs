@@ -112,6 +112,62 @@ const fecharSemana = (s, sem, menos = 0) => planeadosDe(s, sem).slice(0, planead
   if (!f({ atual: 2, melhor: 2 }, 'objetivo-que-nao-existe')) falha('objetivo desconhecido partiu a frase');
 }
 
-console.log('fecho de semana: 6 cenários');
+// ── 7. o fecho que ficou por ver aparece na Home, uma vez ──────────────────
+{
+  const { fechoPorVer } = await import('../js/ui/fecho.js');
+  const s = base();
+  fecharSemana(s, 0, 1);
+  if (fechoPorVer(s, dia(0, 3))) falha('semana por fechar deu fecho por ver');
+  fecharSemana(s, 0);
+  const c = fechoPorVer(s, dia(0, 6));
+  if (!c) falha('semana completa sem fecho visto não aparece na Home');
+  s.fechosVistos = { [iso(c.wk.monday)]: true };
+  if (fechoPorVer(s, dia(0, 6))) falha('fecho já visto voltou a aparecer na Home');
+}
+
+// ── 8. o balanço do ciclo junta as quatro semanas ──────────────────────────
+{
+  const s = base();
+  for (const w of [0, 1, 2, 3]) fecharSemana(s, w, w === 1 ? 1 : 0);
+  const p0 = planeadosDe(s, 0), p2 = planeadosDe(s, 2);
+  s.logs.find(l => l.date === p0[0].date).events = ['Subiste de nível: Flexões diamante', 'Mais carga: Remo a 8 kg'];
+  s.logs.find(l => l.date === p2[0].date).events = ['Mais carga: Remo a 10 kg'];
+  const b = F.balancoDoCiclo(s, dia(3, 6));
+  if (b.semanas !== 4) falha(`o ciclo devia ter 4 semanas, tem ${b.semanas}`);
+  if (b.completas !== 3) falha(`3 semanas completas em 4, deu ${b.completas}`);
+  if (b.niveis.join() !== 'Flexões diamante') falha(`níveis do ciclo: ${b.niveis}`);
+  if (b.cargas.join() !== 'Remo: 10 kg') falha(`devia ficar só a última carga de cada exercício: ${b.cargas}`);
+  if (b.seguinte.ciclo !== 2) falha(`o ciclo seguinte devia ser o 2, deu ${b.seguinte.ciclo}`);
+  if (!/3 de 4 semanas completas/.test(F.fraseDoCiclo(b, 'saude'))) falha(`frase do ciclo incompleto: ${F.fraseDoCiclo(b, 'saude')}`);
+  if (!/do princípio ao fim/.test(F.fraseDoCiclo({ ...b, completas: 4 }, 'saude'))) falha('frase do ciclo completo');
+  if (F.balancoDoCiclo(s, dia(4, 2)).ciclo !== 2) falha('a semana a seguir à 4.ª não começou o ciclo 2');
+}
+
+// ── 9. reiniciar por engano desfaz-se sem repetir a semana 1 ───────────────
+{
+  const P = await import('../js/engine/planner.js');
+  const s = base();                       // ciclo começou na semana 0
+  fecharSemana(s, 0); fecharSemana(s, 1); fecharSemana(s, 2); fecharSemana(s, 3);
+  const hoje = dia(4, 1);                 // terça da semana 1 do ciclo 2
+  if (P.cycleInfo(s.profile, hoje, s).week !== 1) falha('a semana de teste devia ser a 1 do ciclo 2');
+  // carrega em reiniciar: o início passa para a segunda seguinte
+  const anterior = s.profile.cycleStart;
+  s.profile.cycleStart = iso(dia(5, 0));
+  if (!P.reinicioPendente(s.profile, hoje)) falha('reinício marcado não foi detetado');
+  if (P.cycleInfo(s.profile, dia(5, 0), s).week !== 1) falha('o reinício devia repetir a semana 1 (é o problema)');
+  // com o início anterior guardado, volta exatamente lá
+  s.profile.cycleStartAnterior = anterior;
+  if (P.inicioAoCancelar(s, hoje) !== anterior) falha('cancelar não voltou ao início guardado');
+  // sem nada guardado (reinícios antigos): esta semana fica a 1 e a seguinte a 2, no ciclo 2
+  s.profile.cycleStartAnterior = null;
+  const volta = P.inicioAoCancelar(s, hoje);
+  const depois = { ...s.profile, cycleStart: volta };
+  if (P.cycleInfo(depois, hoje, s).week !== 1) falha(`cancelar mudou a semana de agora: ${P.cycleInfo(depois, hoje, s).week}`);
+  if (P.cycleInfo(depois, dia(5, 0), s).week !== 2) falha('depois de cancelar, a semana seguinte devia ser a 2');
+  if (P.cycleInfo(depois, hoje, s).cycle !== 2) falha(`cancelar devia manter o ciclo 2, deu ${P.cycleInfo(depois, hoje, s).cycle}`);
+  if (P.reinicioPendente(depois, hoje)) falha('depois de cancelar ainda há reinício pendente');
+}
+
+console.log('fecho de semana: 9 cenários');
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');

@@ -472,6 +472,11 @@ body::before {
 .fecho-destaque p { font-weight: 600; }
 .fecho .events { align-self: stretch; text-align: left; margin: 0 0 12px; }
 .fecho .btn-big { width: 100%; margin-top: 8px; }
+.fecho-anel-l { font-size: 12px; font-weight: 600; color: var(--text-3); margin: -10px 0 10px; }
+.fecho-lista li { font-weight: 600; padding: 3px 0; }
+.fecho-destaque .muted.small { margin-top: 6px; }
+.card-fecho { border: 1px solid color-mix(in srgb, var(--mint) 45%, transparent); }
+.card-fecho .btn { width: 100%; margin-top: 12px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 /* ---- figuras dos exercícios ---- */
