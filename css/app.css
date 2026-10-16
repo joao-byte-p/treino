@@ -458,6 +458,20 @@ body::before {
   .grid2 { grid-template-columns: repeat(4, 1fr); }
   .tabs { left: 50%; right: auto; transform: translateX(-50%); width: 560px; bottom: 16px; }
 }
+/* Fecho de semana: o anel enche de onde estava até ao fim, mais devagar que os da
+   Home, porque aqui o movimento é a mensagem. Sem movimento, aparece já cheio. */
+.fecho { justify-content: center; gap: 4px; }
+.fecho-anel { position: relative; width: 176px; height: 176px; margin: 8px 0 18px; }
+.fecho-anel .ring-fill { transition: stroke-dashoffset 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s; }
+.fecho-num { position: absolute; inset: 0; display: flex; align-items: baseline; justify-content: center; padding-top: 62px; font-weight: 700; font-size: 44px; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.fecho-num small { font-size: 20px; color: var(--text-3); font-weight: 600; margin-left: 2px; }
+.fecho-frase { color: var(--text-2); max-width: 34ch; margin: 2px auto 0; line-height: 1.45; }
+.fecho .stats { justify-content: center; gap: 34px; }
+.fecho .stat { align-items: center; }
+.fecho-destaque { width: 100%; text-align: left; margin-bottom: 8px; }
+.fecho-destaque p { font-weight: 600; }
+.fecho .events { align-self: stretch; text-align: left; margin: 0 0 12px; }
+.fecho .btn-big { width: 100%; margin-top: 8px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 /* ---- figuras dos exercícios ---- */

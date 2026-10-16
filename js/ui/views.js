@@ -3,6 +3,7 @@ import { buildWeek, sessionFor, WEEK_FOCUS, nextCycleStart, cycleInfo, DAY_META,
 import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../data/exercises.js';
 import { GRUPOS, temGrupo } from '../data/muscles.js';
 import { KIT } from '../data/kit.js';
+import { contasDaSemana, semanasCompletas } from '../engine/fecho.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { lineChart, barChart, chartHead } from './charts.js';
@@ -28,13 +29,10 @@ export function renderHome(nav) {
   const today = new Date();
   const s = sessionFor(state, today);
   const log = findLog(s.date);
-  const wk = buildWeek(state, today);
-  // Um treino avulso não conta como dia planeado: se contasse, pedi-lo passava a
-  // aumentar a dívida da semana, e um dia que ele pediu não pode virar falta.
-  const planeados = wk.sessions.filter(x => x.type !== 'rest' && !x.extra);
-  const planned = planeados.length;
-  const doneThisWeek = planeados.filter(x => findLog(x.date)?.completed).length;
-  const extrasFeitos = wk.sessions.filter(x => x.extra && findLog(x.date)?.completed).length;
+  // As contas dos anéis são as mesmas do ecrã de fecho (engine/fecho.js): se o anel
+  // da semana diz completa, o fecho apareceu quando ele guardou o último treino.
+  const contas = contasDaSemana(state, today);
+  const { wk, planeados: planned, feitos: doneThisWeek, extras: extrasFeitos, minsPlan, minsDone } = contas;
   const p = state.profile;
 
   const goalNotice = p.pendingGoal ? `
@@ -50,9 +48,6 @@ export function renderHome(nav) {
   // Dias parados não contam durante uma pausa marcada: ele avisou, não faltou.
   const emPausaHoje = emPausa(state, iso(today));
   const diasParado = emPausaHoje || !ultimo ? 0 : Math.floor((new Date(iso(today)) - new Date(ultimo)) / 864e5);
-  const ativos = wk.sessions.filter(x => x.type !== 'rest' && !x.extra);
-  const minsPlan = ativos.reduce((a, x) => a + (x.estMinutes || 0), 0);
-  const minsDone = wk.sessions.reduce((a, x) => { const l = findLog(x.date); return a + (l?.completed ? (l.minutes || 0) : 0); }, 0);
   const cicloPct = Math.min(1, ((wk.week - 1) + (planned ? doneThisWeek / planned : 0)) / 4);
   // A frase de orientação: uma só, a que importa hoje. Um dia parado há muito ganha
   // ao foco da semana; senão, contexto de hoje mais o foco.
@@ -421,7 +416,7 @@ export function renderProgress(nav) {
     const n = logs.filter(l => l.date >= start && l.date <= iso(end)).length;
     weeks.push({ n, planned: wk.sessions.filter(s => s.type !== 'rest').length, label: `${String(wk.monday.getDate()).padStart(2, '0')}/${String(wk.monday.getMonth() + 1).padStart(2, '0')}` });
   }
-  const streak = computeStreak(state);
+  const seq = semanasCompletas(state);
   const levels = Object.entries(state.chainLevels).map(([chain, lvl]) => {
     const ls = chainLevels(chain); const cur = ls.find(l => l.level === Math.min(lvl, ls.length));
     return { chain, lvl, max: ls.length, name: cur?.name || chain };
@@ -445,7 +440,7 @@ export function renderProgress(nav) {
   <section class="grid2">
     <div class="card stat-card"><span class="stat-n">${logs.length}</span><span class="stat-l">sessões feitas</span></div>
     <div class="card stat-card"><span class="stat-n">${Math.round(totalMin / 60 * 10) / 10}</span><span class="stat-l">horas de treino</span></div>
-    <div class="card stat-card"><span class="stat-n">${streak}</span><span class="stat-l">semanas seguidas com 4 ou mais treinos</span></div>
+    <div class="card stat-card"><span class="stat-n">${seq.atual}</span><span class="stat-l">${seq.atual === 1 ? 'semana completa' : 'semanas completas seguidas'}${seq.melhor > seq.atual ? ` · a melhor foi ${seq.melhor}` : ''}</span></div>
     <div class="card stat-card"><span class="stat-n">${levels.length}</span><span class="stat-l">${levels.length === 1 ? 'exercício em que subiste de nível' : 'exercícios em que subiste de nível'}</span></div>
   </section>
   ${weeks.length ? `<section class="card">
@@ -531,18 +526,6 @@ function corridaCard(logs) {
 }
 
 const fmtDataCurta = d => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
-
-function computeStreak(state) {
-  let streak = 0;
-  for (let i = 1; i < 60; i++) {
-    const d = new Date(); d.setDate(d.getDate() - i * 7);
-    const wk = buildWeek(state, d);
-    const start = iso(wk.monday); const end = new Date(wk.monday); end.setDate(end.getDate() + 6);
-    const n = state.logs.filter(l => l.completed && l.date >= start && l.date <= iso(end)).length;
-    if (n >= 4) streak++; else break;
-  }
-  return streak;
-}
 
 // ─────────────────────────── DEFINIÇÕES ───────────────────────────
 // Quantos dias desde a última cópia para fora do aparelho. Só avisa quem já tem
