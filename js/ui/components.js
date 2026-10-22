@@ -139,3 +139,34 @@ export function toast(msg, ms = 2600) {
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), ms);
 }
+
+// Campos de minutos e segundos. Vêm preenchidos com o tempo previsto, e no iPhone
+// escrever num campo preenchido acrescenta ao que lá está: "00" + "24" dava "0024",
+// e um 25:24 ficava 25:2400. Ao tocar, seleciona tudo, e o que se escreve substitui.
+// Os segundos guardam só os dois últimos algarismos, que é o que ele quis escrever.
+export function ligarMmss(root) {
+  root.querySelectorAll('[data-c-min], [data-c-seg]').forEach(inp => {
+    const max = inp.matches('[data-c-seg]') ? 2 : 3;
+    const tudo = () => { try { inp.select(); } catch { /* alguns teclados não deixam */ } };
+    // no iPhone o toque que dá o foco desfaz a seleção feita no mesmo instante
+    inp.addEventListener('focus', () => { tudo(); setTimeout(tudo, 0); });
+    inp.addEventListener('mouseup', e => e.preventDefault()); // o clique não desfaz a seleção
+    inp.addEventListener('input', () => {
+      const so = inp.value.replace(/\D/g, '');
+      if (so.length > max) inp.value = so.slice(-max);
+    });
+  });
+}
+
+export function lerMmss(root) {
+  const mi = Math.max(0, Math.floor(Number(root.querySelector('[data-c-min]')?.value) || 0));
+  const se = Math.max(0, Math.floor(Number(root.querySelector('[data-c-seg]')?.value) || 0));
+  return mi * 60 + se;
+}
+
+export function camposMmss(segundos) {
+  return `<div class="mmss">
+    <label><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="600" value="${Math.floor(segundos / 60)}" data-c-min aria-label="Minutos"><small>min</small></label>
+    <label><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" value="${String(Math.round(segundos % 60)).padStart(2, '0')}" data-c-seg aria-label="Segundos"><small>s</small></label>
+  </div>`;
+}

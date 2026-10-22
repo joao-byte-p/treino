@@ -232,6 +232,25 @@ export function saveLog(log) {
   });
 }
 
+// Corrigir o tempo e a distância de um cardio já registado. Só mexe nisso: não volta
+// a aplicar progressão nem toca no resto do registo. O tempo que conta na semana é,
+// como no registo, o maior entre o que a app mediu e o que ele escreveu.
+export function corrigirCardio(dateISO, { seconds, dist }) {
+  const l = findLog(dateISO);
+  if (!l?.cardio || !(seconds > 0)) return false;
+  // Registos de antes de `minutosApp`: se os minutos eram maiores que o tempo escrito,
+  // a diferença era a app a medir (aquecimento, alongamentos); senão não se sabe.
+  const app = l.minutosApp ?? (l.minutes > Math.round((l.cardio.seconds || 0) / 60) ? l.minutes : 0);
+  const cardio = { ...l.cardio, seconds, minutes: seconds / 60, dist: dist > 0 ? dist : null };
+  const mm = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  const soCardio = !Object.keys(l.results || {}).length;
+  saveLog({
+    ...l, cardio, minutosApp: app, minutes: Math.max(app, Math.round(seconds / 60)),
+    summary: soCardio ? `${mm}${cardio.dist ? ` · ${cardio.dist} ${cardio.unit || 'km'}` : ''}` : l.summary,
+  });
+  return true;
+}
+
 export function setLoad(exerciseId, kg) {
   update(s => { s.loads[exerciseId] = kg; });
 }

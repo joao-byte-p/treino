@@ -47,7 +47,7 @@ export async function keepAwake(on) {
 
 // Contagem decrescente baseada em timestamps (não deriva se o separador abrandar).
 export function countdown(seconds, { onTick, onDone, onFrame, tone = 'rest' } = {}) {
-  const total = Math.max(0.001, seconds);
+  let total = Math.max(0.001, seconds); // cresce se ele somar tempo acima do inicial
   const end = Date.now() + seconds * 1000;
   let last = seconds;
   let raf = null;
@@ -83,7 +83,21 @@ export function countdown(seconds, { onTick, onDone, onFrame, tone = 'rest' } = 
     stop() { stopped = true; if (raf) cancelAnimationFrame(raf); },
     pause() { if (!paused) { paused = true; pauseRemain = endAt - Date.now(); } },
     resume() { if (paused) { paused = false; endAt = Date.now() + pauseRemain; } },
-    add(sec) { endAt += sec * 1000; if (paused) pauseRemain += sec * 1000; },
+    // Em pausa o ciclo não corre, por isso o relógio redesenha-se aqui: sem isto os
+    // +10s só apareciam ao retomar, e parecia que o botão não tinha feito nada.
+    add(sec) {
+      if (paused) {
+        pauseRemain = Math.max(0, pauseRemain + sec * 1000);
+        const r = pauseRemain / 1000;
+        total = Math.max(total, r);
+        last = Math.ceil(r);
+        onTick?.(last, r);
+        onFrame?.(Math.min(1, r / total));
+        return;
+      }
+      endAt += sec * 1000;
+      total = Math.max(total, (endAt - Date.now()) / 1000);
+    },
     get paused() { return paused; },
   };
 }

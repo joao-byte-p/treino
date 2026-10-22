@@ -1,11 +1,11 @@
-import { getState, update, subscribe, importJSON, marcarSincronizado, marcarFigura, moverTreino, marcarExtra, removerExtra, extraDe } from './store.js';
+import { getState, update, subscribe, importJSON, marcarSincronizado, corrigirCardio, marcarFigura, moverTreino, marcarExtra, removerExtra, extraDe } from './store.js';
 import * as sync from './sync.js';
 import { applyPendingGoal } from './engine/planner.js';
 import { renderHome, renderPlan, renderDay, renderLibrary, renderExercise, renderProgress, renderSettings, renderExtra, bindSettings } from './ui/views.js';
 import { renderKit, renderKitItem } from './ui/kit.js';
 import { mountSession } from './ui/session.js';
 import { montarFecho } from './ui/fecho.js';
-import { toast } from './ui/components.js';
+import { toast, ligarMmss, lerMmss } from './ui/components.js';
 import { mountFigure } from './ui/figure.js';
 import { chainLevels } from './data/exercises.js';
 
@@ -135,6 +135,18 @@ function render(scrollTop = true) {
       toast('Treino montado. Não conta para a semana.');
       nav.go('day', { date: data });
     }));
+  }
+  const corrigir = view.querySelector('[data-corrigir]');
+  if (corrigir) {
+    ligarMmss(corrigir);
+    corrigir.querySelector('[data-guardar-correcao]').addEventListener('click', () => {
+      const seconds = lerMmss(corrigir);
+      if (!seconds) return toast('Falta o tempo');
+      const dist = Number(String(corrigir.querySelector('[data-c-dist]')?.value || '').replace(',', '.')) || null;
+      corrigirCardio(corrigir.dataset.corrigir, { seconds, dist });
+      toast('Registo corrigido');
+      render(false);
+    });
   }
   view.querySelectorAll('[data-rm-extra]').forEach(b => b.addEventListener('click', () => {
     removerExtra(b.dataset.rmExtra);

@@ -5,7 +5,7 @@ import { applyProgression, RPE } from '../engine/progression.js';
 import { BY_ID } from '../data/exercises.js';
 import { countdown, beep, unlockAudio, keepAwake, fmt, fmtLong } from '../timer.js';
 import { timerRing, setRing } from './components.js';
-import { esc, illustration, ytUrl, toast, prescription } from './components.js';
+import { esc, illustration, ytUrl, toast, prescription, ligarMmss, lerMmss, camposMmss } from './components.js';
 import { contasDaSemana, oQueFechou } from '../engine/fecho.js';
 import { montarFecho } from './fecho.js';
 import { hasPose, mountFigure } from './figure.js';
@@ -174,7 +174,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
           ${isTime ? `
           <div class="srun-timer srun-timer-sm">
             ${timerRing('mint')}
-            <div class="srun-timer-in"><div class="srun-big" data-clock>${fmt(st.seconds)}<small>s</small></div></div>
+            <div class="srun-timer-in"><div class="srun-big" data-clock>${relogio(st.seconds)}</div></div>
           </div>
           ` : `<div class="srun-big srun-reps">${esc(rx)}</div>`}
           <div class="srun-chips">${load}${st.ex.tempo ? `<span class="pill">${esc(st.ex.tempo)}</span>` : ''}</div>
@@ -189,7 +189,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
         beep('go');
         timer = countdown(st.seconds, {
           tone: 'work',
-          onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.innerHTML = `${fmt(s)}<small>s</small>`; },
+          onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.innerHTML = relogio(s); },
           onFrame: f => setRing(root, f),
           onDone: () => advance(),
         });
@@ -296,10 +296,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
           <h4>${esc(cardio.ex.name)}</h4>
           <div class="grid2">
             <div class="field"><span>Tempo</span>
-              <div class="mmss">
-                <label><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="600" value="${Math.floor(cardio.time / 60)}" data-c-min aria-label="Minutos"><small>min</small></label>
-                <label><input type="number" inputmode="numeric" pattern="[0-9]*" min="0" max="59" value="${String(cardio.time % 60).padStart(2, '0')}" data-c-seg aria-label="Segundos"><small>s</small></label>
-              </div>
+              ${camposMmss(cardio.time)}
             </div>
             <label class="field"><span>${cardio.ex.chain === 'swim' ? 'Metros' : 'Km'}</span><input type="number" inputmode="decimal" step="${cardio.ex.chain === 'swim' ? '50' : '0.1'}" placeholder="${cardio.ex.chain === 'swim' ? '800' : '5.0'}" data-c-dist></label>
           </div>
@@ -312,6 +309,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
       </div>`;
 
     // bindings do registo
+    ligarMmss(root);
     root.querySelectorAll('.logrow').forEach(row => {
       const id = row.dataset.log; const r = results[id] = results[id] || { done: false, top: true, rpe: null, kg: null };
       row.querySelector('[data-done]')?.addEventListener('change', e => { r.done = e.target.checked; row.classList.toggle('off', !r.done); });
@@ -358,13 +356,12 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
         const unit = cardio.ex.chain === 'swim' ? 'm' : 'km';
         // Minutos e segundos escritos à parte. "75 segundos" vira 1:15 em vez de dar
         // erro: o que ele quis dizer é óbvio e recusar só o obrigava a fazer a conta.
-        const mi = Math.max(0, Math.floor(Number(root.querySelector('[data-c-min]')?.value) || 0));
-        const se = Math.max(0, Math.floor(Number(root.querySelector('[data-c-seg]')?.value) || 0));
-        const seconds = mi * 60 + se || cardio.time;
+        const seconds = lerMmss(root) || cardio.time;
         log.cardio = { ex: cardio.ex.id, seconds, minutes: seconds / 60, dist, unit, rpe: cardioRpe, kneePain: !!root.querySelector('[data-knee-pain]')?.checked };
         // O tempo que conta na semana é o maior dos dois: o que a app viu e o que ele
         // escreveu. Sem telemóvel ganha o escrito; com a sessão guiada ligada do
         // princípio ao fim, ganha o da app, que inclui aquecimento e alongamentos.
+        log.minutosApp = log.minutes;
         log.minutes = Math.max(log.minutes, Math.round(seconds / 60));
         if (log.cardio.kneePain) { update(s => { s.kneeFlag = true; }); events.push('Joelho a queixar-se: a próxima corrida passa a piscina'); }
       }
@@ -388,3 +385,6 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
 }
 
 const mmss = sec => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
+
+// "45s" abaixo do minuto; acima, "1:10" já diz a unidade e o "s" ficava a mais
+const relogio = sec => (Math.round(sec) >= 60 ? fmt(sec) : `${fmt(sec)}<small>s</small>`);

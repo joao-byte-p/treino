@@ -37,6 +37,7 @@ jobs:
       - run: node tools/audit11.mjs
       - run: node tools/audit12.mjs
       - run: node tools/audit13.mjs
+      - run: node tools/audit14.mjs
       - name: Modulos todos na cache do service worker
         run: node tools/sw.mjs
       - run: node tools/check.mjs

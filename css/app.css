@@ -295,6 +295,7 @@ body::before {
 .bar-l { font-size: 10px; color: var(--text-3); }
 .kv li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
 .kv li:last-child { border-bottom: 0; }
+.kv li[data-nav] { cursor: pointer; }
 .kv strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .kv strong small { color: var(--text-3); font-weight: 600; }
 

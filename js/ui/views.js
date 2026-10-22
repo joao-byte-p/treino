@@ -5,7 +5,7 @@ import { GRUPOS, temGrupo } from '../data/muscles.js';
 import { KIT } from '../data/kit.js';
 import { contasDaSemana, semanasCompletas } from '../engine/fecho.js';
 import { fechoPorVer } from './fecho.js';
-import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription } from './components.js';
+import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription, camposMmss } from './components.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { lineChart, barChart, chartHead } from './charts.js';
 import { CONFIG } from '../config.js';
@@ -88,6 +88,7 @@ export function renderHome(nav) {
         <p class="muted">${esc(log.summary || 'Sessão registada.')}</p>
         ${log.events?.length ? `<ul class="events">${log.events.map(e => `<li>${esc(e)}</li>`).join('')}</ul>` : ''}
         <button class="btn btn-ghost" data-nav="session" data-date="${s.date}">Repetir ou rever</button>
+        ${log.cardio ? `<button class="link" data-nav="day" data-date="${s.date}">Corrigir tempo ou distância</button>` : ''}
       </section>`;
   } else {
     const mainBlock = s.blocks.find(b => ['strength', 'hiit', 'circuit', 'cardio', 'mobility'].includes(b.kind));
@@ -207,6 +208,7 @@ export function renderDay(nav, dateISO, altIndex = null) {
   <p class="lead">${esc(s.subtitle)} · ${s.estMinutes} min · Semana ${s.weekInfo.week}, ${esc(s.weekInfo.focus.label)}</p>
   ${s.notes.map(n => `<p class="note">${esc(n)}</p>`).join('')}
   ${log?.completed ? `<div class="notice">Feito. ${esc(log.summary || '')}</div>` : ''}
+  ${log?.completed && log.cardio ? corrigirCard(dateISO, log) : ''}
   ${blocks}
   ${s.type !== 'rest' ? `<div class="actions">
     <button class="btn btn-primary btn-big" data-nav="session" data-date="${dateISO}" ${altIndex != null ? `data-alt="${altIndex}"` : ''} ${dateISO < iso(new Date()) || log?.completed ? 'data-registar="1"' : ''}>${rotuloAcao(dateISO, log)}</button>
@@ -218,6 +220,23 @@ export function renderDay(nav, dateISO, altIndex = null) {
   </div>` : ''}
   ${s.extra && !log?.completed ? `<button class="link" data-rm-extra="${dateISO}">Afinal não — voltar a descanso</button>` : ''}
   ${log?.completed ? '' : moverCard(state, dateISO, s)}`;
+}
+
+// Corrigir um cardio já registado: um algarismo a mais no tempo estragava o ritmo e
+// os minutos da semana, e a única saída era registar o treino todo outra vez.
+function corrigirCard(dateISO, log) {
+  const c = log.cardio;
+  const nado = c.unit === 'm';
+  const seg = c.seconds ?? Math.round((c.minutes || 0) * 60);
+  return `<section class="card cardio-log" data-corrigir="${dateISO}">
+    <h3>Corrigir o registo</h3>
+    <p class="muted small">Ficou registado ${esc(duracao(c))}${c.dist ? ` em ${esc(distLabel(c))}` : ''}. Muda o que estiver mal e guarda.</p>
+    <div class="grid2">
+      <div class="field"><span>Tempo</span>${camposMmss(seg)}</div>
+      <label class="field"><span>${nado ? 'Metros' : 'Km'}</span><input type="number" inputmode="decimal" step="${nado ? '50' : '0.1'}" min="0" value="${c.dist ?? ''}" placeholder="${nado ? '800' : '5.0'}" data-c-dist></label>
+    </div>
+    <button type="button" class="btn btn-ghost" data-guardar-correcao>Guardar correção</button>
+  </section>`;
 }
 
 // ── Treino avulso ────────────────────────────────────────────────────────────
@@ -468,7 +487,7 @@ export function renderProgress(nav) {
   ${levels.length ? `<section class="card"><h3>Onde estás em cada progressão</h3><ul class="kv">${levels.map(l => `<li><span>${esc(l.name)}</span><strong>nível ${l.lvl}<small> de ${l.max}</small></strong></li>`).join('')}</ul></section>` : ''}
   ${loads.length ? `<section class="card"><h3>Cargas</h3><ul class="kv">${loads.map(l => `<li><span>${esc(l.ex.name)}</span><strong>${l.kg} kg${l.delta ? `<small class="delta ${l.delta > 0 ? 'up' : 'down'}"> ${l.delta > 0 ? '+' : ''}${l.delta} desde ${esc(fmtDate(l.since))}</small>` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${corridaCard(logs)}
-  ${runs.length ? `<section class="card"><h3>Últimos treinos de cardio</h3><ul class="kv">${runs.map(l => `<li><span>${esc(fmtDate(l.date))}</span><strong>${esc(distLabel(l.cardio))} · ${esc(duracao(l.cardio))}${pace(l.cardio) ? ` · ${pace(l.cardio)}` : ''}</strong></li>`).join('')}</ul></section>` : ''}
+  ${runs.length ? `<section class="card"><h3>Últimos treinos de cardio</h3><ul class="kv">${runs.map(l => `<li data-nav="day" data-date="${l.date}" role="button" tabindex="0" aria-label="Ver ou corrigir o treino de ${esc(fmtDate(l.date))}"><span>${esc(fmtDate(l.date))}</span><strong>${esc(distLabel(l.cardio))} · ${esc(duracao(l.cardio))}${pace(l.cardio) ? ` · ${pace(l.cardio)}` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${!logs.length ? `<p class="foot muted">Ainda sem registos. Depois da primeira sessão isto ganha vida.</p>` : ''}`;
 }
 
