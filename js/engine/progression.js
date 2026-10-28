@@ -3,6 +3,7 @@
 // No teto dos halteres a carga para de subir e passa a subir as repetições: pedir 16 kg
 // a quem tem halteres de 12 é dar um conselho que não se pode seguir.
 import { chainLevels } from '../data/exercises.js';
+import { allowed } from './planner.js';
 
 export const BONUS_MAX = 6;      // reps extra antes de a única saída ser comprar peso
 export const TEMPO_MAX = 20;     // segundos extra numa isometria no topo da cadeia
@@ -52,10 +53,15 @@ export function applyProgression(state, session, results) {
     // um ajuste manual) o requisito disparava para um número inalcançável e a
     // progressão de carga ficava presa em silêncio.
     const current = Math.min(state.chainLevels[chain] || 1, levels.length);
-    if ((state.chainStreak[chain] || 0) >= sessoesParaSubir(current) && session.week !== 4) {
-      const next = levels.find(l => l.level === current + 1);
+    // O nível que conta é o do exercício que ele fez, não o da cadeia: com as barras
+    // desligadas a app recua para o remo com halteres, e subir a cadeia para um
+    // nível de barras deixava esse remo sem carga a subir. O nível seguinte é o
+    // próximo que o equipamento dele permite; se não houver, sobe a carga.
+    const feito = Math.min(ex.level || current, current);
+    const next = levels.filter(l => l.level > feito && allowed(l, state.profile || {}, state.kneeFlag)).sort((a, b) => a.level - b.level)[0];
+    if ((state.chainStreak[chain] || 0) >= sessoesParaSubir(feito) && session.week !== 4) {
       if (next) {
-        state.chainLevels[chain] = current + 1;
+        state.chainLevels[chain] = next.level;
         state.chainStreak[chain] = 0;
         events.push({ type: 'level', chain, from: ex.name, to: next.name });
       } else if (!ex.load) {

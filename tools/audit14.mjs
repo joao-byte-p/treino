@@ -65,6 +65,55 @@ const falha = m => problemas.push(m);
   t.stop();
 }
 
-console.log('correções e temporizador: 3 cenários');
+// ── 4. dias de força: 40 minutos, e braços todas as semanas ────────────────
+{
+  const store = await import('../js/store.js');
+  const { buildWeek } = await import('../js/engine/planner.js');
+  const st = store.defaultState(); st.onboarded = true;
+  const seg = store.mondayOf(new Date(2026, 9, 26));
+  st.profile.cycleStart = store.iso(seg);
+  for (let w = 0; w < 4; w++) {
+    const d = new Date(seg); d.setDate(seg.getDate() + w * 7);
+    const wk = buildWeek(st, d);
+    for (const x of wk.sessions) {
+      const ids = x.blocks.flatMap(b => b.items.map(i => i.ex.chain));
+      if (x.type === 'forcaB' && !ids.includes('curl')) falha(`semana ${wk.week}: Força B sem curl`);
+      if (x.type === 'forcaA' && !ids.includes('triceps')) falha(`semana ${wk.week}: Força A sem tríceps`);
+      if (x.type.startsWith('forca') && x.estMinutes < 38) falha(`semana ${wk.week}: ${x.type} com ${x.estMinutes} min, devia ter ~40`);
+      if (['cardio', 'hiit'].includes(x.type) && x.estMinutes > 33) falha(`semana ${wk.week}: ${x.type} passou a ${x.estMinutes} min, devia ficar nos 30`);
+    }
+  }
+  // um extra de "parte de cima" com 30 min fica nos 30, não herda os 40 da força
+  const { buildExtra } = await import('../js/engine/planner.js');
+  const ex = buildExtra(st, store.iso(new Date(seg.getTime() + 5 * 864e5)), 'cima', 30);
+  if (ex.estMinutes > 33) falha(`extra de 30 min saiu com ${ex.estMinutes}`);
+}
+
+// ── 5. barras desligadas: o remo com halteres continua a ganhar carga ──────
+{
+  const store = await import('../js/store.js');
+  const { applyProgression } = await import('../js/engine/progression.js');
+  const { chainLevels } = await import('../js/data/exercises.js');
+  const st = store.defaultState();
+  st.profile.equipment.bars = false;
+  const niveis = chainLevels('row');
+  const semBarras = niveis.filter(l => !l.equipment.includes('bars'));
+  const topo = semBarras[semBarras.length - 1];
+  st.chainLevels.row = topo.level;
+  st.loads[topo.id] = 8;
+  const sessao = n => ({ date: `2026-11-0${n}`, week: 1, blocks: [{ kind: 'strength', items: [{ ex: topo }] }] });
+  let eventos = [];
+  for (let n = 1; n <= 9 && !eventos.length; n++) eventos = applyProgression(st, sessao(n), { [topo.id]: { done: true, top: true, rpe: 8, kg: st.loads[topo.id] } });
+  if (st.chainLevels.row !== topo.level) falha(`com as barras desligadas o remo subiu para o nível ${st.chainLevels.row}, que é de barras`);
+  if (eventos[0]?.type !== 'load') falha(`no topo do que o equipamento permite devia subir a carga, deu: ${JSON.stringify(eventos[0])}`);
+  // com as barras ligadas, sobe para o nível de barras como antes
+  const st2 = store.defaultState();
+  st2.chainLevels.row = topo.level;
+  eventos = [];
+  for (let n = 1; n <= 9 && !eventos.length; n++) eventos = applyProgression(st2, sessao(n), { [topo.id]: { done: true, top: true, rpe: 8, kg: 8 } });
+  if (eventos[0]?.type !== 'level') falha('com barras ligadas o remo devia subir de nível');
+}
+
+console.log('correções, temporizador, dias de força e progressão: 5 cenários');
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');

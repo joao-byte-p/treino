@@ -105,7 +105,7 @@ export const DAY_META = {
 };
 
 // ---------- utilitários de seleção ----------
-function allowed(ex, profile, kneeFlag) {
+export function allowed(ex, profile, kneeFlag) {
   const eq = profile.equipment || {};
   if (!ex.equipment.every(e => eq[e] !== false)) return false;
   if (profile.kneeSensitive && ex.knee === 'avoid') return false;
@@ -263,13 +263,19 @@ function cooldownBlock(ids, state) {
 
 // Monta um bloco de força que ENCHE o tempo disponível: junta exercícios da lista
 // por ordem de prioridade enquanto couberem e, se sobrar tempo, acrescenta séries.
+// `garantir`: cadeias que entram sempre, no fim do bloco, com o tempo reservado antes
+// de os principais o gastarem em séries extra. Sem isto o curl e o tríceps eram os
+// últimos da fila e, num dia de 30 ou 40 minutos, nunca chegavam a entrar.
 function strengthBlock(title, chains, state, week, budgetSec, opts = {}) {
   const minItems = opts.min ?? 3;
   const maxItems = opts.max ?? 7;
   const maxSets = opts.maxSets ?? (week === 4 ? 3 : 5);
   const items = [];
   const used = new Set();
-  const total = () => items.reduce((a, i) => a + estimateStrengthSeconds(i), 0);
+  const fixos = (opts.garantir || []).map(c => pickFromChain(c, state)).filter(Boolean)
+    .map(ex => { used.add(ex.id); return strengthItem(ex, state, week, 2); });
+  const reservado = fixos.reduce((a, i) => a + estimateStrengthSeconds(i), 0);
+  const total = () => items.reduce((a, i) => a + estimateStrengthSeconds(i), 0) + reservado;
 
   for (const c of chains) {
     if (items.length >= maxItems) break;
@@ -291,6 +297,7 @@ function strengthBlock(title, chains, state, week, budgetSec, opts = {}) {
     cand.sets += 1;
   }
 
+  items.push(...fixos);
   fitToBudget(items, budgetSec);
   return { kind: 'strength', title, items };
 }
@@ -350,7 +357,14 @@ function mobilityBlock(ids, state, budgetSec = Infinity) {
 // O orçamento de tempo é o que sobra depois do aquecimento e do arrefecimento.
 // Os blocos principais ENCHEM esse tempo: mudar 30 para 45 minutos dá mais trabalho,
 // não mais folga. A semana de deload encurta o próprio orçamento.
+// Dias de força têm a sua própria duração. Em 30 minutos só cabiam três exercícios
+// principais, e os braços e os ombros nunca chegavam a entrar.
+const DIAS_FORCA = new Set(['forcaA', 'forcaB', 'push', 'pull', 'pernas', 'full']);
+
 function buildSession(type, state, week, dateISO, cardioIndex) {
+  if (DIAS_FORCA.has(type) && state.profile.minutesForca > (state.profile.minutes || 0)) {
+    state = { ...state, profile: { ...state.profile, minutes: state.profile.minutesForca } };
+  }
   const p = state.profile;
   const meta = DAY_META[type];
   const s = { date: dateISO, type, title: meta.title, subtitle: meta.sub, tone: meta.tone, week, blocks: [], notes: [], alternatives: [] };
@@ -368,7 +382,7 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
     case 'forcaA': {
       const f = frame(['arm-circles', 'hip-circles', 'slow-pushup'], ['hip-flexor-stretch', 'downdog-cobra']);
       s.blocks.push(f.w);
-      s.blocks.push(strengthBlock('Principal', ['pushup', 'squat', 'thrust', 'press', 'triceps', 'lateral'], state, week, f.budget * 0.75));
+      s.blocks.push(strengthBlock('Principal', ['pushup', 'squat', 'thrust', 'press', 'lateral'], state, week, f.budget * 0.75, { garantir: ['triceps'] }));
       s.blocks.push(strengthBlock('Core', [altB('antiext', 'plank'), altB('sideplank', 'birddog')], state, week, f.budget * 0.25, { sets: 2, min: 1, max: 2, maxSets: 3 }));
       s.blocks.push(f.c);
       break;
@@ -376,7 +390,7 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
     case 'forcaB': {
       const f = frame(['arm-circles', 'towel-pull-apart', 'hip-circles'], ['figure-four', 'hamstring-stretch']);
       s.blocks.push(f.w);
-      s.blocks.push(strengthBlock('Principal', ['row', 'hinge', 'lunge', altB('kneeiso', 'stepdown'), 'curl', 'backext'], state, week, f.budget * 0.75));
+      s.blocks.push(strengthBlock('Principal', ['row', 'hinge', 'lunge', altB('kneeiso', 'stepdown'), 'reardelt', 'backext'], state, week, f.budget * 0.75, { garantir: ['curl'] }));
       s.blocks.push(strengthBlock('Core', [altB('sideplank', 'birddog'), altB('plank', 'antiext')], state, week, f.budget * 0.25, { sets: 2, min: 1, max: 2, maxSets: 3 }));
       s.blocks.push(f.c);
       break;
@@ -601,7 +615,8 @@ export function buildExtra(state, dateISO, tipo, minutos) {
   const dia = new Date(y, m - 1, d);
   const { week } = cycleInfo(state.profile, dia, state);
   // O tempo pedido entra pelo perfil, que é por onde o orçamento já se calcula.
-  const comMinutos = { ...state, profile: { ...state.profile, minutes: Math.max(MIN_MINUTOS, minutos || MIN_MINUTOS) } };
+  // (e sem a duração própria dos dias de força, senão um extra de 30 min virava 40)
+  const comMinutos = { ...state, profile: { ...state.profile, minutes: Math.max(MIN_MINUTOS, minutos || MIN_MINUTOS), minutesForca: null } };
   // Cardio extra vem DEPOIS das corridas da semana: contadas aqui para o motor
   // escolher a piscina em vez de lhe pôr uma terceira corrida em cima.
   const template = TEMPLATES[state.profile.goal]?.[Math.min(7, Math.max(5, state.profile.daysPerWeek || 5))] || TEMPLATES.saude[5];

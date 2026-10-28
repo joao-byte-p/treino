@@ -38,6 +38,7 @@ export function defaultState() {
       pendingGoal: null,
       daysPerWeek: 5,
       minutes: 30,
+      minutesForca: 40,       // dias de força: 30 minutos davam três exercícios e nada de braços
       runsPerWeek: 2,
       dumbbellMaxKg: 12,
       theme: 'dark',            // dark | light | auto

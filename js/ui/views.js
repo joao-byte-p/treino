@@ -187,7 +187,7 @@ export function renderPlan(nav, offsetWeeks = 0) {
     <p class="muted">${esc(wk.focus.desc)}</p>
   </section>
   <ol class="days">${rows}</ol>
-  <p class="foot muted">Objetivo atual: <strong>${esc(GOALS[state.profile.goal].label)}</strong> · ${state.profile.daysPerWeek} dias · ${state.profile.minutes} min</p>`;
+  <p class="foot muted">Objetivo atual: <strong>${esc(GOALS[state.profile.goal].label)}</strong> · ${state.profile.daysPerWeek} dias · ${state.profile.minutes} min${state.profile.minutesForca > state.profile.minutes ? ` (força ${state.profile.minutesForca})` : ''}</p>`;
 }
 
 export function renderDay(nav, dateISO, altIndex = null) {
@@ -663,6 +663,7 @@ export function renderSettings(nav, onboarding = false) {
       <h3>Semana</h3>
       <label class="field"><span>Dias por semana</span><div class="seg">${[5, 6, 7].map(n => `<button type="button" class="${p.daysPerWeek === n ? 'on' : ''}" data-seg="daysPerWeek" data-val="${n}">${n}</button>`).join('')}</div></label>
       <label class="field"><span>Minutos por sessão</span><div class="seg">${[30, 40, 45].map(n => `<button type="button" class="${p.minutes === n ? 'on' : ''}" data-seg="minutes" data-val="${n}">${n}</button>`).join('')}</div></label>
+      <label class="field"><span>Minutos nos dias de força</span><div class="seg">${[30, 40, 45].map(n => `<button type="button" class="${Math.max(p.minutes || 30, p.minutesForca || 0) === n ? 'on' : ''}" data-seg="minutesForca" data-val="${n}">${n}</button>`).join('')}</div></label>
       <p class="muted small">Trinta minutos é o mínimo. Na semana de deload a sessão mantém o tempo e baixa a carga — uma semana leve não é uma semana curta.</p>
       <label class="field"><span>Corridas por semana</span><div class="seg">${[1, 2, 3].map(n => `<button type="button" class="${p.runsPerWeek === n ? 'on' : ''}" data-seg="runsPerWeek" data-val="${n}">${n}</button>`).join('')}</div></label>
     </section>
