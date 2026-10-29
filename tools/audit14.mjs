@@ -114,6 +114,24 @@ const falha = m => problemas.push(m);
   if (eventos[0]?.type !== 'level') falha('com barras ligadas o remo devia subir de nível');
 }
 
-console.log('correções, temporizador, dias de força e progressão: 5 cenários');
+// ── 6. o relógio espera só no primeiro exercício de cada bloco ─────────────
+{
+  const store = await import('../js/store.js');
+  const { buildWeek } = await import('../js/engine/planner.js');
+  const { buildSteps } = await import('../js/ui/session.js');
+  const st = store.defaultState(); st.onboarded = true;
+  const seg = store.mondayOf(new Date(2026, 9, 26)); st.profile.cycleStart = store.iso(seg);
+  const hiit = buildWeek(st, seg).sessions.find(x => x.type === 'hiit');
+  const passos = buildSteps(hiit);
+  const trabalho = passos.filter(p => p.type === 'work');
+  const blocos = hiit.blocks.filter(b => b.items.length).length;
+  const aEspera = trabalho.filter(p => p.inicioBloco);
+  if (aEspera.length !== blocos) falha(`${blocos} blocos e ${aEspera.length} exercícios à espera de começar`);
+  if (!trabalho[0].inicioBloco) falha('o primeiro exercício da sessão devia esperar');
+  const hiitPassos = trabalho.filter(p => hiit.blocks.find(b => b.kind === 'hiit')?.title === p.block);
+  if (hiitPassos.filter(p => p.inicioBloco).length !== 1) falha('dentro do HIIT, só o primeiro exercício da primeira ronda devia esperar');
+}
+
+console.log('correções, temporizador, dias de força, progressão e arranque de blocos: 6 cenários');
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');

@@ -43,6 +43,16 @@ export function buildSteps(session) {
       });
     }
   }
+  // Primeiro exercício de cada bloco (aquecimento, principal, HIIT, arrefecimento):
+  // é aí que o tipo de trabalho muda e ele precisa de uns segundos para ler o que
+  // vem. As pausas entre séries não contam como mudança.
+  let blocoAnterior = null;
+  for (const st of steps) {
+    if (st.type !== 'work') continue;
+    const bloco = st.block ?? st.label;
+    if (bloco !== blocoAnterior) st.inicioBloco = true;
+    blocoAnterior = bloco;
+  }
   return steps;
 }
 
@@ -99,6 +109,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
 
   function renderStep() {
     stopTimer();
+    aEspera = false;
     if (i >= steps.length) { finish(); return; }
     const st = steps[i];
     const pct = i / steps.length;
@@ -148,7 +159,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
           <p class="srun-note">${esc(st.note || '')}</p>
           <ul class="cues">${st.ex.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ul>
           <div class="srun-actions">
-            <button class="btn btn-ghost" data-pause>Pausar</button>
+            <button class="btn btn-ghost" data-pause>${st.inicioBloco ? 'Começar' : 'Pausar'}</button>
             <button class="btn btn-ghost" data-add="300">+5 min</button>
           </div>
           <button class="btn btn-primary btn-big" data-next>Terminei</button>
@@ -159,6 +170,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
         onFrame: f => setRing(root, f),
         onDone: () => { beep('done'); },
       });
+      if (st.inicioBloco) esperarInicio();
     } else {
       const isTime = st.mode === 'time';
       const rx = isTime ? `${st.seconds}s` : (st.reps ? (st.reps[0] === st.reps[1] ? `${st.reps[0]} reps` : `${st.reps[0]}–${st.reps[1]} reps`) : '');
@@ -179,20 +191,22 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
           ` : `<div class="srun-big srun-reps">${esc(rx)}</div>`}
           <div class="srun-chips">${load}${st.ex.tempo ? `<span class="pill">${esc(st.ex.tempo)}</span>` : ''}</div>
           <ul class="cues">${st.ex.cues.slice(0, 3).map(c => `<li>${esc(c)}</li>`).join('')}</ul>
-          ${isTime ? `<div class="srun-actions"><button class="btn btn-ghost" data-pause>Pausar</button><button class="btn btn-ghost" data-add="10">+10s</button></div>` : ''}
+          ${isTime && st.inicioBloco ? `<p class="srun-novo">Novo bloco: o relógio espera por ti.</p>` : ''}
+          ${isTime ? `<div class="srun-actions"><button class="btn ${st.inicioBloco ? 'btn-primary' : 'btn-ghost'}" data-pause>${st.inicioBloco ? 'Começar' : 'Pausar'}</button><button class="btn btn-ghost" data-add="10">+10s</button></div>` : ''}
           ${isTime
             ? `<button class="link srun-skip" data-next>Saltar exercício</button>`
             : `<button class="btn btn-primary btn-big" data-next>Feito</button>`}
           ${st.item?.homeAlt ? `<button class="btn btn-ghost" data-swap-now="${st.ex.id}" data-alt="${st.item.homeAlt.id}">Trocar por ${esc(st.item.homeAlt.name)}</button>` : ''}
         </div>`;
       if (isTime) {
-        beep('go');
+        if (!st.inicioBloco) beep('go');
         timer = countdown(st.seconds, {
           tone: 'work',
           onTick: s => { const c = root.querySelector('[data-clock]'); if (c) c.innerHTML = relogio(s); },
           onFrame: f => setRing(root, f),
           onDone: () => advance(),
         });
+        if (st.inicioBloco) esperarInicio();
       }
       if (st.item?.kind === 'strength') results[st.ex.id] = results[st.ex.id] || { done: true, top: true, rpe: null, kg: st.load?.kg ?? null };
     }
@@ -207,6 +221,16 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
     root.querySelector('[data-next]')?.addEventListener('click', () => advance());
     root.querySelector('[data-pause]')?.addEventListener('click', e => {
       if (!timer) return;
+      if (aEspera) {
+        // o arranque de um bloco: o sinal de partida só soa quando ele carrega
+        aEspera = false;
+        beep('go');
+        timer.resume();
+        e.target.textContent = 'Pausar';
+        e.target.classList.replace('btn-primary', 'btn-ghost');
+        root.querySelector('.srun-novo')?.remove();
+        return;
+      }
       if (timer.paused) { timer.resume(); e.target.textContent = 'Pausar'; } else { timer.pause(); e.target.textContent = 'Continuar'; }
     });
     root.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => {
@@ -229,7 +253,13 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
     }
   }
 
+  // Relógio parado à espera de "Começar", no primeiro exercício de cada bloco.
+  let aEspera = false;
+  function esperarInicio() { aEspera = true; timer.pause(); }
+
   function showInfo(ex) {
+    // se já estava parado (pausa dele ou à espera de começar), fechar não o arranca
+    const jaParado = !!timer?.paused;
     timer?.pause();
     const dlg = document.createElement('div');
     dlg.className = 'sheet';
@@ -244,7 +274,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
       ${hasPose(ex.id) ? `<button class="link srun-flag" data-flag>${figuraMarcada(ex.id) ? 'Figura marcada como errada — desmarcar' : 'Esta figura está mal'}</button>` : ''}
     </div>`;
     root.appendChild(dlg);
-    const close = () => { dlg.remove(); timer?.resume(); };
+    const close = () => { dlg.remove(); if (!jaParado) timer?.resume(); };
     dlg.querySelector('[data-close]').addEventListener('click', close);
     // Marcar no meio do treino tem de ser um toque e ficar ali: nada de escrever nem
     // de sair do exercício. A nota, se ele quiser, escreve-se depois no Perfil.
