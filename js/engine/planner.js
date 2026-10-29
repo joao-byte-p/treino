@@ -306,19 +306,27 @@ function hiitBlock(state, week, budgetSec) {
   const pool = EXERCISES.filter(e => e.pattern === 'hiit' && allowed(e, state.profile, state.kneeFlag));
   // rotação determinística por semana para variar a ordem sem repetir tudo
   const rotated = [...pool.slice(week % pool.length), ...pool.slice(0, week % pool.length)];
-  const between = 90;
+  // Entre rondas descansa-se o mesmo que entre exercícios, como nos HIIT que ele
+  // segue. Os 90 s de antes são para sprints no máximo; em 40 s de esforço forte
+  // mas não máximo, os 20 s já recuperam, e a pausa curta mantém o coração em cima
+  // (Buchheit & Laursen 2013; McRae et al. 2012). O tempo poupado vai para um 6.º
+  // exercício e não para mais rondas: mais variedade, menos repetição já cansado.
+  const work = 40, rest = 20, between = rest;
   const wantRounds = week === 4 ? 3 : 4;
+  // custo real: o último exercício de cada ronda não tem pausa própria, tem a
+  // pausa entre rondas, e a última ronda não tem nenhuma
+  const custo = (r, n) => r * (n * work + (n - 1) * rest) + (r - 1) * between;
   // prefere manter as rondas e cortar exercícios (6 → 5 → 4) antes de cortar rondas
   let items = [];
   for (const n of [6, 5, 4]) {
-    items = rotated.slice(0, n).map(ex => ({ kind: 'interval', ex, work: 40, rest: 20 }));
-    if (wantRounds * n * 60 + (wantRounds - 1) * between <= budgetSec) break;
+    items = rotated.slice(0, n).map(ex => ({ kind: 'interval', ex, work, rest }));
+    if (custo(wantRounds, n) <= budgetSec) break;
   }
-  const cost = r => r * items.length * 60 + (r - 1) * between;
+  const cost = r => custo(r, items.length);
   let rounds = wantRounds;
   while (rounds > 2 && cost(rounds) > budgetSec) rounds -= 1;
   while (rounds < (week === 4 ? 4 : 7) && cost(rounds + 1) <= budgetSec) rounds += 1;
-  return { kind: 'hiit', title: `${rounds} rondas · 40s trabalho / 20s pausa`, items, rounds, betweenRounds: between };
+  return { kind: 'hiit', title: `${rounds} rondas · ${work}s trabalho / ${rest}s pausa`, items, rounds, betweenRounds: between };
 }
 
 function circuitBlock(title, ids, state, week, budgetSec) {

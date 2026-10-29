@@ -132,6 +132,23 @@ const falha = m => problemas.push(m);
   if (hiitPassos.filter(p => p.inicioBloco).length !== 1) falha('dentro do HIIT, só o primeiro exercício da primeira ronda devia esperar');
 }
 
-console.log('correções, temporizador, dias de força, progressão e arranque de blocos: 6 cenários');
+// ── 7. HIIT: entre rondas descansa-se o mesmo que entre exercícios ─────────
+{
+  const store = await import('../js/store.js');
+  const { buildWeek } = await import('../js/engine/planner.js');
+  const st = store.defaultState(); st.onboarded = true;
+  const seg = store.mondayOf(new Date(2026, 9, 26)); st.profile.cycleStart = store.iso(seg);
+  for (let w = 0; w < 4; w++) {
+    const d = new Date(seg); d.setDate(seg.getDate() + w * 7);
+    const wk = buildWeek(st, d);
+    const h = wk.sessions.find(x => x.type === 'hiit');
+    const b = h.blocks.find(x => x.kind === 'hiit');
+    if (b.betweenRounds !== b.items[0].rest) falha(`semana ${wk.week}: ${b.betweenRounds}s entre rondas e ${b.items[0].rest}s entre exercícios`);
+    if (wk.week !== 4 && b.items.length < 6) falha(`semana ${wk.week}: o tempo poupado devia dar 6 exercícios, deu ${b.items.length}`);
+    if (h.estMinutes > 32) falha(`semana ${wk.week}: HIIT com ${h.estMinutes} min, passou dos 30`);
+  }
+}
+
+console.log('correções, temporizador, dias de força, progressão, arranque de blocos e HIIT: 7 cenários');
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');
