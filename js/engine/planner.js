@@ -65,7 +65,7 @@ export const WEEK_FOCUS = {
   1: { label: 'Adaptação', desc: 'Consolidar técnica. Reps na base do intervalo, carga confortável.' },
   2: { label: 'Volume', desc: 'Mesma carga, reps a meio do intervalo. Uma corrida tempo.' },
   3: { label: 'Intensidade', desc: 'Reps no topo do intervalo, mais uma série nos principais. Semana mais dura.' },
-  4: { label: 'Deload', desc: 'Menos 40% de volume, carga a 80%. O corpo consolida. Bom dia para a piscina.' },
+  4: { label: 'Deload', desc: 'Menos 40% de volume, a mesma carga. O cansaço sai, a força fica. Bom dia para a piscina.' },
 };
 
 // Modelos semanais por objetivo. Cada entrada é um tipo de dia; 'rest' preenche o que sobra.
@@ -151,7 +151,10 @@ function loadHint(ex, state, week) {
   if (!ex.load) return null;
   const last = state.loads[ex.id];
   if (!last) return { kg: null, note: 'Escolhe um peso que permita o topo das reps com boa forma' };
-  if (week === 4) return { kg: Math.max(2, Math.round(last * 0.8)), note: 'Deload: 80% do habitual' };
+  // Deload: corta-se o volume (menos séries) e mantém-se a carga. É o que os estudos
+  // de redução de treino mostram que preserva a força (Bosquet et al. 2007); baixar
+  // também o peso tirava ao deload a parte que mantém o que ele ganhou.
+  if (week === 4) return { kg: last, note: 'Semana leve: o mesmo peso, menos séries' };
   const teto = state.profile?.dumbbellMaxKg || 12;
   if (last >= teto) return { kg: last, teto: true, note: `No teto dos teus halteres: sobem as reps, não o peso` };
   return { kg: last, note: 'Último peso usado' };
@@ -194,7 +197,7 @@ export const MIN_MINUTOS = 30;
 
 function budgetFor(profile, week, usedSec) {
   // O deload corta o TRABALHO, não o tempo: menos uma série, reps no fundo do
-  // intervalo, carga a 80% e pausas mais curtas já estão noutros sítios. O tempo que
+  // intervalo e pausas mais curtas já estão noutros sítios. O tempo que
   // sobra volta em mobilidade, mais abaixo — uma semana leve não é uma semana curta.
   const total = Math.max(MIN_MINUTOS, profile.minutes || 30) * 60 * (week === 4 ? 0.72 : 1);
   return Math.max(5 * 60, total - usedSec);

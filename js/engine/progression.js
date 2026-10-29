@@ -38,8 +38,10 @@ export function applyProgression(state, session, results) {
     if (state.chainLastDate[chain] === session.date) continue; // este dia já foi contado
     state.chainLastDate[chain] = session.date;
 
-    const success = r.done && r.top !== false && (r.rpe == null || r.rpe <= 9);
-    const hardFail = !r.done || r.rpe === 10;
+    // `joelho`: ele disse que o joelho se queixou neste exercício. Não é falhar o
+    // exercício, mas também não é sinal para subir: a sequência recomeça.
+    const success = r.done && r.top !== false && (r.rpe == null || r.rpe <= 9) && !r.joelho;
+    const hardFail = !r.done || r.rpe === 10 || !!r.joelho;
 
     if (success) {
       state.chainStreak[chain] = (state.chainStreak[chain] || 0) + 1;

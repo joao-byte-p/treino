@@ -302,6 +302,9 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
     const strength = session.blocks.flatMap(b => b.kind === 'strength' ? b.items : []);
     const cardio = session.blocks.flatMap(b => b.kind === 'cardio' ? b.items : [])[0];
     const isInterval = session.blocks.some(b => b.kind === 'hiit' || b.kind === 'circuit');
+    // Os exercícios de pernas que carregam o joelho. As cadeias deles sobem como as
+    // outras; o que as trava é ele dizer que o joelho se queixou.
+    const pernas = strength.filter(it => it.ex.knee === 'care');
     root.innerHTML = `
       <header class="srun-top"><span class="srun-count">Registo</span></header>
       <div class="srun srun-log">
@@ -333,6 +336,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
           <div class="rpe" data-cardio-rpe>${RPE.map(x => `<button type="button" data-rpe="${x.value}">${esc(x.label)}</button>`).join('')}</div>
           <label class="toggle small"><input type="checkbox" data-knee-pain><span>O joelho queixou-se</span></label>
         </div>` : ''}
+        ${pernas.length ? `<label class="toggle small srun-joelho"><input type="checkbox" data-knee-strength><span>O joelho queixou-se num exercício de pernas</span></label>` : ''}
         <label class="field"><span>Nota (opcional)</span><input type="text" data-note placeholder="Como te sentiste"></label>
         <button class="btn btn-primary btn-big" data-save>Guardar treino</button>
         <button class="link srun-discard" data-discard>Sair sem guardar</button>
@@ -394,6 +398,15 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
         log.minutosApp = log.minutes;
         log.minutes = Math.max(log.minutes, Math.round(seconds / 60));
         if (log.cardio.kneePain) { update(s => { s.kneeFlag = true; }); events.push('Joelho a queixar-se: a próxima corrida passa a piscina'); }
+      }
+      // Joelho a queixar-se num treino de força: os exercícios de pernas desse dia não
+      // contam para subir (a sequência recomeça) e a semana passa a modo cuidado.
+      // É isto que deixa ir esticando as pernas: sobe-se enquanto o joelho deixar.
+      if (root.querySelector('[data-knee-strength]')?.checked) {
+        log.kneePain = true;
+        for (const it of pernas) if (results[it.ex.id]) results[it.ex.id].joelho = true;
+        update(s => { s.kneeFlag = true; });
+        events.push('Joelho a queixar-se: as pernas não sobem de nível e a semana passa a modo cuidado');
       }
       update(s => {
         const ev = applyProgression(s, session, results);

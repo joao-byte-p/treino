@@ -149,6 +149,33 @@ const falha = m => problemas.push(m);
   }
 }
 
-console.log('correções, temporizador, dias de força, progressão, arranque de blocos e HIIT: 7 cenários');
+// ── 8. deload mantém a carga; joelho a queixar-se trava as pernas ──────────
+{
+  const store = await import('../js/store.js');
+  const { buildWeek } = await import('../js/engine/planner.js');
+  const { applyProgression } = await import('../js/engine/progression.js');
+  const { BY_ID } = await import('../js/data/exercises.js');
+  const st = store.defaultState(); st.onboarded = true;
+  const seg = store.mondayOf(new Date(2026, 9, 26)); st.profile.cycleStart = store.iso(seg);
+  st.loads['goblet-squat'] = 10;
+  const d4 = new Date(seg); d4.setDate(seg.getDate() + 21);
+  const fA = buildWeek(st, d4).sessions.find(x => x.type === 'forcaA');
+  const goblet = fA.blocks.flatMap(b => b.items).find(i => i.ex.id === 'goblet-squat');
+  if (goblet?.load?.kg !== 10) falha(`no deload a carga devia manter-se nos 10 kg, ficou ${goblet?.load?.kg}`);
+  const fA1 = buildWeek(st, seg).sessions.find(x => x.type === 'forcaA');
+  const s1 = fA1.blocks.flatMap(b => b.items).find(i => i.ex.id === 'goblet-squat')?.sets;
+  if (!(goblet.sets < s1)) falha(`no deload devia haver menos séries: ${goblet.sets} contra ${s1}`);
+
+  const gob = BY_ID['goblet-squat'];
+  const sess = n => ({ date: `2026-11-1${n}`, week: 1, blocks: [{ kind: 'strength', items: [{ ex: gob }] }] });
+  const t = store.defaultState();
+  applyProgression(t, sess(1), { 'goblet-squat': { done: true, top: true, rpe: 8, kg: 10 } });
+  if (t.chainStreak.squat !== 1) falha('uma sessão boa devia contar 1');
+  applyProgression(t, sess(2), { 'goblet-squat': { done: true, top: true, rpe: 8, kg: 10, joelho: true } });
+  if (t.chainStreak.squat !== 0) falha('joelho a queixar-se devia recomeçar a sequência das pernas');
+  if ((t.chainLevels.squat || 1) !== 1) falha('com o joelho a queixar-se não podia subir de nível');
+}
+
+console.log('correções, temporizador, dias de força, progressão, arranque de blocos, HIIT e joelho: 8 cenários');
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');
