@@ -176,6 +176,32 @@ const falha = m => problemas.push(m);
   if ((t.chainLevels.squat || 1) !== 1) falha('com o joelho a queixar-se não podia subir de nível');
 }
 
-console.log('correções, temporizador, dias de força, progressão, arranque de blocos, HIIT e joelho: 8 cenários');
+// ── 9. material: só o que se leva, com os pesos, e nada num dia de corrida ─
+{
+  const store = await import('../js/store.js');
+  const { buildWeek } = await import('../js/engine/planner.js');
+  const { materialDaSessao } = await import('../js/engine/material.js');
+  const st = store.defaultState(); st.onboarded = true;
+  const seg = store.mondayOf(new Date(2026, 9, 26)); st.profile.cycleStart = store.iso(seg);
+  st.loads['goblet-squat'] = 10; st.loads['db-press-seated'] = 8;
+  const sem = buildWeek(st, seg).sessions;
+  const fA = materialDaSessao(sem.find(x => x.type === 'forcaA'));
+  const hal = fA.find(m => m.id === 'dumbbells');
+  if (!hal) falha('Força A sem halteres na lista');
+  else {
+    if (!/8.*10 kg/.test(hal.detalhe)) falha(`pesos dos halteres: "${hal.detalhe}"`);
+    if (!hal.montar) falha('falta o peso a montar primeiro');
+  }
+  if (!fA.some(m => m.id === 'board')) falha('Força A sem a push-up board');
+  if (fA.some(m => ['body', 'wall', 'run', 'bars', 'pool', 'court'].includes(m.id))) falha('a lista inclui sítios ou o próprio corpo');
+  const corrida = sem.find(x => x.type === 'cardio' && x.blocks.some(b => b.items?.some(i => i.ex?.chain === 'run')));
+  if (corrida && materialDaSessao(corrida).length) falha(`dia de corrida com material: ${materialDaSessao(corrida).map(m => m.nome)}`);
+  const hiit = materialDaSessao(sem.find(x => x.type === 'hiit'));
+  if (!hiit.some(m => m.id === 'rope')) falha('HIIT com corda sem a corda na lista');
+  const nomes = fA.map(m => m.id);
+  if (new Set(nomes).size !== nomes.length) falha('material repetido na lista');
+}
+
+console.log('correções, temporizador, dias de força, progressão, arranque de blocos, HIIT, joelho e material: 9 cenários');
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');

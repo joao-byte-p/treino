@@ -5,7 +5,8 @@ import { applyProgression, RPE } from '../engine/progression.js';
 import { BY_ID } from '../data/exercises.js';
 import { countdown, beep, unlockAudio, keepAwake, fmt, fmtLong } from '../timer.js';
 import { timerRing, setRing } from './components.js';
-import { esc, illustration, ytUrl, toast, prescription, ligarMmss, lerMmss, camposMmss } from './components.js';
+import { esc, illustration, ytUrl, toast, prescription, ligarMmss, lerMmss, camposMmss, icone } from './components.js';
+import { materialDaSessao } from '../engine/material.js';
 import { contasDaSemana, oQueFechou } from '../engine/fecho.js';
 import { montarFecho } from './fecho.js';
 import { hasPose, mountFigure } from './figure.js';
@@ -88,6 +89,36 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
   if (!soRegistar) { unlockAudio(); keepAwake(true); }
 
   function stopTimer() { if (timer) { timer.stop(); timer = null; } }
+
+  // Antes do primeiro exercício: o que levar para a divisão onde ele treina. Os
+  // vistos são só para ele ir marcando enquanto junta as coisas; não bloqueiam nada.
+  const material = materialDaSessao(session);
+  function renderMaterial() {
+    const halteres = material.find(m => m.montar);
+    root.innerHTML = `
+      <header class="srun-top">
+        <button class="iconbtn" data-exit-material aria-label="Sair">✕</button>
+        <span class="srun-count">Antes de começar</span>
+      </header>
+      <div class="srun mat">
+        <div class="srun-kicker">${esc(session.title)} · ${session.estMinutes} min</div>
+        <h2 class="srun-title">Leva contigo</h2>
+        <p class="mat-sub">Junta tudo antes de ires, para não teres de voltar a meio.</p>
+        <ul class="mat-l">${material.map(m => `<li><button type="button" class="mat-i" role="checkbox" aria-checked="false">
+          <span class="mat-ic" aria-hidden="true">${icone(m.icon)}</span>
+          <span class="mat-t"><strong>${esc(m.nome)}</strong>${m.detalhe ? `<small>${esc(m.detalhe)}</small>` : ''}</span>
+          <span class="mat-ok" aria-hidden="true">${icone('check')}</span>
+        </button></li>`).join('')}</ul>
+        ${halteres ? `<p class="mat-nota">Monta já os halteres nos ${halteres.montar} kg: é o peso do primeiro exercício.</p>` : ''}
+        <button class="btn btn-primary btn-big" data-mat-ok>Tenho tudo, começar</button>
+      </div>`;
+    root.querySelectorAll('.mat-i').forEach(b => b.addEventListener('click', () => {
+      const on = b.getAttribute('aria-checked') !== 'true';
+      b.setAttribute('aria-checked', String(on));
+    }));
+    root.querySelector('[data-mat-ok]').addEventListener('click', () => renderStep());
+    root.querySelector('[data-exit-material]').addEventListener('click', () => { keepAwake(false); nav.go('home'); });
+  }
 
   // o que este treino faz à semana: dá sentido a guardar
   function weekAfter() {
@@ -423,6 +454,7 @@ export function mountSession(root, nav, dateISO, altIndex, { soRegistar = false 
   }
 
   if (soRegistar) finish(false);
+  else if (material.length) renderMaterial();
   else renderStep();
   return () => { stopTimer(); stopFig(); keepAwake(false); };
 }

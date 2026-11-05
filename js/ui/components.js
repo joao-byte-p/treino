@@ -37,7 +37,24 @@ const ICONS = {
   clock: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
   list: '<svg viewBox="0 0 24 24"><path d="M8 6h11M8 12h11M8 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
   flag: '<svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>',
+  // material (engine/material.js)
+  halter: '<svg viewBox="0 0 24 24"><path d="M8 12h8"/><rect x="4.5" y="7.5" width="3.5" height="9" rx="1"/><rect x="16" y="7.5" width="3.5" height="9" rx="1"/><path d="M2.5 10v4M21.5 10v4"/></svg>',
+  board: '<svg viewBox="0 0 24 24"><rect x="2.5" y="13" width="19" height="4" rx="2"/><path d="M7 13v-2.5a1.5 1.5 0 0 1 3 0V13M14 13v-2.5a1.5 1.5 0 0 1 3 0V13"/></svg>',
+  corda: '<svg viewBox="0 0 24 24"><path d="M5 4v5M19 4v5"/><path d="M5 9c0 8 3 11 7 11s7-3 7-11"/></svg>',
+  cadeira: '<svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="7" rx="1.5"/><path d="M5 13h14M7 13v8M17 13v8M8 10v3M16 10v3"/></svg>',
+  toalha: '<svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M5 8h14M9 15h6"/></svg>',
+  saco: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
 };
+
+export const icone = nome => ICONS[nome] || '';
+
+// "Leva contigo": a lista compacta, na Home e na página do dia.
+export function levaContigo(itens) {
+  if (!itens.length) return '';
+  return `<div class="leva"><div class="leva-h">Leva contigo</div>
+    <ul class="leva-l">${itens.map(i => `<li>${icone(i.icon)}<span>${esc(i.nome)}${i.detalhe ? ` <small>${esc(i.detalhe)}</small>` : ''}</span></li>`).join('')}</ul></div>`;
+}
 export function tile({ icon = 'clock', label, num, unit = '' }) {
   return `<div class="tile"><div class="tile-h">${ICONS[icon] || ''}<span>${esc(label)}</span></div>
     <div class="tile-n">${esc(num)}${unit ? `<small>${esc(unit)}</small>` : ''}</div></div>`;

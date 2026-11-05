@@ -5,7 +5,8 @@ import { GRUPOS, temGrupo } from '../data/muscles.js';
 import { KIT } from '../data/kit.js';
 import { contasDaSemana, semanasCompletas } from '../engine/fecho.js';
 import { fechoPorVer } from './fecho.js';
-import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription, camposMmss } from './components.js';
+import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription, camposMmss, levaContigo } from './components.js';
+import { materialDaSessao } from '../engine/material.js';
 import { hasPose, stepsStrip, frameCount, prefersStill } from './figure.js';
 import { lineChart, barChart, chartHead } from './charts.js';
 import { CONFIG } from '../config.js';
@@ -102,6 +103,7 @@ export function renderHome(nav) {
           ${tile({ icon: 'clock', label: 'Duração', num: `${s.estMinutes}`, unit: 'min' })}
           ${tile({ icon: 'list', label: mainBlock && mainBlock.items.length === 1 ? 'Exercício' : 'Exercícios', num: `${mainBlock ? mainBlock.items.length : 0}` })}
         </div>
+        ${levaContigo(materialDaSessao(s))}
         <ul class="preview">${preview}</ul>
         ${s.notes.length ? `<p class="note">${esc(s.notes[0])}</p>` : ''}
         <button class="btn btn-primary btn-big" data-nav="session" data-date="${s.date}">Começar sessão</button>
@@ -209,6 +211,7 @@ export function renderDay(nav, dateISO, altIndex = null) {
   ${s.notes.map(n => `<p class="note">${esc(n)}</p>`).join('')}
   ${log?.completed ? `<div class="notice">Feito. ${esc(log.summary || '')}</div>` : ''}
   ${log?.completed && log.cardio ? corrigirCard(dateISO, log) : ''}
+  ${!log?.completed && s.type !== 'rest' ? levaContigo(materialDaSessao(s)) : ''}
   ${blocks}
   ${s.type !== 'rest' ? `<div class="actions">
     <button class="btn btn-primary btn-big" data-nav="session" data-date="${dateISO}" ${altIndex != null ? `data-alt="${altIndex}"` : ''} ${dateISO < iso(new Date()) || log?.completed ? 'data-registar="1"' : ''}>${rotuloAcao(dateISO, log)}</button>

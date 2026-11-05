@@ -460,6 +460,31 @@ body::before {
   .grid2 { grid-template-columns: repeat(4, 1fr); }
   .tabs { left: 50%; right: auto; transform: translateX(-50%); width: 560px; bottom: 16px; }
 }
+/* Material: "Leva contigo" na Home e no dia, e o ecrã antes do primeiro exercício.
+   O ícone vai a verde porque é o que se procura de relance; o texto fica neutro. */
+.leva { margin: 2px 0 14px; }
+.leva-h { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+.leva-l { display: flex; flex-wrap: wrap; gap: 8px; }
+.leva-l li { display: flex; align-items: center; gap: 7px; background: var(--fill); border-radius: 999px; padding: 7px 13px 7px 10px; font-size: 14px; font-weight: 600; }
+.leva-l small { color: var(--text-3); font-weight: 600; font-size: 13px; }
+.leva-l svg, .mat-ic svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--mint); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.mat { text-align: left; align-items: stretch; }
+.mat .srun-kicker, .mat .srun-title, .mat-sub { text-align: center; }
+.mat-sub { color: var(--text-2); margin: 2px auto 0; max-width: 32ch; line-height: 1.45; }
+.mat-l { display: grid; gap: 10px; margin: 20px 0 4px; }
+.mat-i { width: 100%; min-height: 66px; display: flex; align-items: center; gap: 14px; padding: 12px 16px 12px 12px; background: var(--fill); border: 1px solid transparent; border-radius: 18px; text-align: left; color: var(--text); transition: border-color 0.15s ease, background 0.15s ease; }
+.mat-ic { width: 42px; height: 42px; flex: none; border-radius: 13px; background: var(--fill-2); display: grid; place-items: center; }
+.mat-ic svg { width: 22px; height: 22px; }
+.mat-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.mat-t strong { font-size: 16px; }
+.mat-t small { font-size: 13px; color: var(--text-3); font-weight: 600; }
+.mat-ok { width: 26px; height: 26px; flex: none; border-radius: 50%; border: 2px solid var(--line-strong); display: grid; place-items: center; color: transparent; transition: background 0.15s ease, border-color 0.15s ease; }
+.mat-ok svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.mat-i[aria-checked="true"] { border-color: color-mix(in srgb, var(--mint) 40%, transparent); }
+.mat-i[aria-checked="true"] .mat-ok { background: var(--mint); border-color: var(--mint); color: var(--bg); }
+.mat-nota { color: var(--text-2); font-size: 14px; line-height: 1.45; margin: 10px 2px 16px; }
+.mat .btn-big { width: 100%; margin-top: auto; }
+
 /* Fecho de semana: o anel enche de onde estava até ao fim, mais devagar que os da
    Home, porque aqui o movimento é a mensagem. Sem movimento, aparece já cheio. */
 .fecho { justify-content: center; gap: 4px; }
