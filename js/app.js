@@ -136,6 +136,16 @@ function render(scrollTop = true) {
       nav.go('day', { date: data });
     }));
   }
+  view.querySelector('[data-discos-adiar]')?.addEventListener('click', () => {
+    const d = new Date(); d.setDate(d.getDate() + 60);
+    update(s => { s.profile.discosAdiadoAte = d.toISOString().slice(0, 10); });
+    toast('Volto a lembrar daqui a dois meses');
+    render(false);
+  });
+  view.querySelector('[data-discos-comprei]')?.addEventListener('click', () => {
+    toast('Sobe o peso máximo por halter no Perfil');
+    nav.go('settings');
+  });
   const corrigir = view.querySelector('[data-corrigir]');
   if (corrigir) {
     ligarMmss(corrigir);

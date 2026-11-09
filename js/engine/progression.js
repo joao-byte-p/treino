@@ -90,6 +90,9 @@ export function applyProgression(state, session, results) {
         if (!state.repBonus) state.repBonus = {};
         if (atual + 2 <= teto) {
           state.loads[ex.id] = atual + 2;
+          // a carga voltou a subir (comprou discos e subiu o teto): as repetições
+          // extra eram o substituto da carga, e deixam de fazer falta
+          if (state.repBonus[ex.id]) delete state.repBonus[ex.id];
           state.chainStreak[chain] = 0;
           events.push({ type: 'load', chain, ex: ex.name, kg: atual + 2 });
         } else {

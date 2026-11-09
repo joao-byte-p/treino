@@ -217,6 +217,57 @@ const falha = m => problemas.push(m);
   if (store.getState().profile.dumbbellMaxKg !== 12) falha('a correção voltou a mexer num teto escolhido por ele');
 }
 
-console.log('correções, temporizador, dias de força, progressão, arranque de blocos, HIIT, joelho, material e halteres: 10 cenários');
+// ── 11. banco: supino e remo apoiado alternam; o step-up fica na cadeira ───
+{
+  const store = await import('../js/store.js');
+  const { buildWeek } = await import('../js/engine/planner.js');
+  const { BY_ID } = await import('../js/data/exercises.js');
+  const { materialDaSessao } = await import('../js/engine/material.js');
+  const st = store.defaultState(); st.onboarded = true;
+  const seg = store.mondayOf(new Date(2026, 10, 16)); st.profile.cycleStart = store.iso(seg);
+  const ids = w => { const d = new Date(seg); d.setDate(seg.getDate() + w * 7); return buildWeek(st, d).sessions.flatMap(x => x.blocks.flatMap(b => b.items.map(i => i.ex.id))); };
+  if (!ids(1).includes('db-bench-press')) falha('semana 2 sem supino');
+  if (!ids(0).includes('pushup-board')) falha('semana 1 sem flexões na board');
+  if (!ids(1).includes('chest-supported-row')) falha('semana 2 sem remo apoiado');
+  for (const id of ['step-up', 'slow-step-down']) if (BY_ID[id].equipment.includes('bench')) falha(`${id} não pode ir para o banco: não se sobe para um banco dobrável`);
+  for (const id of ['db-row-1arm', 'db-hip-thrust', 'db-press-seated']) if (!BY_ID[id].equipment.includes('bench')) falha(`${id} devia usar o banco`);
+  const d2 = new Date(seg); d2.setDate(seg.getDate() + 7);
+  const fA = buildWeek(st, d2).sessions.find(x => x.type === 'forcaA');
+  if (!materialDaSessao(fA).some(m => m.id === 'bench')) falha('Força A com supino sem o banco na lista do material');
+  // sem banco, o plano recua para o que há
+  const sem = JSON.parse(JSON.stringify(st)); sem.profile.equipment.bench = false;
+  const semIds = (() => { const d = new Date(seg); d.setDate(seg.getDate() + 7); return buildWeek(sem, d).sessions.flatMap(x => x.blocks.flatMap(b => b.items.map(i => i.ex.id))); })();
+  if (semIds.some(id => BY_ID[id]?.equipment.includes('bench'))) falha('com o banco desligado ainda aparecem exercícios de banco');
+}
+
+// ── 12. discos: só recomenda com dois exercícios presos no teto ────────────
+{
+  const store = await import('../js/store.js');
+  const { recomendacaoDiscos } = await import('../js/engine/discos.js');
+  const { applyProgression } = await import('../js/engine/progression.js');
+  const { BY_ID } = await import('../js/data/exercises.js');
+  const st = store.defaultState();
+  st.loads = { 'goblet-squat': 10, 'db-rdl': 10, 'db-curl': 6 };
+  st.repBonus = { 'goblet-squat': 2 };
+  if (recomendacaoDiscos(st).recomendar) falha('um só exercício preso já recomendou discos');
+  st.repBonus['db-rdl'] = 4;
+  const r = recomendacaoDiscos(st, new Date(2026, 10, 20));
+  if (!r.recomendar || !r.mostrarNaHome) falha('dois exercícios presos no teto deviam recomendar discos');
+  if (r.novoTeto !== 20) falha(`4 discos de 5 kg deviam levar a 20 kg por halter, deu ${r.novoTeto}`);
+  st.profile.discosAdiadoAte = '2027-01-20';
+  if (recomendacaoDiscos(st, new Date(2026, 10, 20)).mostrarNaHome) falha('"Mais tarde" não adiou o aviso na Home');
+  // comprou e subiu o teto: a carga volta a subir e as repetições extra saem
+  st.profile.dumbbellMaxKg = 20;
+  // o push press é o topo da cadeia do press: aí a progressão faz-se por carga
+  const pp = BY_ID['db-push-press'];
+  st.loads['db-push-press'] = 10; st.repBonus['db-push-press'] = 2; st.chainLevels.press = pp.level;
+  const sess = n => ({ date: `2026-12-0${n}`, week: 1, blocks: [{ kind: 'strength', items: [{ ex: pp }] }] });
+  let ev = [];
+  for (let n = 1; n <= 9 && !ev.some(e => e.type === 'load'); n++) ev = applyProgression(st, sess(n), { 'db-push-press': { done: true, top: true, rpe: 8, kg: st.loads['db-push-press'] } });
+  if (st.loads['db-push-press'] !== 12) falha(`depois de subir o teto o push press devia ir a 12 kg, está em ${st.loads['db-push-press']}`);
+  if (st.repBonus['db-push-press']) falha('com a carga a subir, as repetições extra deviam sair');
+}
+
+console.log('correções, temporizador, força, progressão, blocos, HIIT, joelho, material, halteres, banco e discos: 12 cenários');
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');

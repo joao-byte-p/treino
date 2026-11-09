@@ -191,6 +191,23 @@ function propsSVG(props = [], j = null) {
   return (props || []).map(p => {
     if (p.type === 'floor') return `<line class="fig-floor" x1="${p.x1 ?? 2}" y1="${p.y}" x2="${p.x2 ?? 98}" y2="${p.y}"/>`;
     if (p.type === 'box') return `<rect class="fig-prop" x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}" rx="${p.rx ?? 1.5}"/>`;
+    if (p.type === 'bench') {
+      // Banco ajustável: assento e encosto unidos num pivô, o encosto em qualquer
+      // ângulo (`inc` > 0 inclinado, 0 plano, < 0 declinado). `dir` = -1 põe o
+      // encosto para a direita (deitado de barriga para baixo, a olhar em frente).
+      const d = p.dir ?? 1, inc = rad(p.inc || 0), top = p.y + 2;
+      const piv = [p.x, top];
+      const seatEnd = [p.x + d * (p.seat ?? 16), top];
+      const backEnd = [p.x - d * (p.back ?? 36) * Math.cos(inc), top - (p.back ?? 36) * Math.sin(inc)];
+      const meio = [piv[0] + (backEnd[0] - piv[0]) * 0.55, piv[1] + (backEnd[1] - piv[1]) * 0.55];
+      const chao = p.floor ?? 90;
+      const pe1 = seatEnd[0] - d * 3;
+      return `<line class="fig-bench-leg" x1="${n(pe1)}" y1="${top + 2}" x2="${n(pe1)}" y2="${chao}"/>`
+        + `<line class="fig-bench-leg" x1="${n(meio[0])}" y1="${n(meio[1] + 2)}" x2="${n(piv[0] - d * (p.back ?? 36) * 0.62)}" y2="${chao}"/>`
+        + `<line class="fig-bench" x1="${xy(seatEnd).replace(' ', '" y1="')}" x2="${n(piv[0])}" y2="${n(piv[1])}"/>`
+        + `<line class="fig-bench" x1="${n(piv[0])}" y1="${n(piv[1])}" x2="${n(backEnd[0])}" y2="${n(backEnd[1])}"/>`
+        + (p.rolos ? `<circle class="fig-prop" cx="${n(p.rolos[0])}" cy="${n(p.rolos[1])}" r="2.6"/>` : '');
+    }
     if (p.type === 'bar') return `<line class="fig-prop-line" x1="${p.x1}" y1="${p.y1}" x2="${p.x2}" y2="${p.y2}"/>`;
     if (p.type === 'wall') return `<line class="fig-prop-line" x1="${p.x}" y1="${p.y1 ?? 6}" x2="${p.x}" y2="${p.y2 ?? 92}"/>`;
     if (p.type === 'rope') {

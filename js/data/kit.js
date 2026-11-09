@@ -95,7 +95,7 @@ export const KIT = [
     verdade: [
       ['Aperta e confirma', 'Antes de cada série, agarra num disco de cada lado e roda. Se mexe, a porca não está a fazer força. Um disco a sair a meio de um press acima da cabeça é a única lesão grave que este material consegue causar.'],
       ['Os dois lados iguais', 'É banal enganar-se num disco de 1 kg num dos lados. Conta os discos, não confies na memória.'],
-      ['Se um dia quiseres mais', 'As barras são de 28 mm, a medida dos discos avulsos da própria Decathlon. Antes de comprar, mede quanto espaço livre sobra na barra com os 8 kg montados: são barras curtas, e é isso que limita, não o diâmetro.'],
+      ['Quando quiseres mais', 'As barras são de 28 mm, a medida dos discos avulsos da Decathlon. Quatro discos de 5 kg dão um de cada lado em cada halter: até 20 kg por halter, e continuas a subir de 2 em 2 com os de 1 kg. Antes de comprar, monta os 8 kg e mede o espaço livre que sobra na barra: são barras curtas, e é o comprimento que limita, não o diâmetro. A app avisa quando compensa, no Hoje e no Progresso.'],
       ['Dez quilos é um teto', 'Cada halter vai de 2 kg (só a barra) a 10 kg, de 2 em 2: um disco de 1 kg de cada lado de cada vez. Chega para tudo o que envolva um braço de cada vez, e fica curto no agachamento e na dobradiça de anca. A app sabe disso: quando o exercício deixa de ter carga suficiente, ela passa a somar repetições e depois tempo debaixo de tensão, e só te diz para comprar mais peso quando já não há mais nada a fazer.'],
     ],
     montagem: [

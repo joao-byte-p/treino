@@ -169,6 +169,7 @@ body::before {
 .note { font-size: 13.5px; color: var(--text-2); background: var(--fill); border-left: 3px solid var(--accent, var(--amber)); padding: 8px 12px; border-radius: 8px; margin: 0 0 12px; }
 .notice { background: var(--sky-2); border: 1px solid rgba(111, 185, 255, 0.25); color: var(--text); border-radius: var(--radius-s); padding: 12px 14px; margin-bottom: 14px; font-size: 14px; }
 .notice-warn { background: var(--amber-2); border-color: rgba(255, 180, 84, 0.3); }
+.notice-acoes { display: flex; gap: 20px; margin-top: 2px; }
 .events { margin-top: 8px; }
 .events li { font-size: 14px; color: var(--mint); font-weight: 600; padding: 2px 0; }
 
@@ -528,6 +529,8 @@ body::before {
 .fig-floor { stroke: var(--fig); stroke-width: 1.2; opacity: 0.2; stroke-linecap: round; }
 .fig-prop { fill: var(--fill-2); stroke: var(--fig); stroke-width: 1; stroke-opacity: 0.28; }
 .fig-prop-line { stroke: var(--fig); stroke-width: 2.4; opacity: 0.28; stroke-linecap: round; }
+.fig-bench { stroke: var(--fig); stroke-width: 4.2; opacity: 0.32; stroke-linecap: round; }
+.fig-bench-leg { stroke: var(--fig); stroke-width: 1.8; opacity: 0.24; stroke-linecap: round; }
 .fig-db { fill: var(--amber); }
 .fig-rope { fill: none; stroke: var(--amber); stroke-width: 1.6; opacity: 0.75; stroke-linecap: round; }
 .fig-water { stroke: var(--sky); stroke-width: 1.4; opacity: 0.4; stroke-linecap: round; }

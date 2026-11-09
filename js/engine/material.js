@@ -6,6 +6,7 @@
 const ITENS = {
   dumbbells: { nome: 'Halteres', icon: 'halter' },
   board: { nome: 'Push-up board', icon: 'board' },
+  bench: { nome: 'Banco', icon: 'banco' },
   rope: { nome: 'Corda de saltar', icon: 'corda' },
   chair: { nome: 'Cadeira ou banco', icon: 'cadeira' },
   toalha: { nome: 'Toalha', icon: 'toalha' },

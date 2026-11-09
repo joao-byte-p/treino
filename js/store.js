@@ -48,7 +48,7 @@ export function defaultState() {
       lastBackup: null,
       remindMin: 30,
       kneeSensitive: true,
-      equipment: { dumbbells: true, board: true, rope: true, bars: true, pool: true, court: true, chair: true, wall: true, run: true, body: true },
+      equipment: { dumbbells: true, board: true, bench: true, rope: true, bars: true, pool: true, court: true, chair: true, wall: true, run: true, body: true },
       barsOptional: true,
       cycleStart: iso(mondayOf()),
     },

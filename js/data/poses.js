@@ -22,6 +22,11 @@ const VB_PRONE = '0 38 100 56';
 // mãos direto no chão (sem board): resolvido em tools/solve.js
 const PRONE_HANDS = [{ pin: [68.4, 84], bend: 1, far: true }, { pin: [68.4, 84], bend: 1 }];
 const PRONE2_LEGS = [{ pin: [16.2, 83.6], foot: -42, bend: 1, far: true }, { pin: [16.2, 83.6], foot: -45, bend: 1 }];
+// Deitado no banco (de costas, cabeça à esquerda): pés no chão para lá da ponta do banco.
+// O lado afastado sobe 5,2 (far das poses deitadas): o pé dele escreve-se 5,2 mais
+// abaixo para assentar no mesmo chão.
+const LEGS_BANCO = [{ pin: [78, 94.2], foot: 0, bend: -1, far: true }, { pin: [80, 89], foot: 0, bend: -1 }];
+const LEGS_BANCO_INC = [{ pin: [82, 94.2], foot: 0, bend: -1, far: true }, { pin: [84, 89], foot: 0, bend: -1 }];
 const PRONE2_LEGS_LOW = [{ pin: [16.2, 83.6], foot: -37, bend: 1, far: true }, { pin: [16.2, 83.6], foot: -40, bend: 1 }];
 
 export const POSES = {
@@ -1973,6 +1978,96 @@ export const POSES = {
         arms: [{ a: [-4, 4], far: true }, { a: [0, 8] }],
         legs: [{ a: [-4, 2], foot: 60, far: true }, { pin: [50, 88], foot: 0, bend: -1 }],
         marks: [{ at: 'knee1' }],
+      },
+    ],
+  },
+
+  // ── Banco: supino, supino inclinado, remo apoiado, pullover ───────────────
+  // Deitado de costas no banco, cabeça à esquerda: os membros do lado afastado
+  // sobem (far [0, −5.2]), como no dead bug.
+  'db-bench-press': {
+    viewBox: '10 22 92 72',
+    far: [0, -5.2],
+    props: [{ type: 'floor', y: 90, x1: 12, x2: 100 }, { type: 'bench', x: 64, y: 71, seat: 14, back: 36, inc: 0 }],
+    frames: [
+      {
+        label: 'Halteres ao lado do peito',
+        hip: [62, 65], torso: 180, head: 0,
+        arms: [{ a: [-30, 90], far: true }, { a: [-30, 90] }],
+        legs: LEGS_BANCO,
+        items: [{ type: 'db', at: 'wrist0' }, { type: 'db', at: 'wrist1' }],
+      },
+      {
+        label: 'Braços esticados por cima dos ombros',
+        hip: [62, 65], torso: 180, head: 0,
+        arms: [{ a: [88, 93], far: true }, { a: [88, 93] }],
+        legs: LEGS_BANCO,
+        items: [{ type: 'db', at: 'wrist0' }, { type: 'db', at: 'wrist1' }],
+      },
+    ],
+  },
+
+  'db-incline-press': {
+    viewBox: '10 14 92 80',
+    far: [0, -5.2],
+    props: [{ type: 'floor', y: 90, x1: 12, x2: 100 }, { type: 'bench', x: 66, y: 71, seat: 14, back: 38, inc: 32 }],
+    frames: [
+      {
+        label: 'Halteres à altura da parte de cima do peito',
+        hip: [68, 65], torso: 148, head: -4,
+        arms: [{ a: [-28, 95], far: true }, { a: [-28, 95] }],
+        legs: LEGS_BANCO_INC,
+        items: [{ type: 'db', at: 'wrist0' }, { type: 'db', at: 'wrist1' }],
+      },
+      {
+        label: 'Empurra na vertical, por cima dos ombros',
+        hip: [68, 65], torso: 148, head: -4,
+        arms: [{ a: [86, 92], far: true }, { a: [86, 92] }],
+        legs: LEGS_BANCO_INC,
+        items: [{ type: 'db', at: 'wrist0' }, { type: 'db', at: 'wrist1' }],
+      },
+    ],
+  },
+
+  'chest-supported-row': {
+    viewBox: '4 18 92 76',
+    props: [{ type: 'floor', y: 90, x1: 6, x2: 94 }, { type: 'bench', x: 42.5, y: 74.5, seat: 14, back: 36, inc: 35, dir: -1 }],
+    frames: [
+      {
+        label: 'Peito no encosto, braços pendurados',
+        hip: [39.8, 65.8], torso: 35, head: -6,
+        arms: [{ a: [-92, -88], far: true }, { a: [-92, -88] }],
+        legs: [{ pin: [12, 85], foot: -40, bend: -1, far: true }, { pin: [10, 85], foot: -40, bend: -1 }],
+        items: [{ type: 'db', at: 'wrist0', rot: 90 }, { type: 'db', at: 'wrist1', rot: 90 }],
+      },
+      {
+        label: 'Cotovelos para trás, omoplatas juntas',
+        hip: [39.8, 65.8], torso: 35, head: -6,
+        arms: [{ a: [150, -90], far: true }, { a: [150, -90] }],
+        legs: [{ pin: [12, 85], foot: -40, bend: -1, far: true }, { pin: [10, 85], foot: -40, bend: -1 }],
+        items: [{ type: 'db', at: 'wrist0', rot: 90 }, { type: 'db', at: 'wrist1', rot: 90 }],
+      },
+    ],
+  },
+
+  'db-pullover': {
+    viewBox: '4 22 98 72',
+    far: [0, -5.2],
+    props: [{ type: 'floor', y: 90, x1: 6, x2: 100 }, { type: 'bench', x: 64, y: 71, seat: 14, back: 36, inc: 0 }],
+    frames: [
+      {
+        label: 'Halter por cima do peito, seguro com as duas mãos',
+        hip: [62, 65], torso: 180, head: 0,
+        arms: [{ a: [88, 96], far: true }, { a: [88, 96] }],
+        legs: LEGS_BANCO,
+        items: [{ type: 'db', at: 'wrist1', rot: 90 }],
+      },
+      {
+        label: 'Leva-o para trás da cabeça',
+        hip: [62, 65], torso: 180, head: 0,
+        arms: [{ a: [168, 176], far: true }, { a: [168, 176] }],
+        legs: LEGS_BANCO,
+        items: [{ type: 'db', at: 'wrist1', rot: 90 }],
       },
     ],
   },

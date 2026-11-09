@@ -393,7 +393,8 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
     case 'forcaA': {
       const f = frame(['arm-circles', 'hip-circles', 'slow-pushup'], ['hip-flexor-stretch', 'downdog-cobra']);
       s.blocks.push(f.w);
-      s.blocks.push(strengthBlock('Principal', ['pushup', 'squat', 'thrust', 'press', 'lateral'], state, week, f.budget * 0.75, { garantir: ['triceps'] }));
+      // flexões e supino alternam por semana: a board numa, o banco na outra
+      s.blocks.push(strengthBlock('Principal', [altB('pushup', 'chestpress'), 'squat', 'thrust', 'press', 'lateral'], state, week, f.budget * 0.75, { garantir: ['triceps'] }));
       s.blocks.push(strengthBlock('Core', [altB('antiext', 'plank'), altB('sideplank', 'birddog')], state, week, f.budget * 0.25, { sets: 2, min: 1, max: 2, maxSets: 3 }));
       s.blocks.push(f.c);
       break;
@@ -401,7 +402,8 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
     case 'forcaB': {
       const f = frame(['arm-circles', 'towel-pull-apart', 'hip-circles'], ['figure-four', 'hamstring-stretch']);
       s.blocks.push(f.w);
-      s.blocks.push(strengthBlock('Principal', ['row', 'hinge', 'lunge', altB('kneeiso', 'stepdown'), 'reardelt', 'backext'], state, week, f.budget * 0.75, { garantir: ['curl'] }));
+      // remo unilateral e remo com o peito apoiado alternam por semana
+      s.blocks.push(strengthBlock('Principal', [altB('row', 'chestrow'), 'hinge', 'lunge', altB('kneeiso', 'stepdown'), 'reardelt', 'pullover', 'backext'], state, week, f.budget * 0.75, { garantir: ['curl'] }));
       s.blocks.push(strengthBlock('Core', [altB('sideplank', 'birddog'), altB('plank', 'antiext')], state, week, f.budget * 0.25, { sets: 2, min: 1, max: 2, maxSets: 3 }));
       s.blocks.push(f.c);
       break;
@@ -409,14 +411,14 @@ function buildSession(type, state, week, dateISO, cardioIndex) {
     case 'push': {
       const f = frame(['arm-circles', 'slow-pushup'], ['thoracic-rotation']);
       s.blocks.push(f.w);
-      s.blocks.push(strengthBlock('Principal', ['pushup', 'press', 'dips', 'pike', 'lateral', 'triceps'], state, week, f.budget));
+      s.blocks.push(strengthBlock('Principal', ['chestpress', 'pushup', 'press', 'dips', 'pike', 'lateral', 'triceps'], state, week, f.budget));
       s.blocks.push(f.c);
       break;
     }
     case 'pull': {
       const f = frame(['arm-circles', 'towel-pull-apart'], ['cat-cow']);
       s.blocks.push(f.w);
-      s.blocks.push(strengthBlock('Principal', ['row', 'curl', 'reardelt', 'backext', 'hangcore'], state, week, f.budget));
+      s.blocks.push(strengthBlock('Principal', ['row', 'chestrow', 'curl', 'pullover', 'reardelt', 'backext', 'hangcore'], state, week, f.budget));
       s.blocks.push(f.c);
       break;
     }

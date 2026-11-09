@@ -4,6 +4,7 @@ import { EXERCISES, BY_ID, chainLevels, isProgression, PATTERN_LABEL } from '../
 import { GRUPOS, temGrupo } from '../data/muscles.js';
 import { KIT } from '../data/kit.js';
 import { contasDaSemana, semanasCompletas } from '../engine/fecho.js';
+import { recomendacaoDiscos } from '../engine/discos.js';
 import { fechoPorVer } from './fecho.js';
 import { esc, ring, dial, tile, exerciseRow, illustration, chip, patternLabel, equipmentLabel, ytUrl, dateLabel, toast, prescription, camposMmss, levaContigo } from './components.js';
 import { materialDaSessao } from '../engine/material.js';
@@ -42,6 +43,14 @@ export function renderHome(nav) {
       <strong>Objetivo agendado:</strong> ${esc(GOALS[p.pendingGoal].label)} a partir de ${esc(fmtDate(p.pendingGoalFrom))}, no início do próximo ciclo.
     </div>` : '';
 
+  // Discos: aparece quando dois exercícios já estão no teto e a subir por reps.
+  // "Mais tarde" adia dois meses; "Já comprei" leva ao Perfil para subir o teto.
+  const discos = recomendacaoDiscos(state, today);
+  const discosNotice = discos.mostrarNaHome ? `
+    <div class="notice notice-discos">
+      <strong>Altura de comprar discos.</strong> ${discos.presos.length} exercícios já estão nos ${discos.teto} kg e a subir só por repetições (${esc(discos.presos.slice(0, 3).map(x => x.ex.name).join(' · '))}). ${esc(discos.sugestao)} levam-te até ${discos.novoTeto} kg por halter, se couberem nas barras.
+      <div class="notice-acoes"><button type="button" class="link" data-discos-comprei>Já comprei</button><button type="button" class="link" data-discos-adiar>Mais tarde</button></div>
+    </div>` : '';
   const kneeNotice = state.kneeFlag ? `<div class="notice notice-warn">Joelho em modo cuidado: sem corrida nem exercícios de impacto esta semana. Desliga nas Definições quando estiver bem.</div>` : '';
 
   // Se ele já treinou antes e há dias que não aparece, a app diz-lhe quantos.
@@ -118,7 +127,7 @@ export function renderHome(nav) {
       <h1>Olá, ${esc(p.name)}</h1>
     </div>
   </header>
-  ${fechoCard}${goalNotice}${kneeNotice}
+  ${fechoCard}${goalNotice}${kneeNotice}${discosNotice}
   <section class="card card-dials">
     <div class="dials">
       ${dial(planned ? doneThisWeek / planned : 0, { num: `${doneThisWeek}`, unit: `/${planned}`, label: 'Semana', sub: doneThisWeek >= planned && planned ? (extrasFeitos ? `completa · +${extrasFeitos} extra` : 'completa') : `${planned - doneThisWeek} por fazer`, tone: 'mint' })}
@@ -488,6 +497,7 @@ export function renderProgress(nav) {
     })}
   </section>` : ''}
   ${levels.length ? `<section class="card"><h3>Onde estás em cada progressão</h3><ul class="kv">${levels.map(l => `<li><span>${esc(l.name)}</span><strong>nível ${l.lvl}<small> de ${l.max}</small></strong></li>`).join('')}</ul></section>` : ''}
+  ${discosCard(state)}
   ${loads.length ? `<section class="card"><h3>Cargas</h3><ul class="kv">${loads.map(l => `<li><span>${esc(l.ex.name)}</span><strong>${l.kg} kg${l.delta ? `<small class="delta ${l.delta > 0 ? 'up' : 'down'}"> ${l.delta > 0 ? '+' : ''}${l.delta} desde ${esc(fmtDate(l.since))}</small>` : ''}</strong></li>`).join('')}</ul></section>` : ''}
   ${corridaCard(logs)}
   ${runs.length ? `<section class="card"><h3>Últimos treinos de cardio</h3><ul class="kv">${runs.map(l => `<li data-nav="day" data-date="${l.date}" role="button" tabindex="0" aria-label="Ver ou corrigir o treino de ${esc(fmtDate(l.date))}"><span>${esc(fmtDate(l.date))}</span><strong>${esc(distLabel(l.cardio))} · ${esc(duracao(l.cardio))}${pace(l.cardio) ? ` · ${pace(l.cardio)}` : ''}</strong></li>`).join('')}</ul></section>` : ''}
@@ -560,6 +570,17 @@ function corridaCard(logs) {
 }
 
 const fmtDataCurta = d => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
+
+// Halteres no teto: a lista fica sempre visível no Progresso, sem adiar.
+function discosCard(state) {
+  const d = recomendacaoDiscos(state);
+  if (!d.lista.length) return '';
+  return `<section class="card">
+    <h3>Halteres no teto <span class="muted">${d.lista.length}</span></h3>
+    <p class="muted small">${d.recomendar ? `Já compensa comprar discos: ${esc(d.sugestao)} levam cada halter até ${d.novoTeto} kg.` : `Ainda não compensa comprar: a app sobe as repetições primeiro, e avisa quando dois exercícios ficarem presos.`}</p>
+    <ul class="kv">${d.lista.map(x => `<li><span>${esc(x.ex.name)}</span><strong>${d.teto} kg${x.bonus ? `<small> +${x.bonus} reps</small>` : ''}</strong></li>`).join('')}</ul>
+  </section>`;
+}
 
 // ─────────────────────────── DEFINIÇÕES ───────────────────────────
 // Quantos dias desde a última cópia para fora do aparelho. Só avisa quem já tem
@@ -649,7 +670,7 @@ export function renderSettings(nav, onboarding = false) {
   const state = getState();
   const p = state.profile;
   const eq = p.equipment;
-  const eqList = [['dumbbells', 'Halteres'], ['board', 'Push-up board'], ['rope', 'Corda'], ['bars', 'Barras street workout'], ['pool', 'Piscina'], ['court', 'Ringue de basket'], ['chair', 'Cadeira / banco / degrau']];
+  const eqList = [['dumbbells', 'Halteres'], ['board', 'Push-up board'], ['bench', 'Banco de musculação'], ['rope', 'Corda'], ['bars', 'Barras street workout'], ['pool', 'Piscina'], ['court', 'Ringue de basket'], ['chair', 'Cadeira / banco / degrau']];
   const goalOpts = Object.entries(GOALS).map(([k, g]) => `
     <label class="opt ${p.goal === k ? 'on' : ''}"><input type="radio" name="goal" value="${k}" ${p.goal === k ? 'checked' : ''}><span><strong>${esc(g.label)}</strong><small>${esc(g.desc)}</small></span></label>`).join('');
   return `

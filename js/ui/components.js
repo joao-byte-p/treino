@@ -41,6 +41,7 @@ const ICONS = {
   halter: '<svg viewBox="0 0 24 24"><path d="M8 12h8"/><rect x="4.5" y="7.5" width="3.5" height="9" rx="1"/><rect x="16" y="7.5" width="3.5" height="9" rx="1"/><path d="M2.5 10v4M21.5 10v4"/></svg>',
   board: '<svg viewBox="0 0 24 24"><rect x="2.5" y="13" width="19" height="4" rx="2"/><path d="M7 13v-2.5a1.5 1.5 0 0 1 3 0V13M14 13v-2.5a1.5 1.5 0 0 1 3 0V13"/></svg>',
   corda: '<svg viewBox="0 0 24 24"><path d="M5 4v5M19 4v5"/><path d="M5 9c0 8 3 11 7 11s7-3 7-11"/></svg>',
+  banco: '<svg viewBox="0 0 24 24"><path d="M3 12.5h11.5l6-5.5"/><path d="M6 12.5V19M14 12.5V19M18 9.5L19.5 19"/></svg>',
   cadeira: '<svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="7" rx="1.5"/><path d="M5 13h14M7 13v8M17 13v8M8 10v3M16 10v3"/></svg>',
   toalha: '<svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M5 8h14M9 15h6"/></svg>',
   saco: '<svg viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
