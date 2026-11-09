@@ -90,17 +90,18 @@ export const KIT = [
     id: 'dumbbells',
     equip: 'dumbbells',
     name: 'Halteres ajustáveis',
-    modelo: '12 kg cada',
+    modelo: 'Decathlon, conjunto de 20 kg · até 10 kg cada, de 2 em 2 kg',
     resumo: 'O erro caro dos ajustáveis não é o peso — é um disco mal apertado.',
     verdade: [
       ['Aperta e confirma', 'Antes de cada série, agarra num disco de cada lado e roda. Se mexe, a porca não está a fazer força. Um disco a sair a meio de um press acima da cabeça é a única lesão grave que este material consegue causar.'],
       ['Os dois lados iguais', 'É banal enganar-se num disco de 1 kg num dos lados. Conta os discos, não confies na memória.'],
-      ['Doze quilos é um teto', 'Chega para tudo o que envolva um braço de cada vez, e fica curto no agachamento e na dobradiça de anca. A app sabe disso: quando o exercício deixa de ter carga suficiente, ela passa a somar repetições e depois tempo debaixo de tensão, e só te diz para comprar mais peso quando já não há mais nada a fazer.'],
+      ['Se um dia quiseres mais', 'As barras são de 28 mm, a medida dos discos avulsos da própria Decathlon. Antes de comprar, mede quanto espaço livre sobra na barra com os 8 kg montados: são barras curtas, e é isso que limita, não o diâmetro.'],
+      ['Dez quilos é um teto', 'Cada halter vai de 2 kg (só a barra) a 10 kg, de 2 em 2: um disco de 1 kg de cada lado de cada vez. Chega para tudo o que envolva um braço de cada vez, e fica curto no agachamento e na dobradiça de anca. A app sabe disso: quando o exercício deixa de ter carga suficiente, ela passa a somar repetições e depois tempo debaixo de tensão, e só te diz para comprar mais peso quando já não há mais nada a fazer.'],
     ],
     montagem: [
       'Monta no chão, nunca em cima de uma superfície alta.',
       'Discos do mais pesado para o mais leve, de dentro para fora — assim o peso fica junto ao centro e o halter não abana.',
-      'Guarda-os desmontados se ficarem num sítio de passagem. Um halter de 12 kg em cima de um pé descalço não é brincadeira.',
+      'Guarda-os desmontados se ficarem num sítio de passagem. Um halter de 10 kg em cima de um pé descalço não é brincadeira.',
     ],
     posicoes: [],
     erros: [

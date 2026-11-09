@@ -119,7 +119,7 @@ const store = await import('../js/store.js');
 const copiaAntiga = JSON.stringify({ schema: 1, profile: { name: 'João', goal: 'saude' }, logs: [] }); // sem trainTime, sem remindMin
 store.importJSON(copiaAntiga);
 const p = store.getState().profile;
-if (p.trainTime !== '18:00' || p.remindMin !== 30 || p.dumbbellMaxKg !== 12) falha(`cópia antiga apagou definições novas: ${JSON.stringify({ t: p.trainTime, r: p.remindMin, kg: p.dumbbellMaxKg })}`);
+if (p.trainTime !== '18:00' || p.remindMin !== 30 || p.dumbbellMaxKg !== 10) falha(`cópia antiga apagou definições novas: ${JSON.stringify({ t: p.trainTime, r: p.remindMin, kg: p.dumbbellMaxKg })}`);
 if (p.name !== 'João') falha('cópia antiga perdeu o nome');
 try {
   store.importJSON(JSON.stringify({ schema: 99, profile: {} }));

@@ -202,6 +202,21 @@ const falha = m => problemas.push(m);
   if (new Set(nomes).size !== nomes.length) falha('material repetido na lista');
 }
 
-console.log('correções, temporizador, dias de força, progressão, arranque de blocos, HIIT, joelho e material: 9 cenários');
+// ── 10. halteres de 10 kg: teto corrigido uma vez, cargas impossíveis baixam ─
+{
+  const store = await import('../js/store.js');
+  const velho = store.defaultState();
+  delete velho.profile.halteresRevistos; velho.profile.dumbbellMaxKg = 12; velho.loads = { 'db-rdl': 12, 'db-curl': 8 };
+  store.importJSON(JSON.stringify(velho));
+  let p = store.getState().profile;
+  if (p.dumbbellMaxKg !== 10) falha(`o teto antigo de 12 kg devia passar a 10, ficou ${p.dumbbellMaxKg}`);
+  if (store.getState().loads['db-rdl'] !== 10 || store.getState().loads['db-curl'] !== 8) falha(`cargas depois da correção: ${JSON.stringify(store.getState().loads)}`);
+  // um teto escolhido por ele depois da correção não é mexido
+  const escolhido = JSON.parse(JSON.stringify(store.getState())); escolhido.profile.dumbbellMaxKg = 12;
+  store.importJSON(JSON.stringify(escolhido));
+  if (store.getState().profile.dumbbellMaxKg !== 12) falha('a correção voltou a mexer num teto escolhido por ele');
+}
+
+console.log('correções, temporizador, dias de força, progressão, arranque de blocos, HIIT, joelho, material e halteres: 10 cenários');
 if (problemas.length) { console.log(`${problemas.length} problemas:\n  ` + problemas.join('\n  ')); process.exitCode = 1; }
 else console.log('sem problemas');

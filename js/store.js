@@ -40,7 +40,7 @@ export function defaultState() {
       minutes: 30,
       minutesForca: 40,       // dias de força: 30 minutos davam três exercícios e nada de braços
       runsPerWeek: 2,
-      dumbbellMaxKg: 12,
+      dumbbellMaxKg: 10,       // Decathlon 20 kg: 2 barras de 2 kg + 16 kg de discos → 10 kg por halter
       theme: 'dark',            // dark | light | auto
       trainTime: '18:00',
       syncEmail: '',
@@ -75,6 +75,19 @@ export function defaultState() {
 // "Guardar". Numa corrida feita sem telemóvel isso é um ou dois minutos, e o tempo
 // que ele escreveu ficava guardado à parte sem contar para nada. Corrige registos
 // antigos: idempotente, corre a cada arranque e a cada sincronização sem estragar.
+// Os halteres dele são o conjunto de 20 kg da Decathlon: 10 kg por halter, e não os
+// 12 que a app assumia desde o início. Corrige uma vez (o teto que ele escolha
+// depois no Perfil fica) e baixa as cargas guardadas acima do que dá para montar.
+function corrigeHalteres(st) {
+  const p = st.profile || {};
+  if (!p.halteresRevistos) {
+    if (p.dumbbellMaxKg === 12) p.dumbbellMaxKg = 10;
+    p.halteresRevistos = true;
+  }
+  const teto = p.dumbbellMaxKg || 10;
+  for (const [id, kg] of Object.entries(st.loads || {})) if (kg > teto) st.loads[id] = teto;
+}
+
 function corrigeTempos(st) {
   for (const l of st.logs || []) {
     const c = l.cardio;
@@ -105,6 +118,7 @@ function load() {
     const st = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...(parsed.profile || {}) } };
     if (st.profile.minutes < 30) st.profile.minutes = 30; // 30 min passou a ser o mínimo
     corrigeTempos(st);
+    corrigeHalteres(st);
     limpaFigurasRevistas(st);
     return st;
   } catch {
@@ -208,6 +222,7 @@ export function importJSON(text, { manterHora = false } = {}) {
   // apagar definições que ainda não existiam quando foi feita.
   state = { ...defaultState(), ...parsed, profile: { ...defaultState().profile, ...parsed.profile } };
   corrigeTempos(state);
+  corrigeHalteres(state);
   limpaFigurasRevistas(state);
   persist(manterHora);
 }

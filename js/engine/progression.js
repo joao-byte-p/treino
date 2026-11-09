@@ -85,7 +85,7 @@ export function applyProgression(state, session, results) {
           } else events.push({ type: 'limite', chain, ex: ex.name });
         }
       } else {
-        const teto = state.profile?.dumbbellMaxKg || 12;
+        const teto = state.profile?.dumbbellMaxKg || 10;
         const atual = state.loads[ex.id] || 0;
         if (!state.repBonus) state.repBonus = {};
         if (atual + 2 <= teto) {

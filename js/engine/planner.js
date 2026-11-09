@@ -155,7 +155,7 @@ function loadHint(ex, state, week) {
   // de redução de treino mostram que preserva a força (Bosquet et al. 2007); baixar
   // também o peso tirava ao deload a parte que mantém o que ele ganhou.
   if (week === 4) return { kg: last, note: 'Semana leve: o mesmo peso, menos séries' };
-  const teto = state.profile?.dumbbellMaxKg || 12;
+  const teto = state.profile?.dumbbellMaxKg || 10;
   if (last >= teto) return { kg: last, teto: true, note: `No teto dos teus halteres: sobem as reps, não o peso` };
   return { kg: last, note: 'Último peso usado' };
 }
