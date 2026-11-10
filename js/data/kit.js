@@ -91,7 +91,7 @@ export const KIT = [
     equip: 'bench',
     name: 'Banco ajustável',
     modelo: 'PASYOU PA300 · 9 posições do encosto · até 230 kg',
-    resumo: 'O assento não mexe; o encosto vai de plano a quase vertical. Cada exercício tem a sua posição.',
+    resumo: 'O assento não mexe e não há declínio; o encosto vai de plano a quase vertical. Cada exercício tem a sua posição.',
     // Ângulos medidos nas fotos dele, de lado; a perspetiva engana uns graus.
     // A posição 1 é o encosto plano, a 9 a mais alta.
     angulos: [
@@ -115,6 +115,7 @@ export const KIT = [
       'Muda a posição sem ninguém sentado: levanta o encosto, põe a barra de apoio no dente que queres e deixa-o assentar.',
       'Antes de te deitares, empurra o encosto com a mão. Se a barra não estiver no fundo do dente, salta com o teu peso em cima.',
       'Os rolos da frente servem para prender os pés nos abdominais. No resto dos exercícios não te prendas a nada.',
+      'O poste da frente, o dos rolos, não muda de altura: o pino dele é só para dobrar e fica sempre fechado durante o treino. Por isso este banco não faz declínio.',
       'Para o dobrar tira os pinos, e nunca com peso em cima. Dobrado mede 90 × 40 × 25 cm.',
     ],
     erros: [
