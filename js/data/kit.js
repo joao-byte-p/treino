@@ -87,6 +87,46 @@ export const KIT = [
   },
 
   {
+    id: 'bench',
+    equip: 'bench',
+    name: 'Banco ajustável',
+    modelo: 'PASYOU PA300 · 9 posições do encosto · até 230 kg',
+    resumo: 'O assento não mexe; o encosto vai de plano a quase vertical. Cada exercício tem a sua posição.',
+    // Ângulos medidos nas fotos dele, de lado; a perspetiva engana uns graus.
+    // A posição 1 é o encosto plano, a 9 a mais alta.
+    angulos: [
+      { n: 1, graus: 0, nome: 'Plano', para: 'Supino, pullover, remo unilateral, dips, hip thrust, búlgaro, flexão declinada, pike elevado, Copenhague, curl concentrado' },
+      { n: 2, graus: 10, nome: 'Quase plano', para: 'Supino com o peito um pouco mais alto, se o plano incomodar o ombro' },
+      { n: 3, graus: 20, nome: 'Inclinação baixa', para: 'Supino inclinado nos dias em que o ombro pede menos' },
+      { n: 4, graus: 30, nome: 'Inclinado', para: 'Supino inclinado: é a posição dele. Mais alto e passa a ser press de ombros' },
+      { n: 5, graus: 40, nome: 'Inclinado médio', para: 'Remo com o peito apoiado' },
+      { n: 6, graus: 50, nome: 'Meio', para: 'Remo apoiado mais vertical, se o queixo bater no encosto na 5' },
+      { n: 7, graus: 65, nome: 'Alto', para: 'Curl inclinado: o braço fica atrás do corpo e o bíceps trabalha esticado' },
+      { n: 8, graus: 75, nome: 'Quase vertical', para: 'Press de ombros, se a 9 te empurrar a cabeça para a frente' },
+      { n: 9, graus: 80, nome: 'O mais alto', para: 'Press de ombros sentado e extensão de tríceps sentado' },
+    ],
+    posicoes: [],
+    verdade: [
+      ['O assento é fixo', 'Só o encosto inclina. Nas posições altas o corpo tende a escorregar para a frente: pés bem assentes no chão, afastados, e glúteos encostados ao fundo do assento.'],
+      ['É um apoio, não um degrau', 'Não se sobe para cima dele. Um banco dobrável com um peso em cada mão vira. O step-up e o step-down continuam na cadeira ou num degrau.'],
+      ['O sítio do banco conta', 'No hip thrust apoias-te no lado comprido: encosta o banco à parede para não fugir para trás quando empurras.'],
+    ],
+    montagem: [
+      'Muda a posição sem ninguém sentado: levanta o encosto, põe a barra de apoio no dente que queres e deixa-o assentar.',
+      'Antes de te deitares, empurra o encosto com a mão. Se a barra não estiver no fundo do dente, salta com o teu peso em cima.',
+      'Os rolos da frente servem para prender os pés nos abdominais. No resto dos exercícios não te prendas a nada.',
+      'Para o dobrar tira os pinos, e nunca com peso em cima. Dobrado mede 90 × 40 × 25 cm.',
+    ],
+    erros: [
+      ['Encosto alto de mais no supino inclinado', 'Acima da posição 4 o ombro faz o trabalho do peito. Para o peito de cima, 30° chegam.'],
+      ['Pousar os halteres no encosto', 'Nas séries de supino, no fim, leva os halteres ao peito e senta-te com eles apoiados nas coxas. Largá-los para o lado é o que estraga ombros.'],
+      ['Sentar sem confirmar o encaixe', 'Uma barra de apoio meio encaixada é o único acidente sério que este banco consegue causar.'],
+    ],
+    rotina: '',
+    plano: 'O supino alterna com as flexões no Força A e o remo apoiado com o remo unilateral no Força B, de semana para semana.',
+  },
+
+  {
     id: 'dumbbells',
     equip: 'dumbbells',
     name: 'Halteres ajustáveis',

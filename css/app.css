@@ -461,6 +461,19 @@ body::before {
   .grid2 { grid-template-columns: repeat(4, 1fr); }
   .tabs { left: 50%; right: auto; transform: translateX(-50%); width: 560px; bottom: 16px; }
 }
+/* Guia do banco: cada posição do encosto desenhada de lado, com o que serve. */
+.kitang { display: grid; gap: 12px; margin-top: 12px; }
+.kitang li { display: grid; grid-template-columns: 88px 1fr; gap: 14px; align-items: center; }
+.kitang-art { background: var(--fill); border-radius: 12px; padding: 6px; }
+.kit-encosto { width: 100%; height: auto; display: block; }
+.kit-chao { stroke: var(--line-strong); stroke-width: 1.2; }
+.kit-perna { stroke: var(--text-3); stroke-width: 2; stroke-linecap: round; }
+.kit-pad { stroke: var(--text-3); stroke-width: 5; stroke-linecap: round; }
+.kit-pad-on { stroke: var(--mint); }
+.kitang-n { font-weight: 700; font-size: 16px; }
+.kitang-n span { font-weight: 600; font-size: 13px; color: var(--text-3); }
+.kitang-t p { font-size: 14px; color: var(--text-2); margin-top: 2px; line-height: 1.4; }
+
 /* Material: "Leva contigo" na Home e no dia, e o ecrã antes do primeiro exercício.
    O ícone vai a verde porque é o que se procura de relance; o texto fica neutro. */
 .leva { margin: 2px 0 14px; }

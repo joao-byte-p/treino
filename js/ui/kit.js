@@ -21,6 +21,19 @@ function topo({ largura, altura, rot }) {
   </svg>`;
 }
 
+// O encosto visto de lado, no ângulo da posição, como nas fotos dele: assento fixo
+// à esquerda, pivô ao meio, encosto a subir para a direita.
+function encosto(graus) {
+  const r = graus * Math.PI / 180, L = 38, px = 32, py = 40;
+  const x = px + L * Math.cos(r), y = py - L * Math.sin(r);
+  return `<svg class="kit-encosto" viewBox="0 0 90 56" aria-hidden="true">
+    <line class="kit-chao" x1="4" y1="52" x2="86" y2="52"/>
+    <line class="kit-perna" x1="14" y1="42" x2="14" y2="52"/><line class="kit-perna" x1="${px + 20}" y1="42" x2="${px + 26}" y2="52"/>
+    <line class="kit-pad" x1="10" y1="${py}" x2="${px}" y2="${py}"/>
+    <line class="kit-pad kit-pad-on" x1="${px}" y1="${py}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>
+  </svg>`;
+}
+
 export function renderKit(nav) {
   return `
   <header class="top"><button class="iconbtn" data-nav="back" aria-label="Voltar">‹</button>
@@ -64,6 +77,16 @@ export function renderKitItem(nav, id) {
         <p>${esc(p.como)}</p>
         ${p.nota ? `<p class="kitpos-nota">${esc(p.nota)}</p>` : ''}
       </div>
+    </li>`).join('')}</ul>
+  </section>` : ''}
+
+  ${k.angulos ? `<section class="card">
+    <h3>As posições do encosto <span class="muted">${k.angulos.length}</span></h3>
+    <p class="muted small">Conta a partir do encosto plano, que é a posição 1. Os graus são aproximados.</p>
+    <ul class="kitang">${k.angulos.map(a => `<li>
+      <div class="kitang-art">${encosto(a.graus)}</div>
+      <div class="kitang-t"><div class="kitang-n">${a.n} <span>· ${esc(a.nome)}${a.graus ? ` · ~${a.graus}°` : ''}</span></div>
+      <p>${esc(a.para)}</p></div>
     </li>`).join('')}</ul>
   </section>` : ''}
 

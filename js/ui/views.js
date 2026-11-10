@@ -367,7 +367,7 @@ export function renderLibrary(nav, query = '', filter = 'todos', onlyMine = fals
   <div class="frow"><span class="frow-l">Movimento</span><div class="fchips" role="group" aria-label="Filtrar por movimento">${chips}</div></div>
   <div class="frow"><span class="frow-l">Músculo</span><div class="fchips" role="group" aria-label="Filtrar por músculo">${mchips}</div></div>
   <label class="toggle small only-mine"><input type="checkbox" data-lib-mine ${onlyMine ? 'checked' : ''}><span>Só com o material que tenho</span></label>
-  <button class="kit-entry" data-nav="kit"><span><strong>Como usar o material</strong><small>${KIT.length} guias · push-up board, halteres, corda</small></span><span aria-hidden="true">›</span></button>
+  <button class="kit-entry" data-nav="kit"><span><strong>Como usar o material</strong><small>${KIT.length} guias · ${esc(KIT.map(k => k.name.toLowerCase()).join(', '))}</small></span><span aria-hidden="true">›</span></button>
   ${total ? groups.map(g => `
     <section class="block">
       <h3 class="block-title">${esc(PATTERN_LABEL[g.p])} <span class="muted">${g.items.length}</span></h3>
